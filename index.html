@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>健康指揮中樞</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css">
+<style>
+/* ── Reset & Base ─────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:        #f7f6f2;
+  --surface:   #ffffff;
+  --border:    #e3e1da;
+  --text:      #1a1a18;
+  --muted:     #7a7870;
+  --accent:    #1B4332;
+  --accent-lt: #D8F3DC;
+  --accent-md: #52B788;
+  --warn:      #F4A261;
+  --danger:    #E76F51;
+  --info:      #60a5fa;
+  --radius:    10px;
+  --radius-sm: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111210; --surface: #1c1c1a; --border: #2e2e2b;
+    --text: #e8e6df; --muted: #7a7870;
+    --accent-lt: #1B4332;
+  }
+}
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; min-height: 100vh; }
+a { color: var(--accent-md); }
+
+/* ── Layout ───────────────────────────────────── */
+.shell { display: flex; min-height: 100vh; }
+.sidebar { width: 200px; min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); padding: 1.5rem 0.75rem; display: flex; flex-direction: column; gap: 4px; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; }
+.sidebar .logo { font-size: 15px; font-weight: 600; padding: 0 0.5rem 1rem; border-bottom: 1px solid var(--border); margin-bottom: 0.5rem; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+.nav-btn { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: none; background: transparent; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; color: var(--muted); width: 100%; text-align: left; font-family: inherit; transition: all 0.15s; }
+.nav-btn:hover { background: var(--bg); color: var(--text); }
+.nav-btn.active { background: var(--accent-lt); color: var(--accent); font-weight: 500; }
+.nav-btn i { font-size: 16px; width: 18px; }
+.main { margin-left: 200px; padding: 1.5rem; max-width: 860px; }
+.page { display: none; } .page.active { display: block; }
+.page-title { font-size: 18px; font-weight: 600; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+.page-title i { font-size: 20px; color: var(--accent-md); }
+
+/* ── Cards ────────────────────────────────────── */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
+.card-title { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 0.875rem; display: flex; align-items: center; gap: 6px; }
+.card-title i { font-size: 15px; }
+
+/* ── Forms ────────────────────────────────────── */
+.fg { display: grid; gap: 10px; margin-bottom: 10px; }
+.fg2 { grid-template-columns: 1fr 1fr; }
+.fg3 { grid-template-columns: 1fr 1fr 1fr; }
+.fg4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.f label { font-size: 11px; color: var(--muted); margin-bottom: 3px; display: block; }
+.f input, .f select, .f textarea {
+  width: 100%; padding: 7px 10px; font-size: 13px;
+  border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font-family: inherit;
+  transition: border-color 0.15s;
+}
+.f input:focus, .f select:focus, .f textarea:focus { outline: none; border-color: var(--accent-md); }
+.f textarea { resize: vertical; min-height: 64px; }
+
+/* ── Buttons ──────────────────────────────────── */
+.btn { padding: 7px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: transparent; color: var(--text); font-size: 13px; cursor: pointer; font-family: inherit; transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px; }
+.btn:hover { background: var(--bg); }
+.btn.p { background: var(--accent); color: #d8f3dc; border-color: var(--accent); }
+.btn.p:hover { background: #245a41; }
+.btn.sm { padding: 5px 10px; font-size: 12px; }
+.btn.danger { border-color: var(--danger); color: var(--danger); }
+.btn.danger:hover { background: #FCE4D6; }
+.btn-row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 0.75rem; flex-wrap: wrap; }
+
+/* ── Metrics Grid ─────────────────────────────── */
+.mc { display: grid; gap: 8px; margin-bottom: 1rem; }
+.mc2 { grid-template-columns: repeat(2,1fr); }
+.mc3 { grid-template-columns: repeat(3,1fr); }
+.mc4 { grid-template-columns: repeat(4,1fr); }
+.mci { background: var(--bg); border-radius: var(--radius-sm); padding: 0.75rem; text-align: center; border: 1px solid var(--border); }
+.mci .v { font-size: 20px; font-weight: 600; margin-bottom: 2px; }
+.mci .l { font-size: 11px; color: var(--muted); }
+.mci .s { font-size: 11px; margin-top: 2px; color: var(--muted); }
+
+/* ── Progress Bars ────────────────────────────── */
+.pw { margin-bottom: 10px; }
+.pl { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.pb { height: 8px; background: var(--bg); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
+.pf { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+.c-cal  { background: var(--accent); }
+.c-prot { background: var(--accent-md); }
+.c-carb { background: var(--warn); }
+.c-fat  { background: var(--danger); }
+.c-water{ background: var(--info); }
+.over   { background: var(--danger) !important; }
+
+/* ── Badges ───────────────────────────────────── */
+.badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 500; }
+.badge.g { background: #D8F3DC; color: #1B4332; }
+.badge.w { background: #FFF3CD; color: #7C5E00; }
+.badge.d { background: #FCE4D6; color: #8B2500; }
+.badge.b { background: #DBEAFE; color: #1E40AF; }
+
+/* ── AI Output ────────────────────────────────── */
+.ai-box { background: var(--bg); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 0.75rem; border-left: 3px solid var(--accent); line-height: 1.8; font-size: 13px; border: 1px solid var(--border); border-left-width: 3px; }
+.ai-box.warn   { border-left-color: var(--warn); }
+.ai-box.danger { border-left-color: var(--danger); }
+.ai-box.info   { border-left-color: var(--info); }
+
+/* ── Item Rows ────────────────────────────────── */
+.item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.item-row:last-child { border-bottom: none; }
+.item-row .n { font-size: 13px; font-weight: 500; }
+.item-row .d { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.del-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 15px; padding: 3px 6px; border-radius: var(--radius-sm); transition: all 0.15s; }
+.del-btn:hover { background: #FCE4D6; color: var(--danger); }
+
+/* ── Photo Zone ───────────────────────────────── */
+.photo-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; cursor: pointer; position: relative; transition: all 0.2s; }
+.photo-zone:hover { border-color: var(--accent-md); background: var(--bg); }
+.photo-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.photo-zone i { font-size: 36px; color: var(--muted); margin-bottom: 0.5rem; display: block; }
+.prev-img { max-height: 180px; width: 100%; object-fit: cover; border-radius: var(--radius-sm); margin-bottom: 0.75rem; }
+
+/* ── Symptom Selector ─────────────────────────── */
+.sym-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 0.75rem; }
+.sym-item { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.625rem 0.75rem; cursor: pointer; transition: all 0.15s; }
+.sym-item:hover { border-color: var(--accent-md); }
+.sym-item.sel { border-color: var(--danger); background: #FCE4D6; }
+.sym-item .sym { font-size: 13px; font-weight: 500; }
+.sym-item .desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.sev-bar { display: flex; gap: 6px; margin: 6px 0 0.75rem; }
+.sev-btn { flex: 1; padding: 6px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; text-align: center; background: transparent; font-family: inherit; transition: all 0.15s; }
+.sev-btn.s0 { background: #D8F3DC; color: #1B4332; border-color: #52B788; }
+.sev-btn.s1 { background: #FFF3CD; color: #7C5E00; border-color: #F4A261; }
+.sev-btn.s2 { background: #FCE4D6; color: #8B2500; border-color: #E76F51; }
+
+/* ── Chart Tabs ───────────────────────────────── */
+.tab-bar { display: flex; gap: 4px; margin-bottom: 1rem; }
+.tab-bar button { padding: 5px 12px; border: 1px solid var(--border); background: transparent; cursor: pointer; font-size: 12px; color: var(--muted); border-radius: var(--radius-sm); font-family: inherit; transition: all 0.15s; }
+.tab-bar button:hover { background: var(--bg); }
+.tab-bar button.active { background: var(--accent-lt); color: var(--accent); border-color: var(--accent-md); font-weight: 500; }
+
+/* ── Toast ────────────────────────────────────── */
+#toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--accent); color: #d8f3dc; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; }
+#toast.show { opacity: 1; }
+
+/* ── Spinner ──────────────────────────────────── */
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent-md); border-radius: 50%; animation: sp 0.8s linear infinite; vertical-align: middle; margin-right: 5px; }
+@keyframes sp { to { transform: rotate(360deg); } }
+
+/* ── Setup Banner ─────────────────────────────── */
+.setup-banner { background: #FFF3CD; border: 1px solid #F4A261; border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1rem; font-size: 13px; line-height: 1.8; }
+.setup-banner strong { color: #7C5E00; }
+.setup-banner code { background: rgba(0,0,0,0.08); padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+
+/* ── Separator ────────────────────────────────── */
+.sep { border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }
+
+/* ── Water ────────────────────────────────────── */
+.water-big { font-size: 48px; font-weight: 600; color: var(--info); text-align: center; line-height: 1; }
+.water-sub  { text-align: center; font-size: 13px; color: var(--muted); margin-top: 4px; margin-bottom: 1rem; }
+
+/* ── Supp chip ────────────────────────────────── */
+.time-chip { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--accent-lt); color: var(--accent); margin-right: 4px; }
+
+/* ── Responsive ───────────────────────────────── */
+@media (max-width: 640px) {
+  .sidebar { width: 100%; min-height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 0.5rem; border-right: none; border-bottom: 1px solid var(--border); }
+  .sidebar .logo { display: none; }
+  .nav-btn { width: auto; padding: 6px 10px; }
+  .main { margin-left: 0; padding: 1rem; }
+  .fg3, .fg4 { grid-template-columns: 1fr 1fr; }
+  .mc4 { grid-template-columns: repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<div class="shell">
+<!-- ══ Sidebar ══════════════════════════════════════════ -->
+<nav class="sidebar">
+  <div class="logo"><i class="ti ti-heart-rate-monitor"></i> 健康中樞</div>
+  <button class="nav-btn active" onclick="sw('body')"><i class="ti ti-body-scan"></i> 身體數據</button>
+  <button class="nav-btn" onclick="sw('diet')"><i class="ti ti-salad"></i> 飲食追蹤</button>
+  <button class="nav-btn" onclick="sw('photo')"><i class="ti ti-camera"></i> AI 辨識</button>
+  <button class="nav-btn" onclick="sw('water')"><i class="ti ti-droplet"></i> 水分</button>
+  <button class="nav-btn" onclick="sw('meal')"><i class="ti ti-chef-hat"></i> 餐點建議</button>
+  <button class="nav-btn" onclick="sw('supp')"><i class="ti ti-pill"></i> 保健食品</button>
+  <button class="nav-btn" onclick="sw('activity')"><i class="ti ti-stairs"></i> 運動記錄</button>
+  <button class="nav-btn" onclick="sw('health')"><i class="ti ti-stethoscope"></i> 健康異常</button>
+  <button class="nav-btn" onclick="sw('chart')"><i class="ti ti-chart-line"></i> 趨勢圖</button>
+  <button class="nav-btn" onclick="sw('summary')"><i class="ti ti-report-analytics"></i> 每日總結</button>
+  <hr class="sep" style="margin-top:auto">
+  <button class="nav-btn" onclick="sw('setup')"><i class="ti ti-settings"></i> 設定</button>
+</nav>
+
+<!-- ══ Main Content ════════════════════════════════════ -->
+<main class="main">
+
+<!-- ── 設定 ─────────────────────────────────── -->
+<div id="page-setup" class="page active">
+  <div class="page-title"><i class="ti ti-settings"></i> 初始設定</div>
+  <div class="setup-banner">
+    <strong>⚡ 首次使用請先完成以下設定</strong><br>
+    1. 前往 <a href="https://sheets.google.com" target="_blank">Google Sheets</a> 建立一個新試算表<br>
+    2. 點選上方選單 <strong>「擴充功能」→「Apps Script」</strong><br>
+    3. 刪除預設程式碼，貼上 <code>Code.gs</code> 的內容，儲存<br>
+    4. 點選 <strong>「部署」→「新增部署作業」</strong>，類型選 <strong>Web 應用程式</strong><br>
+    5. 執行身分選 <strong>我</strong>，存取權選 <strong>任何人</strong>，點選部署<br>
+    6. 複製取得的 <strong>Web App 網址</strong>，貼到下方<br>
+    7. 你的 Claude API Key 貼到第二格（用於 AI 功能）<br>
+    <a href="#" onclick="showSetupGuide()">📖 查看詳細圖文教學</a>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-link"></i> API 連線設定</div>
+    <div class="fg">
+      <div class="f"><label>Google Apps Script Web App 網址</label>
+        <input type="url" id="cfg-gas" placeholder="https://script.google.com/macros/s/AKfycb.../exec"></div>
+      <div class="f"><label>Claude API Key（用於 AI 功能）</label>
+        <input type="password" id="cfg-claude" placeholder="sk-ant-api03-..."></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="testConnection()"><i class="ti ti-plug"></i> 測試連線</button>
+      <button class="btn p" onclick="saveConfig()"><i class="ti ti-device-floppy"></i> 儲存設定</button>
+    </div>
+    <div id="cfg-status" style="margin-top:0.75rem;font-size:13px"></div>
+  </div>
+  <div id="setup-guide" style="display:none">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-book"></i> 詳細設定步驟</div>
+      <ol style="font-size:13px;line-height:2;padding-left:1.5rem">
+        <li>開啟 <a href="https://sheets.google.com" target="_blank">sheets.google.com</a>，登入 Google 帳號</li>
+        <li>點「空白試算表」建立新檔案，命名為「健康追蹤」</li>
+        <li>上方選單：擴充功能 → Apps Script</li>
+        <li>在 Apps Script 編輯器中，刪除 <code>function myFunction(){}</code></li>
+        <li>開啟下載的 <code>Code.gs</code>，複製全部內容貼入</li>
+        <li>Ctrl+S 儲存，右上角「部署」→「新增部署作業」</li>
+        <li>類型：Web 應用程式 / 描述：health-tracker</li>
+        <li>執行身分：<strong>我</strong> / 誰可以存取：<strong>任何人</strong></li>
+        <li>按「部署」，複製 Web 應用程式網址</li>
+        <li>回到這個設定頁面，貼上網址並儲存</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- ── 身體數據 ──────────────────────────────── -->
+<div id="page-body" class="page">
+  <div class="page-title"><i class="ti ti-body-scan"></i> 身體數據</div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-ruler-measure"></i> 基本體位</div>
+    <div class="fg fg3">
+      <div class="f"><label>年齡</label><input type="number" id="age" value="28"></div>
+      <div class="f"><label>性別</label><select id="gender"><option value="male">男性</option><option value="female">女性</option></select></div>
+      <div class="f"><label>身高 (cm)</label><input type="number" id="height" value="170"></div>
+    </div>
+    <div class="fg fg3">
+      <div class="f"><label>目前體重 (kg)</label><input type="number" id="weight" value="72" step="0.1"></div>
+      <div class="f"><label>目標體重 (kg)</label><input type="number" id="tw" value="65" step="0.1"></div>
+      <div class="f"><label>活動程度</label><select id="act-level">
+        <option value="1.2">久坐（少動）</option>
+        <option value="1.375" selected>輕度活動（週 1–3 天）</option>
+        <option value="1.55">中度活動（週 3–5 天）</option>
+        <option value="1.725">高度活動（週 6–7 天）</option>
+      </select></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-percentage"></i> 體組成數據</div>
+    <div class="fg fg4">
+      <div class="f"><label>體脂率 (%)</label><input type="number" id="bf" value="22" step="0.1"></div>
+      <div class="f"><label>目標體脂率 (%)</label><input type="number" id="tbf" value="15" step="0.1"></div>
+      <div class="f"><label>肌肉量 (kg)</label><input type="number" id="muscle" value="52" step="0.1"></div>
+      <div class="f"><label>目標肌肉量 (kg)</label><input type="number" id="tmuscle" value="57" step="0.1"></div>
+    </div>
+    <div class="fg fg4">
+      <div class="f"><label>內臟脂肪等級</label><input type="number" id="vf" value="8" min="1" max="30"></div>
+      <div class="f"><label>目標內臟脂肪</label><input type="number" id="tvf" value="5" min="1" max="30"></div>
+      <div class="f"><label>BMR (自動計算)</label><input type="number" id="bmr-display" readonly placeholder="儲存後顯示"></div>
+      <div class="f"><label>目標</label><select id="goal">
+        <option value="cut">減脂</option>
+        <option value="maintain">維持體重</option>
+        <option value="bulk">增肌</option>
+      </select></div>
+    </div>
+  </div>
+  <div id="body-result" class="card" style="display:none">
+    <div class="card-title"><i class="ti ti-chart-pie"></i> 計算結果</div>
+    <div class="mc mc4" id="body-metrics"></div>
+    <div id="body-status" style="margin-top:0.5rem;font-size:13px;color:var(--muted)"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn p" onclick="calcAndSaveBody()"><i class="ti ti-device-floppy"></i> 計算並儲存到 Sheets</button>
+  </div>
+</div>
+
+<!-- ── 飲食追蹤 ──────────────────────────────── -->
+<div id="page-diet" class="page">
+  <div class="page-title"><i class="ti ti-salad"></i> 今日飲食追蹤</div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-chart-bar"></i> 今日進度</div>
+    <div class="mc mc4">
+      <div class="mci"><div class="v" id="dm-cal">0</div><div class="l">熱量</div><div class="s" id="dm-cal-t">/ 0 kcal</div></div>
+      <div class="mci"><div class="v" id="dm-prot">0g</div><div class="l">蛋白質</div><div class="s" id="dm-prot-t">/ 0g</div></div>
+      <div class="mci"><div class="v" id="dm-carb">0g</div><div class="l">碳水</div><div class="s" id="dm-carb-t">/ 0g</div></div>
+      <div class="mci"><div class="v" id="dm-fat">0g</div><div class="l">脂肪</div><div class="s" id="dm-fat-t">/ 0g</div></div>
+    </div>
+    <div class="pw"><div class="pl"><span>熱量</span><span id="pb-cal-l">0/0 kcal</span></div><div class="pb"><div class="pf c-cal" id="pb-cal" style="width:0%"></div></div></div>
+    <div class="pw"><div class="pl"><span>蛋白質</span><span id="pb-prot-l">0/0g</span></div><div class="pb"><div class="pf c-prot" id="pb-prot" style="width:0%"></div></div></div>
+    <div class="pw"><div class="pl"><span>碳水</span><span id="pb-carb-l">0/0g</span></div><div class="pb"><div class="pf c-carb" id="pb-carb" style="width:0%"></div></div></div>
+    <div class="pw" style="margin-bottom:0"><div class="pl"><span>脂肪</span><span id="pb-fat-l">0/0g</span></div><div class="pb"><div class="pf c-fat" id="pb-fat" style="width:0%"></div></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-plus"></i> 新增飲食記錄</div>
+    <div class="fg fg2">
+      <div class="f"><label>食物名稱</label><input type="text" id="fn" placeholder="例：雞胸肉、白飯"></div>
+      <div class="f"><label>份量 (g)</label><input type="number" id="fa" value="100" min="1"></div>
+    </div>
+    <div class="fg fg3">
+      <div class="f"><label>蛋白質 (g)</label><input type="number" id="fp" value="0" step="0.1"></div>
+      <div class="f"><label>碳水化合物 (g)</label><input type="number" id="fc" value="0" step="0.1"></div>
+      <div class="f"><label>脂肪 (g)</label><input type="number" id="ff" value="0" step="0.1"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn sm" onclick="qa('白飯',200,5,57,0.4)">+白飯 200g</button>
+      <button class="btn sm" onclick="qa('雞胸肉',150,46,0,3)">+雞胸 150g</button>
+      <button class="btn sm" onclick="qa('水煮蛋',60,7.5,0.6,5.3)">+水煮蛋</button>
+      <button class="btn p" onclick="addFood()"><i class="ti ti-plus"></i> 新增並同步</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-list"></i> 今日飲食清單</div>
+    <div id="food-list"><p style="font-size:12px;color:var(--muted);padding:0.5rem;text-align:center">尚未記錄</p></div>
+  </div>
+</div>
+
+<!-- ── AI 辨識 ───────────────────────────────── -->
+<div id="page-photo" class="page">
+  <div class="page-title"><i class="ti ti-camera"></i> AI 食物辨識</div>
+  <div class="card">
+    <div class="photo-zone" id="dz">
+      <i class="ti ti-camera-plus"></i>
+      <p style="font-size:13px;color:var(--muted)">點擊或拖曳上傳食物照片</p>
+      <p style="font-size:12px;color:var(--muted);margin-top:4px">支援 JPG、PNG</p>
+      <input type="file" accept="image/*" id="pi" onchange="handlePic(event)">
+    </div>
+    <div id="ppw" style="display:none;margin-top:0.75rem">
+      <img id="pp" class="prev-img" src="" alt="食物預覽">
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn" onclick="clearPic()">重新選擇</button>
+        <button class="btn p" id="abtn" onclick="analyzePhoto()"><i class="ti ti-sparkles"></i> AI 分析</button>
+      </div>
+    </div>
+  </div>
+  <div id="photo-result" style="display:none">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-report"></i> 辨識結果</div>
+      <div id="photo-content"></div>
+      <div id="photo-add-row" class="btn-row" style="display:none">
+        <button class="btn p" onclick="addAI()"><i class="ti ti-check"></i> 全部加入今日記錄</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 水分 ─────────────────────────────────── -->
+<div id="page-water" class="page">
+  <div class="page-title"><i class="ti ti-droplet"></i> 水分追蹤</div>
+  <div class="card" style="text-align:center;padding:1.5rem">
+    <div class="water-big" id="water-display">0</div>
+    <div class="water-sub">/ <span id="water-goal-display">2500</span> ml 每日建議</div>
+    <div style="max-width:400px;margin:0 auto 1rem">
+      <div class="pb" style="height:12px"><div class="pf c-water" id="water-pb" style="width:0%"></div></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+      <button class="btn sm" onclick="addWater(150)">+150ml</button>
+      <button class="btn sm" onclick="addWater(250)">+250ml (小杯)</button>
+      <button class="btn sm" onclick="addWater(350)">+350ml (中杯)</button>
+      <button class="btn sm" onclick="addWater(500)">+500ml (大瓶)</button>
+      <button class="btn sm" onclick="addWater(600)">+600ml (運動瓶)</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:flex-end;max-width:300px;margin:0.75rem auto 0">
+      <div class="f" style="flex:1"><label>自訂 (ml)</label><input type="number" id="custom-water" value="200"></div>
+      <button class="btn p sm" onclick="addWater(+document.getElementById('custom-water').value)">新增</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-info-circle"></i> 個人化建議</div>
+    <div id="water-tips" style="font-size:13px;line-height:1.9;color:var(--muted)">請先在「身體數據」儲存數據以獲得個人化建議。</div>
+  </div>
+</div>
+
+<!-- ── 餐點建議 ──────────────────────────────── -->
+<div id="page-meal" class="page">
+  <div class="page-title"><i class="ti ti-chef-hat"></i> 餐點建議</div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-carrot"></i> 手邊食材</div>
+    <div class="f" style="margin-bottom:0.75rem">
+      <label>目前有哪些食材？（用逗號分隔）</label>
+      <textarea id="ingredients" placeholder="例：雞胸肉、花椰菜、糙米、雞蛋、番茄、豆腐、橄欖油、燕麥"></textarea>
+    </div>
+    <div class="fg fg2">
+      <div class="f"><label>餐點類型</label><select id="meal-type"><option value="breakfast">早餐</option><option value="lunch">午餐</option><option value="dinner">晚餐</option><option value="snack">點心</option></select></div>
+      <div class="f"><label>特殊需求</label><select id="meal-pref"><option value="">無特殊</option><option value="low_carb">低碳水</option><option value="high_protein">高蛋白</option><option value="light">清淡好消化</option></select></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn p" onclick="getMealRec()"><i class="ti ti-sparkles"></i> AI 生成餐點建議</button>
+    </div>
+  </div>
+  <div id="meal-result" style="display:none">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chef-hat"></i> 建議餐點與進食順序</div>
+      <div id="meal-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 保健食品 ──────────────────────────────── -->
+<div id="page-supp" class="page">
+  <div class="page-title"><i class="ti ti-pill"></i> 保健食品管理</div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-plus"></i> 新增補充品</div>
+    <div class="fg fg2">
+      <div class="f"><label>名稱</label><input type="text" id="supp-name" placeholder="例：愛康鈣、魚油、B群"></div>
+      <div class="f"><label>主要成分</label><input type="text" id="supp-comp" placeholder="例：活性維生素D3、EPA/DHA 1000mg"></div>
+    </div>
+    <div class="fg fg2">
+      <div class="f"><label>劑量</label><input type="text" id="supp-dose" placeholder="例：1顆 500mg"></div>
+      <div class="f"><label>服用時間</label><select id="supp-time">
+        <option value="morning">早餐後</option>
+        <option value="lunch">午餐後</option>
+        <option value="dinner">晚餐後</option>
+        <option value="sleep">睡前</option>
+        <option value="empty">空腹</option>
+        <option value="exercise">運動前後</option>
+      </select></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn p" onclick="addSupp()"><i class="ti ti-plus"></i> 新增並同步</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-list"></i> 目前補充清單</div>
+    <div id="supp-list"><p style="font-size:12px;color:var(--muted);text-align:center;padding:0.5rem">尚未新增</p></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn p" onclick="analyzeSupp()"><i class="ti ti-sparkles"></i> AI 分析時序與衝突</button>
+  </div>
+  <div id="supp-result" style="display:none">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-clock"></i> 服用時序建議</div>
+      <div id="supp-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 運動記錄 ──────────────────────────────── -->
+<div id="page-activity" class="page">
+  <div class="page-title"><i class="ti ti-stairs"></i> 運動記錄</div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-plus"></i> 新增運動</div>
+    <div class="fg fg2">
+      <div class="f"><label>運動類型</label><select id="act-type" onchange="toggleStairs()">
+        <option value="stairs">階梯訓練</option>
+        <option value="cardio">有氧運動</option>
+        <option value="strength">重量訓練</option>
+        <option value="yoga">瑜伽/伸展</option>
+        <option value="walk">散步/健走</option>
+        <option value="swim">游泳</option>
+      </select></div>
+      <div class="f"><label>時間 (分鐘)</label><input type="number" id="act-min" value="30" min="1"></div>
+    </div>
+    <div id="stairs-fields" class="fg fg2">
+      <div class="f"><label>階梯層數（單趟）</label><input type="number" id="stairs-up" value="8" placeholder="如：8"></div>
+      <div class="f"><label>訓練組數（幾個來回）</label><input type="number" id="stairs-sets" value="2" placeholder="如：2 代表 8+8"></div>
+    </div>
+    <div class="fg fg2">
+      <div class="f"><label>強度</label><select id="act-int"><option value="low">輕鬆</option><option value="med" selected>中等</option><option value="high">高強度</option></select></div>
+      <div class="f"><label>備注</label><input type="text" id="act-note" placeholder="例：下午完成、有點喘"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn p" onclick="addActivity()"><i class="ti ti-device-floppy"></i> 記錄並同步</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-list"></i> 今日運動清單</div>
+    <div id="act-list"><p style="font-size:12px;color:var(--muted);text-align:center;padding:0.5rem">尚未記錄</p></div>
+    <div id="act-totals" style="display:none">
+      <hr class="sep">
+      <div class="mc mc3">
+        <div class="mci"><div class="v" id="at-min">0</div><div class="l">總分鐘</div></div>
+        <div class="mci"><div class="v" id="at-cal">0</div><div class="l">消耗熱量</div></div>
+        <div class="mci"><div class="v" id="at-stairs">—</div><div class="l">階梯總層數</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 健康異常 ──────────────────────────────── -->
+<div id="page-health" class="page">
+  <div class="page-title"><i class="ti ti-stethoscope"></i> 健康異常管理</div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-activity"></i> 今日症狀</div>
+    <div class="sym-grid" id="symptom-grid">
+      <div class="sym-item" onclick="toggleSym(this,'綠痰')"><div class="sym">🟢 綠痰</div><div class="desc">細菌感染跡象</div></div>
+      <div class="sym-item" onclick="toggleSym(this,'喉嚨痛')"><div class="sym">🔴 喉嚨痛</div><div class="desc">發炎腫痛感</div></div>
+      <div class="sym-item" onclick="toggleSym(this,'流鼻水')"><div class="sym">💧 流鼻水</div><div class="desc">鼻腔分泌物增加</div></div>
+      <div class="sym-item" onclick="toggleSym(this,'發燒')"><div class="sym">🌡️ 發燒</div><div class="desc">體溫升高</div></div>
+      <div class="sym-item" onclick="toggleSym(this,'疲勞')"><div class="sym">😴 嚴重疲勞</div><div class="desc">無力感明顯</div></div>
+      <div class="sym-item" onclick="toggleSym(this,'咳嗽')"><div class="sym">💨 持續咳嗽</div><div class="desc">呼吸道刺激</div></div>
+    </div>
+    <div style="margin-bottom:0.75rem">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">嚴重程度</div>
+      <div class="sev-bar">
+        <button class="sev-btn s0" onclick="setSev(0,this)">輕微</button>
+        <button class="sev-btn" onclick="setSev(1,this)">中等</button>
+        <button class="sev-btn" onclick="setSev(2,this)">嚴重</button>
+      </div>
+    </div>
+    <div class="f" style="margin-bottom:0.75rem">
+      <label>目前服用藥物（逗號分隔）</label>
+      <input type="text" id="meds" placeholder="例：克流感、普拿疼、阿莫西林">
+    </div>
+    <div class="btn-row">
+      <button class="btn p" onclick="analyzeHealth()"><i class="ti ti-sparkles"></i> AI 分析調整建議</button>
+    </div>
+  </div>
+  <div id="health-result" style="display:none">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-alert-triangle"></i> 健康調整方案（運動、飲食）</div>
+      <div id="health-content"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-pill"></i> 藥物 × 保健食品衝突檢查</div>
+      <div id="conflict-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 趨勢圖 ─────────────────────────────────── -->
+<div id="page-chart" class="page">
+  <div class="page-title"><i class="ti ti-chart-line"></i> 身體數據趨勢</div>
+  <div class="card">
+    <div class="tab-bar">
+      <button class="active" onclick="showChart('weight',this)">體重 (kg)</button>
+      <button onclick="showChart('bf',this)">體脂率 (%)</button>
+      <button onclick="showChart('muscle',this)">肌肉量 (kg)</button>
+      <button onclick="showChart('water',this)">水分 (ml)</button>
+    </div>
+    <canvas id="trend-chart" height="220"></canvas>
+    <p style="font-size:11px;color:var(--muted);margin-top:0.5rem;text-align:center">每次儲存身體數據時自動更新（保留 30 天）</p>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-sparkles"></i> AI 趨勢分析與一週飲食建議</div>
+    <div class="btn-row" style="margin-top:0">
+      <button class="btn p" onclick="analyzeChart()"><i class="ti ti-sparkles"></i> 分析趨勢</button>
+    </div>
+    <div id="chart-ai-out" style="margin-top:0.75rem"></div>
+  </div>
+</div>
+
+<!-- ── 每日總結 ──────────────────────────────── -->
+<div id="page-summary" class="page">
+  <div class="page-title"><i class="ti ti-report-analytics"></i> 每日總結</div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-calendar-check"></i> 今日摘要</div>
+    <div id="sum-stats"><p style="font-size:12px;color:var(--muted)">載入中...</p></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn p" onclick="genSummary()"><i class="ti ti-sparkles"></i> 生成今日總結與明日建議</button>
+  </div>
+  <div id="sum-result" style="display:none">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-message-circle"></i> 今日飲食與健康總結</div>
+      <div id="sum-today"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-bulb"></i> 明日具體建議</div>
+      <div id="sum-tomorrow"></div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div><!-- end .shell -->
+
+<script>
+// ══════════════════════════════════════════════════
+// CONFIG & STATE
+// ══════════════════════════════════════════════════
+const CFG = {
+  gasUrl:    localStorage.getItem('ht_gas') || '',
+  claudeKey: localStorage.getItem('ht_claude') || '',
+};
+
+const S = {
+  targets:  { cal:2000, prot:150, carb:200, fat:55 },
+  foods:    [],
+  supps:    [],
+  activities: [],
+  water:    0,
+  waterGoal: 2500,
+  history:  [],
+  aiItems:  [],
+  photoB64: null,
+  profile:  {},
+  symptoms: new Set(),
+  severity: 0,
+  chartInst:null,
+};
+
+// ── Apply saved config on load ─────────────────
+if (CFG.gasUrl)    document.getElementById('cfg-gas').value    = CFG.gasUrl;
+if (CFG.claudeKey) document.getElementById('cfg-claude').value = CFG.claudeKey;
+
+// ══════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════
+function sw(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelector(`.nav-btn[onclick="sw('${id}')"]`).classList.add('active');
+  if (id === 'chart') setTimeout(() => renderTrendChart(S.chartType || 'weight'), 80);
+  if (id === 'summary') renderSumStats();
+}
+
+// ══════════════════════════════════════════════════
+// GAS API CALLS
+// ══════════════════════════════════════════════════
+async function gasCall(body) {
+  if (!CFG.gasUrl) { toast('⚠️ 請先在「設定」填寫 Apps Script 網址'); return null; }
+  try {
+    const r = await fetch(CFG.gasUrl, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+    return await r.json();
+  } catch (e) {
+    toast('連線失敗：' + e.message);
+    return null;
+  }
+}
+
+async function loadAll() {
+  if (!CFG.gasUrl) return;
+  const d = await gasCall({ action: 'getAll' });
+  if (!d || !d.ok) return;
+  // Profile
+  if (d.profile && d.profile.length > 1) {
+    const p = d.profile[1];
+    ['age','gender','height','weight','tw','bf','tbf','muscle','tmuscle','vf','tvf'].forEach(k => {
+      const el = document.getElementById(k);
+      if (el && p[k] !== undefined) el.value = p[k];
+    });
+    S.targets = { cal: +p.calTarget, prot: +p.protTarget, carb: +p.carbTarget, fat: +p.fatTarget };
+    S.profile  = p;
+    S.waterGoal= +p.waterGoal || 2500;
+    updateWaterUI();
+  }
+  // Foods
+  S.foods = (d.foods || []).map((f,i) => ({ ...f, prot:+f.prot, carb:+f.carb, fat:+f.fat, cal:+f.cal, amount:+f.amount, id:i }));
+  renderFoodList(); updateDietProgress();
+  // Water
+  S.water = +(d.water) || 0;
+  updateWaterUI();
+  // Activities
+  S.activities = (d.activities || []).map((a,i) => ({ ...a, min:+a.minutes, cal:+a.cal, id:i,
+    typeLabel: a.typeLabel,
+    stairsInfo: a.stairsUp ? { up:+a.stairsUp, sets:+a.stairsSets, total:+a.stairsTotal } : null }));
+  renderActList();
+  // Supplements
+  S.supps = (d.supplements || []).map((s,i) => ({ ...s, id:i }));
+  renderSuppList();
+  // History
+  S.history = (d.history || []).map(h => ({ ...h, weight:+h.weight, bf:+h.bf, muscle:+h.muscle, vf:+h.vf, water:+h.water }));
+}
+
+// ══════════════════════════════════════════════════
+// SETUP
+// ══════════════════════════════════════════════════
+function saveConfig() {
+  CFG.gasUrl    = document.getElementById('cfg-gas').value.trim();
+  CFG.claudeKey = document.getElementById('cfg-claude').value.trim();
+  localStorage.setItem('ht_gas',    CFG.gasUrl);
+  localStorage.setItem('ht_claude', CFG.claudeKey);
+  toast('設定已儲存！');
+}
+
+async function testConnection() {
+  CFG.gasUrl = document.getElementById('cfg-gas').value.trim();
+  const el = document.getElementById('cfg-status');
+  el.innerHTML = '<span class="spin"></span>測試中…';
+  const d = await gasCall({ action: 'getAll' });
+  el.innerHTML = d && d.ok
+    ? '<span style="color:var(--accent-md)">✓ 連線成功！Google Sheets 已就緒</span>'
+    : '<span style="color:var(--danger)">✗ 連線失敗，請確認網址是否正確</span>';
+}
+
+function showSetupGuide() {
+  const g = document.getElementById('setup-guide');
+  g.style.display = g.style.display === 'none' ? 'block' : 'none';
+}
+
+// ══════════════════════════════════════════════════
+// BODY DATA
+// ══════════════════════════════════════════════════
+async function calcAndSaveBody() {
+  const age    = +document.getElementById('age').value;
+  const gender = document.getElementById('gender').value;
+  const h      = +document.getElementById('height').value;
+  const w      = +document.getElementById('weight').value;
+  const tw     = +document.getElementById('tw').value;
+  const bf     = +document.getElementById('bf').value;
+  const tbf    = +document.getElementById('tbf').value;
+  const muscle = +document.getElementById('muscle').value;
+  const tmuscle= +document.getElementById('tmuscle').value;
+  const vf     = +document.getElementById('vf').value;
+  const tvf    = +document.getElementById('tvf').value;
+  const actV   = +document.getElementById('act-level').value;
+  const goal   = document.getElementById('goal').value;
+
+  const lbm  = w * (1 - bf / 100);
+  const bmr  = Math.round(gender === 'male' ? 10*w + 6.25*h - 5*age + 5 : 10*w + 6.25*h - 5*age - 161);
+  const tdee = Math.round(bmr * actV);
+  const cal  = goal === 'cut' ? tdee - 500 : goal === 'bulk' ? tdee + 300 : tdee;
+  const prot = Math.round(w * 2);
+  const fat  = Math.round(cal * 0.25 / 9);
+  const carb = Math.round((cal - prot*4 - fat*9) / 4);
+  const waterGoal = Math.round(w * 35);
+
+  S.targets  = { cal, prot, carb, fat };
+  S.waterGoal = waterGoal;
+  S.profile   = { age, gender, height:h, weight:w, targetWeight:tw, bf, targetBf:tbf, muscle, targetMuscle:tmuscle, vf, targetVf:tvf, goal };
+  document.getElementById('bmr-display').value = bmr;
+
+  const bmi      = (w / (h/100)**2).toFixed(1);
+  const bmiLabel = bmi < 18.5 ? '過輕' : bmi < 24 ? '正常' : bmi < 28 ? '過重' : '肥胖';
+  const vfColor  = vf <= 4 ? 'g' : vf <= 9 ? 'w' : 'd';
+
+  document.getElementById('body-result').style.display = 'block';
+  document.getElementById('body-metrics').innerHTML = `
+    <div class="mci"><div class="v">${cal}</div><div class="l">目標熱量</div><div class="s">kcal/天</div></div>
+    <div class="mci"><div class="v">${bmr}</div><div class="l">基礎代謝 BMR</div><div class="s">kcal/天</div></div>
+    <div class="mci"><div class="v">${tdee}</div><div class="l">TDEE</div><div class="s">每日總消耗</div></div>
+    <div class="mci"><div class="v">${waterGoal}ml</div><div class="l">建議水分</div><div class="s">體重×35ml</div></div>
+  `;
+  document.getElementById('body-status').innerHTML = `
+    BMI <strong>${bmi}</strong>（${bmiLabel}）・
+    體脂目標差 <strong>${(bf-tbf).toFixed(1)}%</strong>・
+    內臟脂肪 <span class="badge ${vfColor}">${vf} 級</span>・
+    蛋白質目標 <strong>${prot}g</strong>
+  `;
+  document.getElementById('water-tips').innerHTML = `
+    根據體重 <strong>${w}kg</strong>，每日建議 <strong>${waterGoal}ml</strong>（體重×35ml）。<br>
+    減脂期可增至 <strong>${Math.round(w*40)}ml</strong>，協助代謝廢物排出。<br>
+    早起空腹一杯 250ml 溫水啟動代謝；運動後每 30 分鐘補充 200-300ml。
+  `;
+  updateWaterUI();
+  updateDietProgress();
+
+  // Save to Sheets
+  const r = await gasCall({ action: 'saveProfile', data: { age, gender, height:h, weight:w, targetWeight:tw, bf, targetBf:tbf, muscle, targetMuscle:tmuscle, vf, targetVf:tvf, activity:actV, goal, bmr, tdee, calTarget:cal, protTarget:prot, carbTarget:carb, fatTarget:fat, waterGoal } });
+  if (r && r.ok) {
+    await gasCall({ action: 'addHistory', data: { weight:w, bf, muscle, vf, water:S.water } });
+    toast('✓ 身體數據已儲存至 Google Sheets');
+  }
+}
+
+// ══════════════════════════════════════════════════
+// DIET TRACKING
+// ══════════════════════════════════════════════════
+function getTotals() {
+  return S.foods.reduce((a,f) => ({ cal:a.cal+f.cal, prot:a.prot+f.prot, carb:a.carb+f.carb, fat:a.fat+f.fat }), { cal:0, prot:0, carb:0, fat:0 });
+}
+
+function updateDietProgress() {
+  const t = getTotals(), g = S.targets;
+  const keys = ['cal','prot','carb','fat'];
+  const units = { cal:'kcal', prot:'g', carb:'g', fat:'g' };
+  keys.forEach(k => {
+    const v = Math.round(t[k]), max = g[k] || 1;
+    document.getElementById('dm-'+k).textContent = v + (k !== 'cal' ? 'g' : '');
+    document.getElementById('dm-'+k+'-t').textContent = '/ ' + max + units[k];
+    const pct = Math.min(Math.round(v/max*100), 100);
+    const bar = document.getElementById('pb-'+k);
+    bar.style.width = pct + '%';
+    bar.classList.toggle('over', v > max);
+    document.getElementById('pb-'+k+'-l').textContent = v + units[k] + ' / ' + max + units[k];
+  });
+}
+
+async function addFood() {
+  const name = document.getElementById('fn').value.trim();
+  if (!name) return;
+  const p = +document.getElementById('fp').value;
+  const c = +document.getElementById('fc').value;
+  const f = +document.getElementById('ff').value;
+  const cal = Math.round(p*4 + c*4 + f*9);
+  const item = { name, amount:+document.getElementById('fa').value, prot:p, carb:c, fat:f, cal, id:Date.now() };
+  S.foods.push(item);
+  renderFoodList(); updateDietProgress();
+  document.getElementById('fn').value = '';
+  const r = await gasCall({ action:'addFood', data:item });
+  if (r && r.ok) toast('✓ 已同步到 Sheets');
+}
+
+function qa(name, amount, prot, carb, fat) {
+  document.getElementById('fn').value = name;
+  document.getElementById('fa').value = amount;
+  document.getElementById('fp').value = prot;
+  document.getElementById('fc').value = carb;
+  document.getElementById('ff').value = fat;
+  addFood();
+}
+
+function renderFoodList() {
+  const el = document.getElementById('food-list');
+  if (!S.foods.length) { el.innerHTML = '<p style="font-size:12px;color:var(--muted);text-align:center;padding:0.5rem">尚未記錄</p>'; return; }
+  el.innerHTML = S.foods.map(f => `
+    <div class="item-row">
+      <div>
+        <div class="n">${f.name} <span style="font-weight:400;color:var(--muted)">${f.amount}g</span></div>
+        <div class="d">${f.cal}kcal · 蛋白質 ${f.prot}g · 碳水 ${f.carb}g · 脂肪 ${f.fat}g</div>
+      </div>
+      <button class="del-btn" onclick="removeFood(${f.id})" title="刪除"><i class="ti ti-x"></i></button>
+    </div>`).join('');
+}
+
+async function removeFood(id) {
+  const idx = S.foods.findIndex(f => f.id === id);
+  if (idx < 0) return;
+  S.foods.splice(idx, 1);
+  renderFoodList(); updateDietProgress();
+  await gasCall({ action:'deleteFood', rowIndex:idx });
+}
+
+// ══════════════════════════════════════════════════
+// PHOTO AI
+// ══════════════════════════════════════════════════
+function handlePic(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    S.photoB64 = ev.target.result.split(',')[1];
+    document.getElementById('pp').src = ev.target.result;
+    document.getElementById('ppw').style.display = 'block';
+    document.getElementById('photo-result').style.display = 'none';
+  };
+  r.readAsDataURL(file);
+}
+
+function clearPic() {
+  S.photoB64 = null;
+  document.getElementById('ppw').style.display = 'none';
+  document.getElementById('pi').value = '';
+}
+
+async function analyzePhoto() {
+  if (!S.photoB64) { alert('請先上傳照片'); return; }
+  if (!CFG.claudeKey) { toast('⚠️ 請先在設定填入 Claude API Key'); return; }
+  const btn = document.getElementById('abtn');
+  btn.innerHTML = '<span class="spin"></span>辨識中…'; btn.disabled = true;
+  document.getElementById('photo-result').style.display = 'block';
+  document.getElementById('photo-content').innerHTML = '<p style="color:var(--muted)"><span class="spin"></span>AI 正在分析食物…</p>';
+  document.getElementById('photo-add-row').style.display = 'none';
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': CFG.claudeKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000,
+        messages: [{ role:'user', content:[
+          { type:'image', source:{ type:'base64', media_type:'image/jpeg', data:S.photoB64 }},
+          { type:'text',  text:'辨識食物估算營養素，只回傳JSON不含markdown：{"items":[{"name":"食物","amount":100,"cal":150,"prot":10,"carb":20,"fat":5}]}' }
+        ]}]})
+    });
+    const data = await resp.json();
+    const text = data.content.map(i => i.text||'').join('');
+    const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+    S.aiItems = parsed.items;
+    document.getElementById('photo-content').innerHTML = parsed.items.map(item => `
+      <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:5px;border:1px solid var(--border)">
+        <div><div style="font-weight:500">${item.name}</div><div style="font-size:11px;color:var(--muted)">${item.amount}g · ${item.cal}kcal</div></div>
+        <div style="font-size:11px;color:var(--muted);text-align:right">蛋白質 ${item.prot}g<br>碳水 ${item.carb}g · 脂肪 ${item.fat}g</div>
+      </div>`).join('');
+    document.getElementById('photo-add-row').style.display = 'flex';
+  } catch (e) {
+    document.getElementById('photo-content').innerHTML = `<p style="color:var(--danger)">辨識失敗：${e.message}</p>`;
+  }
+  btn.innerHTML = '<i class="ti ti-sparkles"></i> AI 分析'; btn.disabled = false;
+}
+
+async function addAI() {
+  for (const item of S.aiItems) {
+    const f = { name:item.name, amount:item.amount, prot:item.prot, carb:item.carb, fat:item.fat, cal:item.cal, id:Date.now()+Math.random() };
+    S.foods.push(f);
+    await gasCall({ action:'addFood', data:f });
+  }
+  renderFoodList(); updateDietProgress();
+  sw('diet'); toast('✓ 已加入今日飲食並同步');
+}
+
+// ══════════════════════════════════════════════════
+// WATER
+// ══════════════════════════════════════════════════
+async function addWater(ml) {
+  S.water = Math.min(S.water + ml, 9999);
+  updateWaterUI();
+  await gasCall({ action:'setWater', ml:S.water });
+}
+
+function updateWaterUI() {
+  document.getElementById('water-display').textContent = S.water;
+  document.getElementById('water-goal-display').textContent = S.waterGoal;
+  const pct = Math.min(Math.round(S.water / S.waterGoal * 100), 100);
+  document.getElementById('water-pb').style.width = pct + '%';
+}
+
+// ══════════════════════════════════════════════════
+// MEAL RECOMMENDATION
+// ══════════════════════════════════════════════════
+async function getMealRec() {
+  const ing = document.getElementById('ingredients').value.trim();
+  if (!ing) { alert('請輸入手邊食材'); return; }
+  if (!CFG.claudeKey) { toast('⚠️ 請先在設定填入 Claude API Key'); return; }
+  const typeLabel = { breakfast:'早餐', lunch:'午餐', dinner:'晚餐', snack:'點心' }[document.getElementById('meal-type').value];
+  const goalLabel = { cut:'減脂', maintain:'維持體重', bulk:'增肌' }[document.getElementById('goal').value || 'maintain'];
+  const pref = document.getElementById('meal-pref').value;
+  const el = document.getElementById('meal-content');
+  document.getElementById('meal-result').style.display = 'block';
+  el.innerHTML = '<p style="color:var(--muted)"><span class="spin"></span>AI 規劃中…</p>';
+  const prompt = `用戶目標：${goalLabel}，蛋白質目標 ${S.targets.prot}g/天，體脂率 ${S.profile.bf||'?'}%。手邊食材：${ing}。為${typeLabel}設計餐點。${pref?'特殊需求：'+pref:''}。提供 2 個方案，每個包含：① 食材與分量 ② 建議進食順序（說明原因，如先吃蔬菜穩定血糖）③ 預估熱量與三大營養素。繁體中文，格式清楚。`;
+  try {
+    const resp = await claudeAI(prompt, 1200);
+    el.innerHTML = `<div class="ai-box" style="border-left-color:var(--accent-md)">${resp.replace(/\n/g,'<br>')}</div>`;
+  } catch(e) { el.innerHTML = `<p style="color:var(--danger)">生成失敗：${e.message}</p>`; }
+}
+
+// ══════════════════════════════════════════════════
+// SUPPLEMENTS
+// ══════════════════════════════════════════════════
+async function addSupp() {
+  const name = document.getElementById('supp-name').value.trim();
+  if (!name) return;
+  S.supps.push({ name, comp:document.getElementById('supp-comp').value, dose:document.getElementById('supp-dose').value, time:document.getElementById('supp-time').value, id:Date.now() });
+  renderSuppList();
+  document.getElementById('supp-name').value = '';
+  await gasCall({ action:'saveSupplements', data:S.supps });
+  toast('✓ 已同步保健食品清單');
+}
+
+async function removeSupp(id) {
+  S.supps = S.supps.filter(s => s.id !== id);
+  renderSuppList();
+  await gasCall({ action:'saveSupplements', data:S.supps });
+}
+
+function renderSuppList() {
+  const el = document.getElementById('supp-list');
+  const tl = { morning:'早餐後', lunch:'午餐後', dinner:'晚餐後', sleep:'睡前', empty:'空腹', exercise:'運動前後' };
+  if (!S.supps.length) { el.innerHTML = '<p style="font-size:12px;color:var(--muted);text-align:center;padding:0.5rem">尚未新增</p>'; return; }
+  el.innerHTML = S.supps.map(s => `
+    <div class="item-row">
+      <div>
+        <div class="n">${s.name}</div>
+        <div class="d">${s.comp} · ${s.dose} <span class="time-chip">${tl[s.time]||s.time}</span></div>
+      </div>
+      <button class="del-btn" onclick="removeSupp(${s.id})"><i class="ti ti-x"></i></button>
+    </div>`).join('');
+}
+
+async function analyzeSupp() {
+  if (!S.supps.length) { alert('請先新增保健食品'); return; }
+  if (!CFG.claudeKey) { toast('⚠️ 請先在設定填入 Claude API Key'); return; }
+  const el = document.getElementById('supp-content');
+  document.getElementById('supp-result').style.display = 'block';
+  el.innerHTML = '<p style="color:var(--muted)"><span class="spin"></span>AI 分析中…</p>';
+  const list = S.supps.map(s => `${s.name}（${s.comp}，${s.dose}，目前：${s.time}）`).join('；');
+  const prompt = `用戶服用保健食品：${list}。請：① 最佳服用時序（分早中晚睡前列出）② 重複成分警告（特別注意：愛康鈣含活性維生素D3，與一般D3合用可能過量，詳細說明風險）③ 建議額外補充的營養素（依目標：${S.profile.goal||'維持'}）④ 潛在交互作用警示。繁體中文，分段清楚。`;
+  try {
+    const resp = await claudeAI(prompt, 1200);
+    el.innerHTML = `<div class="ai-box">${resp.replace(/\n/g,'<br>')}</div>`;
+  } catch(e) { el.innerHTML = `<p style="color:var(--danger)">分析失敗：${e.message}</p>`; }
+}
+
+// ══════════════════════════════════════════════════
+// ACTIVITY
+// ══════════════════════════════════════════════════
+function toggleStairs() {
+  document.getElementById('stairs-fields').style.display =
+    document.getElementById('act-type').value === 'stairs' ? 'grid' : 'none';
+}
+
+async function addActivity() {
+  const type = document.getElementById('act-type').value;
+  const typeLabel = { stairs:'階梯訓練', cardio:'有氧運動', strength:'重量訓練', yoga:'瑜伽/伸展', walk:'散步健走', swim:'游泳' }[type];
+  const min = +document.getElementById('act-min').value;
+  const intV = document.getElementById('act-int').value;
+  const intMult = { low:4, med:6, high:9 }[intV];
+  const w = S.profile.weight || 70;
+  const cal = Math.round(min * intMult * w / 60);
+  let stairsInfo = null;
+  if (type === 'stairs') {
+    const up = +document.getElementById('stairs-up').value;
+    const sets = +document.getElementById('stairs-sets').value;
+    stairsInfo = { up, sets, total: up * sets * 2 };
+  }
+  const act = { type, typeLabel, min, intensity:intV, cal, stairsInfo, note:document.getElementById('act-note').value, id:Date.now() };
+  S.activities.push(act);
+  renderActList();
+  const r = await gasCall({ action:'addActivity', data:act });
+  if (r && r.ok) toast('✓ 運動記錄已同步');
+}
+
+function renderActList() {
+  const el = document.getElementById('act-list');
+  if (!S.activities.length) { el.innerHTML = '<p style="font-size:12px;color:var(--muted);text-align:center;padding:0.5rem">尚未記錄</p>'; return; }
+  el.innerHTML = S.activities.map(a => `
+    <div class="item-row">
+      <div>
+        <div class="n">${a.typeLabel} ${a.stairsInfo ? `（${a.stairsInfo.up}層 × ${a.stairsInfo.sets}組）` : ''}</div>
+        <div class="d">${a.min} 分鐘 · 消耗約 ${a.cal} kcal${a.note ? ' · '+a.note : ''}</div>
+      </div>
+      <button class="del-btn" onclick="removeAct(${a.id})"><i class="ti ti-x"></i></button>
+    </div>`).join('');
+  const totalMin    = S.activities.reduce((a,x) => a+x.min, 0);
+  const totalCal    = S.activities.reduce((a,x) => a+x.cal, 0);
+  const stairsTotal = S.activities.filter(a => a.stairsInfo).reduce((a,x) => a+(x.stairsInfo?.total||0), 0);
+  document.getElementById('act-totals').style.display = 'block';
+  document.getElementById('at-min').textContent    = totalMin;
+  document.getElementById('at-cal').textContent    = totalCal;
+  document.getElementById('at-stairs').textContent = stairsTotal || '—';
+}
+
+async function removeAct(id) {
+  const idx = S.activities.findIndex(a => a.id === id);
+  if (idx < 0) return;
+  S.activities.splice(idx, 1);
+  renderActList();
+  await gasCall({ action:'deleteActivity', rowIndex:idx });
+}
+
+// ══════════════════════════════════════════════════
+// HEALTH / SYMPTOMS
+// ══════════════════════════════════════════════════
+function toggleSym(el, sym) {
+  if (S.symptoms.has(sym)) { S.symptoms.delete(sym); el.classList.remove('sel'); }
+  else { S.symptoms.add(sym); el.classList.add('sel'); }
+}
+
+function setSev(v, btn) {
+  S.severity = v;
+  document.querySelectorAll('.sev-btn').forEach((b, i) => {
+    b.className = 'sev-btn' + (i === v ? ' s'+v : '');
+  });
+}
+
+async function analyzeHealth() {
+  if (!CFG.claudeKey) { toast('⚠️ 請先在設定填入 Claude API Key'); return; }
+  const syms    = Array.from(S.symptoms);
+  const sevLabel = ['輕微','中等','嚴重'][S.severity];
+  const meds     = document.getElementById('meds').value.trim();
+  const suppList = S.supps.map(s => `${s.name}（${s.comp}）`).join('；') || '無';
+  const el1 = document.getElementById('health-content');
+  const el2 = document.getElementById('conflict-content');
+  document.getElementById('health-result').style.display = 'block';
+  el1.innerHTML = '<p style="color:var(--muted)"><span class="spin"></span>分析中…</p>';
+  el2.innerHTML = '';
+  const prompt = `用戶症狀：${syms.length ? syms.join('、') : '無'}（嚴重程度：${sevLabel}）。服用藥物：${meds||'無'}。保健食品：${suppList}。健身目標：${S.profile.goal||'維持'}。請提供：
+① 運動量調整建議（依嚴重程度說明應降至幾成強度、哪些訓練暫停）
+② 「去皮飲食」指令：清淡易消化食物清單、應避免食物（有感冒症狀時啟動）
+③ 症狀對應食療食物建議
+④ 藥物×保健食品衝突詳細檢查（特別針對愛康鈣活性D3 vs 市售D3重複攝取風險）
+繁體中文，標題清楚分段。`;
+  try {
+    const resp = await claudeAI(prompt, 1500);
+    const parts = resp.split(/(?=④)/);
+    el1.innerHTML = `<div class="ai-box ${S.severity===2?'danger':S.severity===1?'warn':''}">${(parts[0]||resp).replace(/\n/g,'<br>')}</div>`;
+    el2.innerHTML = parts[1] ? `<div class="ai-box warn">${parts[1].replace(/\n/g,'<br>')}</div>` : '<p style="color:var(--muted);font-size:13px">無特別衝突警示</p>';
+  } catch(e) { el1.innerHTML = `<p style="color:var(--danger)">分析失敗：${e.message}</p>`; }
+
+  await gasCall({ action:'addSymptom', data:{ symptoms:syms, severity:S.severity, meds } });
+}
+
+// ══════════════════════════════════════════════════
+// CHART
+// ══════════════════════════════════════════════════
+function showChart(type, btn) {
+  S.chartType = type;
+  document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTrendChart(type);
+}
+
+function renderTrendChart(type) {
+  const canvas = document.getElementById('trend-chart');
+  if (S.chartInst) { S.chartInst.destroy(); S.chartInst = null; }
+  const hist = S.history.slice(-14);
+  if (!hist.length) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#888'; ctx.font = '13px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('尚無歷史資料，請儲存身體數據後再查看', canvas.width/2, 100);
+    return;
+  }
+  const cfg = {
+    weight: { label:'體重 (kg)',   color:'#1B4332' },
+    bf:     { label:'體脂率 (%)',  color:'#E76F51' },
+    muscle: { label:'肌肉量 (kg)', color:'#52B788' },
+    water:  { label:'水分 (ml)',   color:'#60a5fa' },
+  };
+  const c = cfg[type];
+  const isDark = window.matchMedia('(prefers-color-scheme:dark)').matches;
+  const tc = isDark ? '#aaa' : '#888';
+  S.chartInst = new Chart(canvas, {
+    type: 'line',
+    data: { labels: hist.map(h => h.date), datasets: [{ label:c.label, data:hist.map(h => h[type]||0), borderColor:c.color, backgroundColor:c.color+'22', tension:0.4, pointRadius:4, pointBackgroundColor:c.color, fill:true }] },
+    options: { responsive:true, plugins:{ legend:{ display:false } }, scales: { x:{ ticks:{color:tc,font:{size:11}}, grid:{color:isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)'} }, y:{ ticks:{color:tc,font:{size:11}}, grid:{color:isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)'} } } }
+  });
+}
+
+async function analyzeChart() {
+  if (!CFG.claudeKey) { toast('⚠️ 請先在設定填入 Claude API Key'); return; }
+  const el = document.getElementById('chart-ai-out');
+  if (S.history.length < 2) { el.innerHTML = '<p style="color:var(--muted);font-size:13px">需至少 2 筆記錄才能分析趨勢</p>'; return; }
+  el.innerHTML = '<p style="color:var(--muted)"><span class="spin"></span>分析趨勢中…</p>';
+  const hist = S.history.slice(-14);
+  const prompt = `近期身體數據（${hist.length}筆）：${JSON.stringify(hist)}。目標：體重 ${S.profile.targetWeight||'?'}kg，體脂 ${S.profile.targetBf||'?'}%，${S.profile.goal||'維持'}。請分析趨勢是否朝目標前進，並給予接下來一週的具體飲食調整建議（3-5 項，可執行）。繁體中文，200 字以內。`;
+  try {
+    const resp = await claudeAI(prompt, 600);
+    el.innerHTML = `<div class="ai-box">${resp.replace(/\n/g,'<br>')}</div>`;
+  } catch(e) { el.innerHTML = `<p style="color:var(--danger)">分析失敗：${e.message}</p>`; }
+}
+
+// ══════════════════════════════════════════════════
+// SUMMARY
+// ══════════════════════════════════════════════════
+function renderSumStats() {
+  const t = getTotals(), g = S.targets;
+  const actCal = S.activities.reduce((a,x) => a+x.cal, 0);
+  const stairsTotal = S.activities.filter(a => a.stairsInfo).reduce((a,x) => a+(x.stairsInfo?.total||0), 0);
+  document.getElementById('sum-stats').innerHTML = `
+    <div class="item-row"><span>熱量攝取</span><span><strong>${Math.round(t.cal)}</strong> / ${g.cal} kcal（${Math.round(t.cal/g.cal*100||0)}%）</span></div>
+    <div class="item-row"><span>蛋白質</span><span><strong>${Math.round(t.prot)}g</strong> / ${g.prot}g</span></div>
+    <div class="item-row"><span>碳水</span><span><strong>${Math.round(t.carb)}g</strong> / ${g.carb}g</span></div>
+    <div class="item-row"><span>脂肪</span><span><strong>${Math.round(t.fat)}g</strong> / ${g.fat}g</span></div>
+    <div class="item-row"><span>水分</span><span><strong>${S.water}ml</strong> / ${S.waterGoal}ml</span></div>
+    <div class="item-row"><span>運動消耗</span><span><strong>${actCal} kcal</strong></span></div>
+    ${stairsTotal ? `<div class="item-row"><span>階梯訓練</span><span><strong>${stairsTotal} 層</strong>累計</span></div>` : ''}
+  `;
+}
+
+async function genSummary() {
+  if (!CFG.claudeKey) { toast('⚠️ 請先在設定填入 Claude API Key'); return; }
+  const el1 = document.getElementById('sum-today');
+  const el2 = document.getElementById('sum-tomorrow');
+  document.getElementById('sum-result').style.display = 'block';
+  el1.innerHTML = '<span class="spin"></span>'; el2.innerHTML = '';
+  const t = getTotals(), g = S.targets;
+  const acts = S.activities.map(a => a.typeLabel + ' ' + a.min + '分鐘').join('、') || '無';
+  const syms = Array.from(S.symptoms).join('、') || '無';
+  const prompt = `今日數據：熱量 ${Math.round(t.cal)}/${g.cal}kcal，蛋白質 ${Math.round(t.prot)}/${g.prot}g，碳水 ${Math.round(t.carb)}/${g.carb}g，脂肪 ${Math.round(t.fat)}/${g.fat}g，水分 ${S.water}/${S.waterGoal}ml，運動：${acts}，症狀：${syms}，目標：${S.profile.goal||'維持'}。只回傳JSON：{"today":"今日總結100字以內","tomorrow":"明日3項具體建議"}`;
+  try {
+    const resp = await claudeAI(prompt, 800);
+    const parsed = JSON.parse(resp.replace(/```json|```/g,'').trim());
+    el1.innerHTML = `<div class="ai-box">${parsed.today.replace(/\n/g,'<br>')}</div>`;
+    el2.innerHTML = `<div class="ai-box info">${parsed.tomorrow.replace(/\n/g,'<br>')}</div>`;
+  } catch(e) { el1.innerHTML = `<p style="color:var(--danger)">生成失敗：${e.message}</p>`; }
+}
+
+// ══════════════════════════════════════════════════
+// CLAUDE API HELPER
+// ══════════════════════════════════════════════════
+async function claudeAI(prompt, maxTokens = 1000) {
+  if (!CFG.claudeKey) throw new Error('未設定 Claude API Key');
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'x-api-key':CFG.claudeKey, 'anthropic-version':'2023-06-01' },
+    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:maxTokens, messages:[{ role:'user', content:prompt }] })
+  });
+  const data = await resp.json();
+  return data.content.map(i => i.text||'').join('');
+}
+
+// ══════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  if (CFG.gasUrl) {
+    sw('body');
+    loadAll();
+  }
+  // Stairs toggle init
+  toggleStairs();
+});
+</script>
+</body>
+</html>
