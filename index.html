@@ -748,6 +748,7 @@ function updateWaterUI(){
 // ══ PHOTO AI ═════════════════════════════════════
 function handlePic(e){
   const file=e.target.files[0]; if(!file)return;
+  S.photoMediaType=file.type||'image/jpeg';
   const r=new FileReader();
   r.onload=ev=>{
     S.photoB64=ev.target.result.split(',')[1];
@@ -870,6 +871,7 @@ function showCropOverlay(imgUrl, imgW, imgH){
         ctx.drawImage(src,ox,oy,ow,oh,0,0,ow,oh);
         const cropped=crop.toDataURL('image/png');
         S.photoB64=cropped.split(',')[1];
+        S.photoMediaType='image/png';
         document.getElementById('pp').src=cropped;
         document.getElementById('ppw').style.display='block';
         document.getElementById('photo-result').style.display='none';
@@ -888,7 +890,8 @@ function clearPic(){S.photoB64=null;document.getElementById('ppw').style.display
 
 async function analyzeAs(mode){
   if(!S.photoB64){alert('請先上傳圖片');return;}
-  if(!CFG.claudeKey){toast('⚠️ 請先在設定填入 Claude API Key');return;}
+  const key=getKey();
+  if(!key){toast('⚠️ 請先在設定填入 Claude API Key');return;}
   const isLabel=(mode==='label');
   const btnId=isLabel?'abtn-label':'abtn-food';
   const btn=document.getElementById(btnId);
@@ -898,25 +901,35 @@ async function analyzeAs(mode){
   document.getElementById('photo-add-row').style.display='none';
 
   const prompt = isLabel
-    ? `這是一張食品營養標示的圖片。請仔細讀取標示上的所有數值，回傳JSON格式（只回傳JSON不含markdown）：{"items":[{"name":"食品名稱","amount":100,"cal":0,"prot":0,"carb":0,"fat":0,"sug":0,"fib":0}]}。amount為每份份量(g)，其他單位為g或kcal。若標示為每100g，直接使用該數值。`
-    : `辨識照片中所有食物，估算每項食物的份量與營養素。只回傳JSON不含markdown：{"items":[{"name":"食物名稱","amount":100,"cal":150,"prot":10,"carb":20,"fat":5,"sug":3,"fib":2}]}`;
+    ? '這是一張食品營養標示的圖片。請仔細讀取標示上所有數值，只回傳JSON不含markdown：{"items":[{"name":"食品名稱","amount":100,"cal":0,"prot":0,"carb":0,"fat":0,"sug":0,"fib":0}]}。amount為每份份量g，其他單位g或kcal。'
+    : '辨識照片中所有食物，估算份量與營養素。只回傳JSON不含markdown：{"items":[{"name":"食物","amount":100,"cal":150,"prot":10,"carb":20,"fat":5,"sug":3,"fib":2}]}';
+
+  // Detect image type from stored data URL prefix or default to png for screenshots
+  const mediaType = S.photoMediaType || 'image/png';
 
   try{
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{
         'Content-Type':'application/json',
-        'x-api-key':getKey(),
+        'x-api-key':key,
         'anthropic-version':'2023-06-01',
         'anthropic-dangerous-direct-browser-access':'true'
       },
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:[
-        {type:'image',source:{type:'base64',media_type:'image/jpeg',data:S.photoB64}},
-        {type:'text',text:prompt}
-      ]}]})
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:mediaType,data:S.photoB64}},
+          {type:'text',text:prompt}
+        ]}]
+      })
     });
+    if(!resp.ok){
+      const e=await resp.json().catch(()=>({}));
+      throw new Error(e.error?.message||'HTTP '+resp.status);
+    }
     const data=await resp.json();
-    const text=data.content.map(i=>i.text||'').join('');
+    if(data.error) throw new Error(data.error.message);
+    const text=data.content.filter(i=>i.type==='text').map(i=>i.text).join('');
     const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
     S.aiItems=parsed.items;
     document.getElementById('photo-content').innerHTML=
@@ -927,7 +940,9 @@ async function analyzeAs(mode){
         <div style="font-size:11px;color:var(--muted);text-align:right">蛋白質${item.prot}g · 碳水${item.carb}g<br>脂肪${item.fat}g · 糖${item.sug||0}g · 纖維${item.fib||0}g</div>
       </div>`).join('');
     document.getElementById('photo-add-row').style.display='flex';
-  }catch(e){document.getElementById('photo-content').innerHTML=`<p style="color:var(--danger)">辨識失敗：${e.message}</p>`;}
+  }catch(e){
+    document.getElementById('photo-content').innerHTML=`<p style="color:var(--danger)">辨識失敗：${e.message}</p>`;
+  }
   btn.innerHTML=isLabel?'<i class="ti ti-sparkles"></i>辨識營養標示':'<i class="ti ti-sparkles"></i>辨識食物';
   btn.disabled=false;
 }
