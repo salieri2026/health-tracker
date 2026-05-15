@@ -846,7 +846,7 @@ async function getMealRec(){
   const prompt=`你是一位營養師。用戶目標：${goalLabel}，蛋白質目標${S.targets.prot}g/天，體脂率${S.profile.bf||'?'}%。手邊食材：${ing}。為${typeLabel}設計餐點。${pref?'特殊需求：'+pref+'。':''}請提供2個不同的餐點方案，每個方案包含：① 餐點名稱 ② 各食材與建議分量 ③ 建議進食順序及原因（例如先吃蔬菜穩定血糖） ④ 預估熱量與蛋白質、碳水、脂肪。用繁體中文，格式清楚易讀。`;
 
   try{
-    const resp=await claudeAI(prompt,1200,true);
+    const resp=await claudeAI(prompt,1200);
     el.innerHTML=`<div class="ai-box" style="border-left-color:var(--accent-md)">${resp.replace(/\n/g,'<br>')}</div>`;
   }catch(e){el.innerHTML=`<p style="color:var(--danger)">生成失敗：${e.message}</p>`;}
 }
@@ -897,7 +897,7 @@ async function analyzeSupp(){
 請用繁體中文，條列清楚。`;
 
   try{
-    const resp=await claudeAI(prompt,1500,true);
+    const resp=await claudeAI(prompt,1500);
     el.innerHTML=`<div class="ai-box">${resp.replace(/\n/g,'<br>')}</div>`;
   }catch(e){el.innerHTML=`<p style="color:var(--danger)">分析失敗：${e.message}</p>`;}
 }
@@ -993,7 +993,7 @@ async function analyzeHealth(){
 繁體中文，分段標題清楚。`;
 
   try{
-    const resp=await claudeAI(prompt,1500,true);
+    const resp=await claudeAI(prompt,1500);
     const parts=resp.split(/(?=④)/);
     el1.innerHTML=`<div class="ai-box ${S.severity===2?'danger':S.severity===1?'warn':''}">${(parts[0]||resp).replace(/\n/g,'<br>')}</div>`;
     el2.innerHTML=parts[1]?`<div class="ai-box warn">${parts[1].replace(/\n/g,'<br>')}</div>`:'<p style="color:var(--muted);font-size:13px">無特別衝突警示</p>';
@@ -1038,7 +1038,7 @@ async function analyzeChart(){
   el.innerHTML='<p style="color:var(--muted)"><span class="spin"></span>分析中…</p>';
   const prompt=`近期身體數據：${JSON.stringify(S.history.slice(-14))}。目標體脂${S.profile.tbf||'?'}%，目標肌肉${S.profile.tmuscle||'?'}kg，方向：${S.profile.goal||'維持'}。請分析趨勢並給予接下來一週具體飲食調整建議（3-5項）。繁體中文200字以內。`;
   try{
-    const resp=await claudeAI(prompt,600,false);
+    const resp=await claudeAI(prompt,600);
     el.innerHTML=`<div class="ai-box">${resp.replace(/\n/g,'<br>')}</div>`;
   }catch(e){el.innerHTML=`<p style="color:var(--danger)">分析失敗：${e.message}</p>`;}
 }
@@ -1069,7 +1069,7 @@ async function genSummary(){
   const syms=Array.from(S.symptoms).join('、')||'無';
   const prompt=`今日：熱量${Math.round(t.cal)}/${g.cal}kcal，蛋白質${Math.round(t.prot)}/${g.prot}g，碳水${Math.round(t.carb)}/${g.carb}g，糖${Math.round(t.sug)}/${g.sug}g，纖維${Math.round(t.fib)}/${g.fib}g，水分${S.water}/${S.waterGoal}ml，運動：${acts}，症狀：${syms}，目標：${S.profile.goal||'維持'}。只回傳JSON：{"today":"今日總結100字","tomorrow":"明日3項具體建議"}`;
   try{
-    const resp=await claudeAI(prompt,800,false);
+    const resp=await claudeAI(prompt,800);
     const parsed=JSON.parse(resp.replace(/```json|```/g,'').trim());
     el1.innerHTML=`<div class="ai-box">${parsed.today.replace(/\n/g,'<br>')}</div>`;
     el2.innerHTML=`<div class="ai-box info">${parsed.tomorrow.replace(/\n/g,'<br>')}</div>`;
@@ -1077,15 +1077,23 @@ async function genSummary(){
 }
 
 // ══ CLAUDE AI HELPER ═════════════════════════════
-async function claudeAI(prompt, maxTokens=1000, useWebSearch=false){
+async function claudeAI(prompt, maxTokens=1000){
   if(!CFG.claudeKey) throw new Error('未設定 Claude API Key');
   const body={model:'claude-sonnet-4-20250514',max_tokens:maxTokens,messages:[{role:'user',content:prompt}]};
-  if(useWebSearch) body.tools=[{type:'web_search_20250305',name:'web_search'}];
   const resp=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':CFG.claudeKey,'anthropic-version':'2023-06-01'},
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':CFG.claudeKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
     body:JSON.stringify(body)
   });
+  if(!resp.ok){
+    const err=await resp.json().catch(()=>({}));
+    throw new Error(err.error?.message||'HTTP '+resp.status);
+  }
   const data=await resp.json();
   if(data.error) throw new Error(data.error.message);
   return data.content.filter(i=>i.type==='text').map(i=>i.text).join('');
