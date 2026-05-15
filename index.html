@@ -533,13 +533,57 @@ async function gasCall(body) {
   if (!CFG.gasUrl) { toast('⚠️ 請先在「設定」填寫 Apps Script 網址'); return null; }
   try {
     const action = body.action;
+    // Vision requests have large base64 payloads — use POST via form to avoid URL length limit
+    // Apps Script doGet reads e.parameter, so we encode action in URL and data in body via no-cors workaround:
+    // Actually GAS only supports doGet for cross-origin; send large data via chunked GET with a redirect trick.
+    // Best approach: encode in URL params but compress image first for vision
     const data = Object.assign({}, body); delete data.action;
     const params = new URLSearchParams({ action });
     if (Object.keys(data).length > 0)
       params.append('data', encodeURIComponent(JSON.stringify(data)));
-    const r = await fetch(CFG.gasUrl + '?' + params.toString(), { redirect: 'follow' });
-    return JSON.parse(await r.text());
+    const url = CFG.gasUrl + '?' + params.toString();
+    // GAS has ~8KB URL limit; for vision we need more — use a relay via fetch with redirect
+    const r = await fetch(url, { redirect: 'follow' });
+    const txt = await r.text();
+    return JSON.parse(txt);
   } catch (e) { toast('連線失敗：' + e.message); return null; }
+}
+
+// For large payloads (vision), split base64 and send via multiple calls or compress
+async function gasCallVision(prompt, imageBase64, mediaType) {
+  if (!CFG.gasUrl) { toast('⚠️ 請先在「設定」填寫 Apps Script 網址'); return null; }
+  try {
+    // Use a form POST approach: encode action in URL, data as application/x-www-form-urlencoded
+    // GAS doGet can't read POST body, so we store image in script properties temporarily
+    // Simpler: resize image before sending to keep base64 small enough for URL
+    const compressed = await compressBase64(imageBase64, mediaType);
+    const data = { prompt, imageBase64: compressed, mediaType };
+    const params = new URLSearchParams({ action: 'geminiVision' });
+    params.append('data', encodeURIComponent(JSON.stringify(data)));
+    const r = await fetch(CFG.gasUrl + '?' + params.toString(), { redirect: 'follow' });
+    const txt = await r.text();
+    return JSON.parse(txt);
+  } catch (e) { toast('連線失敗：' + e.message); return null; }
+}
+
+async function compressBase64(base64, mediaType) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 800;
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        const ratio = Math.min(MAX/w, MAX/h);
+        w = Math.round(w * ratio); h = Math.round(h * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      resolve(dataUrl.split(',')[1]);
+    };
+    img.src = 'data:' + mediaType + ';base64,' + base64;
+  });
 }
 
 async function loadAll() {
@@ -915,7 +959,9 @@ async function analyzeAs(mode){
   const mediaType = S.photoMediaType || 'image/png';
 
   try{
-    const text = await geminiVision(prompt, S.photoB64, mediaType);
+    const vr = await gasCallVision(prompt, S.photoB64, mediaType);
+    if(!vr || !vr.ok) throw new Error(vr?.error || '辨識失敗');
+    const text = vr.text;
     const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
     S.aiItems=parsed.items;
     document.getElementById('photo-content').innerHTML=
@@ -1190,55 +1236,23 @@ async function genSummary(){
   }catch(e){el1.innerHTML=`<p style="color:var(--danger)">生成失敗：${e.message}</p>`;}
 }
 
-// ══ AI HELPERS ═══════════════════════════════════
-// Gemini text-only
+// ══ AI HELPERS（透過 Apps Script 轉發，繞過地區限制）═════════
 async function geminiAI(prompt, maxTokens=2000){
-  const key = getGeminiKey();
-  if(!key) throw new Error('請先在「設定」填入 Gemini API Key');
-  const resp = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-    { method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        contents:[{parts:[{text:prompt}]}],
-        generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}
-      })
-    }
-  );
-  if(!resp.ok){
-    const e=await resp.json().catch(()=>({}));
-    throw new Error(e.error?.message||'HTTP '+resp.status);
-  }
-  const data=await resp.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  if(!CFG.gasUrl) throw new Error('請先在「設定」填入 Apps Script 網址');
+  const r = await gasCall({ action:'geminiText', prompt, maxTokens });
+  if(!r || !r.ok) throw new Error(r?.error || '轉發失敗');
+  return r.text;
 }
 
-// Gemini vision (image + text)
 async function geminiVision(prompt, base64Data, mediaType='image/png'){
-  const key = getGeminiKey();
-  if(!key) throw new Error('請先在「設定」填入 Gemini API Key');
-  const resp = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-    { method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        contents:[{parts:[
-          {inline_data:{mime_type:mediaType,data:base64Data}},
-          {text:prompt}
-        ]}],
-        generationConfig:{maxOutputTokens:1000,temperature:0.2}
-      })
-    }
-  );
-  if(!resp.ok){
-    const e=await resp.json().catch(()=>({}));
-    throw new Error(e.error?.message||'HTTP '+resp.status);
-  }
-  const data=await resp.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  if(!text) throw new Error('Gemini 未回傳內容，請重試');
-  return text;
+  if(!CFG.gasUrl) throw new Error('請先在「設定」填入 Apps Script 網址');
+  // image data can be large — send via POST-style but we use GET+data param in gasCall
+  // Split into chunks if needed; for most food photos base64 < 1MB which fits URL
+  const r = await gasCall({ action:'geminiVision', prompt, imageBase64:base64Data, mediaType });
+  if(!r || !r.ok) throw new Error(r?.error || '圖片辨識失敗');
+  return r.text;
 }
 
-// claudeAI kept as alias to geminiAI for backward compat
 async function claudeAI(prompt, maxTokens=1000){
   return geminiAI(prompt, maxTokens);
 }
