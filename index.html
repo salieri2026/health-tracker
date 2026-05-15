@@ -122,7 +122,8 @@ a{color:var(--accent-md)}
     <div class="card-title"><i class="ti ti-link"></i>API 連線設定</div>
     <div class="fg">
       <div class="f"><label>Google Apps Script Web App 網址</label><input type="url" id="cfg-gas" placeholder="https://script.google.com/macros/s/AKfycb.../exec"></div>
-      <div class="f"><label>Claude API Key</label><input type="password" id="cfg-claude" placeholder="sk-ant-api03-..."></div>
+      <div class="f"><label>Gemini API Key（AI 辨識、餐點建議等功能）</label><input type="password" id="cfg-gemini" placeholder="AIzaSy..."></div>
+      <div class="f"><label>Claude API Key（選填，備用）</label><input type="password" id="cfg-claude" placeholder="sk-ant-api03-..."></div>
     </div>
     <div class="btn-row">
       <button class="btn" onclick="testConn()"><i class="ti ti-plug"></i>測試連線</button>
@@ -502,9 +503,11 @@ document.getElementById('ver-display').textContent = 'v' + VERSION;
 const CFG = {
   gasUrl:    localStorage.getItem('ht_gas') || '',
   claudeKey: localStorage.getItem('ht_claude') || '',
+  geminiKey: localStorage.getItem('ht_gemini') || 'AIzaSyAFRfFcW0M4bCiqcrN9ErNLkqD20rtDS1E',
 };
 if (CFG.gasUrl)    document.getElementById('cfg-gas').value    = CFG.gasUrl;
 if (CFG.claudeKey) document.getElementById('cfg-claude').value = CFG.claudeKey;
+if (CFG.geminiKey) document.getElementById('cfg-gemini').value = CFG.geminiKey;
 
 // ══ STATE ════════════════════════════════════════
 const S = {
@@ -575,13 +578,17 @@ async function loadAll() {
 function saveCfg() {
   CFG.gasUrl    = document.getElementById('cfg-gas').value.trim();
   CFG.claudeKey = document.getElementById('cfg-claude').value.trim();
+  CFG.geminiKey = document.getElementById('cfg-gemini').value.trim();
   localStorage.setItem('ht_gas',    CFG.gasUrl);
   localStorage.setItem('ht_claude', CFG.claudeKey);
+  localStorage.setItem('ht_gemini', CFG.geminiKey);
   toast('✓ 設定已儲存！');
 }
 function getKey(){
-  // Always read fresh from localStorage in case CFG not updated
   return CFG.claudeKey || localStorage.getItem('ht_claude') || '';
+}
+function getGeminiKey(){
+  return CFG.geminiKey || localStorage.getItem('ht_gemini') || '';
 }
 async function testConn() {
   CFG.gasUrl = document.getElementById('cfg-gas').value.trim();
@@ -890,8 +897,8 @@ function clearPic(){S.photoB64=null;document.getElementById('ppw').style.display
 
 async function analyzeAs(mode){
   if(!S.photoB64){alert('請先上傳圖片');return;}
-  const key=getKey();
-  if(!key){toast('⚠️ 請先在設定填入 Claude API Key');return;}
+  const key=getGeminiKey();
+  if(!key){toast('⚠️ 請先在設定填入 Gemini API Key');return;}
   const isLabel=(mode==='label');
   const btnId=isLabel?'abtn-label':'abtn-food';
   const btn=document.getElementById(btnId);
@@ -908,28 +915,7 @@ async function analyzeAs(mode){
   const mediaType = S.photoMediaType || 'image/png';
 
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':key,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
-        messages:[{role:'user',content:[
-          {type:'image',source:{type:'base64',media_type:mediaType,data:S.photoB64}},
-          {type:'text',text:prompt}
-        ]}]
-      })
-    });
-    if(!resp.ok){
-      const e=await resp.json().catch(()=>({}));
-      throw new Error(e.error?.message||'HTTP '+resp.status);
-    }
-    const data=await resp.json();
-    if(data.error) throw new Error(data.error.message);
-    const text=data.content.filter(i=>i.type==='text').map(i=>i.text).join('');
+    const text = await geminiVision(prompt, S.photoB64, mediaType);
     const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
     S.aiItems=parsed.items;
     document.getElementById('photo-content').innerHTML=
@@ -960,7 +946,7 @@ async function addAI(){
 async function getMealRec(){
   const rawIng=document.getElementById('ingredients').value.trim();
   if(!rawIng){alert('請輸入手邊食材');return;}
-  if(!CFG.claudeKey){toast('⚠️ 請先在設定填入 Claude API Key');return;}
+  if(!getGeminiKey()){toast('⚠️ 請先在設定填入 Gemini API Key');return;}
   // Split by whitespace, newline, comma, Chinese comma/pause mark
   const ing=rawIng.split(/[\s,，、\n]+/).filter(Boolean).join('、');
   const typeLabel={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'點心'}[document.getElementById('meal-type').value];
@@ -1006,7 +992,7 @@ function renderSuppList(){
 
 async function analyzeSupp(){
   if(!S.supps.length){alert('請先新增保健食品');return;}
-  if(!CFG.claudeKey){toast('⚠️ 請先在設定填入 Claude API Key');return;}
+  if(!getGeminiKey()){toast('⚠️ 請先在設定填入 Gemini API Key');return;}
   const el=document.getElementById('supp-content');
   document.getElementById('supp-result').style.display='block';
   el.innerHTML='<p style="color:var(--muted)"><span class="spin"></span>AI 上網查詢資料並分析中…</p>';
@@ -1103,7 +1089,7 @@ function setSev(v,btn){
 }
 
 async function analyzeHealth(){
-  if(!CFG.claudeKey){toast('⚠️ 請先在設定填入 Claude API Key');return;}
+  if(!getGeminiKey()){toast('⚠️ 請先在設定填入 Gemini API Key');return;}
   const syms=Array.from(S.symptoms);
   const sevLabel=['輕微','中等','嚴重'][S.severity];
   const meds=document.getElementById('meds').value.trim();
@@ -1160,7 +1146,7 @@ function renderTrendChart(type){
 }
 
 async function analyzeChart(){
-  if(!CFG.claudeKey){toast('⚠️ 請先在設定填入 Claude API Key');return;}
+  if(!getGeminiKey()){toast('⚠️ 請先在設定填入 Gemini API Key');return;}
   const el=document.getElementById('chart-ai-out');
   if(S.history.length<2){el.innerHTML='<p style="color:var(--muted);font-size:13px">需至少2筆記錄才能分析趨勢</p>';return;}
   el.innerHTML='<p style="color:var(--muted)"><span class="spin"></span>分析中…</p>';
@@ -1188,7 +1174,7 @@ function renderSumStats(){
 }
 
 async function genSummary(){
-  if(!CFG.claudeKey){toast('⚠️ 請先在設定填入 Claude API Key');return;}
+  if(!getGeminiKey()){toast('⚠️ 請先在設定填入 Gemini API Key');return;}
   const el1=document.getElementById('sum-today'),el2=document.getElementById('sum-tomorrow');
   document.getElementById('sum-result').style.display='block';
   el1.innerHTML='<span class="spin"></span>'; el2.innerHTML='';
@@ -1204,28 +1190,57 @@ async function genSummary(){
   }catch(e){el1.innerHTML=`<p style="color:var(--danger)">生成失敗：${e.message}</p>`;}
 }
 
-// ══ CLAUDE AI HELPER ═════════════════════════════
-async function claudeAI(prompt, maxTokens=1000){
-  const key = getKey();
-  if(!key) throw new Error('請先在「設定」填入 Claude API Key');
-  const body={model:'claude-sonnet-4-20250514',max_tokens:maxTokens,messages:[{role:'user',content:prompt}]};
-  const resp=await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'x-api-key':key,
-      'anthropic-version':'2023-06-01',
-      'anthropic-dangerous-direct-browser-access':'true'
-    },
-    body:JSON.stringify(body)
-  });
+// ══ AI HELPERS ═══════════════════════════════════
+// Gemini text-only
+async function geminiAI(prompt, maxTokens=2000){
+  const key = getGeminiKey();
+  if(!key) throw new Error('請先在「設定」填入 Gemini API Key');
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+    { method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        contents:[{parts:[{text:prompt}]}],
+        generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}
+      })
+    }
+  );
   if(!resp.ok){
-    const err=await resp.json().catch(()=>({}));
-    throw new Error(err.error?.message||'HTTP '+resp.status);
+    const e=await resp.json().catch(()=>({}));
+    throw new Error(e.error?.message||'HTTP '+resp.status);
   }
   const data=await resp.json();
-  if(data.error) throw new Error(data.error.message);
-  return data.content.filter(i=>i.type==='text').map(i=>i.text).join('');
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+// Gemini vision (image + text)
+async function geminiVision(prompt, base64Data, mediaType='image/png'){
+  const key = getGeminiKey();
+  if(!key) throw new Error('請先在「設定」填入 Gemini API Key');
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+    { method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        contents:[{parts:[
+          {inline_data:{mime_type:mediaType,data:base64Data}},
+          {text:prompt}
+        ]}],
+        generationConfig:{maxOutputTokens:1000,temperature:0.2}
+      })
+    }
+  );
+  if(!resp.ok){
+    const e=await resp.json().catch(()=>({}));
+    throw new Error(e.error?.message||'HTTP '+resp.status);
+  }
+  const data=await resp.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  if(!text) throw new Error('Gemini 未回傳內容，請重試');
+  return text;
+}
+
+// claudeAI kept as alias to geminiAI for backward compat
+async function claudeAI(prompt, maxTokens=1000){
+  return geminiAI(prompt, maxTokens);
 }
 
 // ══ TOAST ════════════════════════════════════════
