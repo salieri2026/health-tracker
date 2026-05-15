@@ -575,9 +575,13 @@ async function loadAll() {
 function saveCfg() {
   CFG.gasUrl    = document.getElementById('cfg-gas').value.trim();
   CFG.claudeKey = document.getElementById('cfg-claude').value.trim();
-  localStorage.setItem('ht_gas', CFG.gasUrl);
+  localStorage.setItem('ht_gas',    CFG.gasUrl);
   localStorage.setItem('ht_claude', CFG.claudeKey);
-  toast('設定已儲存！');
+  toast('✓ 設定已儲存！');
+}
+function getKey(){
+  // Always read fresh from localStorage in case CFG not updated
+  return CFG.claudeKey || localStorage.getItem('ht_claude') || '';
 }
 async function testConn() {
   CFG.gasUrl = document.getElementById('cfg-gas').value.trim();
@@ -759,21 +763,125 @@ async function captureScreen(){
     toast('⚠️ 此瀏覽器不支援螢幕截圖，請手動截圖後上傳');return;
   }
   try{
-    const stream=await navigator.mediaDevices.getDisplayMedia({video:{mediaSource:'screen'}});
+    // 1. Capture full screen
+    const stream=await navigator.mediaDevices.getDisplayMedia({
+      video:{mediaSource:'screen',cursor:'always'},preferCurrentTab:false
+    });
     const track=stream.getVideoTracks()[0];
+    await new Promise(r=>setTimeout(r,300)); // wait for stream ready
     const imgCapture=new ImageCapture(track);
     const bitmap=await imgCapture.grabFrame();
-    track.stop();
-    const canvas=document.createElement('canvas');
-    canvas.width=bitmap.width; canvas.height=bitmap.height;
-    canvas.getContext('2d').drawImage(bitmap,0,0);
-    const dataUrl=canvas.toDataURL('image/png');
-    S.photoB64=dataUrl.split(',')[1];
-    document.getElementById('pp').src=dataUrl;
-    document.getElementById('ppw').style.display='block';
-    document.getElementById('photo-result').style.display='none';
-    toast('✓ 截圖完成，點「辨識營養標示」繼續');
-  }catch(e){toast('截圖取消或失敗：'+e.message);}
+    track.stop(); stream.getTracks().forEach(t=>t.stop());
+
+    // 2. Draw full capture to offscreen canvas
+    const full=document.createElement('canvas');
+    full.width=bitmap.width; full.height=bitmap.height;
+    full.getContext('2d').drawImage(bitmap,0,0);
+    const fullUrl=full.toDataURL('image/png');
+
+    // 3. Show crop overlay
+    showCropOverlay(fullUrl, bitmap.width, bitmap.height);
+  }catch(e){
+    if(e.name!=='NotAllowedError') toast('截圖失敗：'+e.message);
+  }
+}
+
+function showCropOverlay(imgUrl, imgW, imgH){
+  // Remove existing overlay
+  document.getElementById('crop-overlay')?.remove();
+
+  const overlay=document.createElement('div');
+  overlay.id='crop-overlay';
+  overlay.style.cssText=`position:fixed;inset:0;z-index:9999;background:#000a;display:flex;flex-direction:column;align-items:center;justify-content:center;`;
+
+  const hint=document.createElement('div');
+  hint.textContent='拖曳選取要辨識的範圍，放開後確認截圖';
+  hint.style.cssText=`color:#fff;font-size:14px;margin-bottom:12px;background:rgba(0,0,0,.6);padding:6px 16px;border-radius:6px;pointer-events:none;`;
+
+  const wrap=document.createElement('div');
+  wrap.style.cssText=`position:relative;cursor:crosshair;`;
+
+  const img=document.createElement('img');
+  img.src=imgUrl;
+  // Scale to fit screen
+  const maxW=Math.min(imgW, window.innerWidth-40);
+  const maxH=Math.min(imgH, window.innerHeight-120);
+  const scale=Math.min(maxW/imgW, maxH/imgH);
+  img.style.cssText=`display:block;width:${Math.round(imgW*scale)}px;height:${Math.round(imgH*scale)}px;user-select:none;`;
+
+  const sel=document.createElement('div');
+  sel.style.cssText=`position:absolute;border:2px solid #52B788;background:rgba(82,183,136,.15);pointer-events:none;display:none;`;
+
+  wrap.appendChild(img); wrap.appendChild(sel);
+  overlay.appendChild(hint); overlay.appendChild(wrap);
+
+  const btnRow=document.createElement('div');
+  btnRow.style.cssText=`margin-top:12px;display:flex;gap:10px;`;
+  const cancelBtn=document.createElement('button');
+  cancelBtn.textContent='取消';
+  cancelBtn.style.cssText=`padding:7px 18px;border-radius:6px;border:1px solid #fff;background:transparent;color:#fff;font-size:13px;cursor:pointer;`;
+  cancelBtn.onclick=()=>overlay.remove();
+  btnRow.appendChild(cancelBtn);
+  overlay.appendChild(btnRow);
+  document.body.appendChild(overlay);
+
+  let startX,startY,dragging=false;
+  let cropRect={x:0,y:0,w:0,h:0};
+
+  wrap.addEventListener('mousedown',e=>{
+    const r=img.getBoundingClientRect();
+    startX=e.clientX-r.left; startY=e.clientY-r.top;
+    dragging=true; sel.style.display='block';
+    sel.style.left=startX+'px'; sel.style.top=startY+'px';
+    sel.style.width='0'; sel.style.height='0';
+    e.preventDefault();
+  });
+
+  window.addEventListener('mousemove',e=>{
+    if(!dragging)return;
+    const r=img.getBoundingClientRect();
+    const cx=Math.max(0,Math.min(e.clientX-r.left,img.offsetWidth));
+    const cy=Math.max(0,Math.min(e.clientY-r.top,img.offsetHeight));
+    const x=Math.min(startX,cx), y=Math.min(startY,cy);
+    const w=Math.abs(cx-startX), h=Math.abs(cy-startY);
+    sel.style.left=x+'px'; sel.style.top=y+'px';
+    sel.style.width=w+'px'; sel.style.height=h+'px';
+    cropRect={x,y,w,h};
+  });
+
+  window.addEventListener('mouseup',e=>{
+    if(!dragging)return; dragging=false;
+    if(cropRect.w<10||cropRect.h<10){sel.style.display='none';return;}
+    // Show confirm button
+    const confirmBtn=document.createElement('button');
+    confirmBtn.textContent='✓ 確認截取此範圍';
+    confirmBtn.style.cssText=`padding:7px 18px;border-radius:6px;border:none;background:#1B4332;color:#d8f3dc;font-size:13px;cursor:pointer;`;
+    confirmBtn.onclick=()=>{
+      // Crop at original resolution
+      const dispW=img.offsetWidth, dispH=img.offsetHeight;
+      const scaleX=imgW/dispW, scaleY=imgH/dispH;
+      const ox=Math.round(cropRect.x*scaleX), oy=Math.round(cropRect.y*scaleY);
+      const ow=Math.round(cropRect.w*scaleX), oh=Math.round(cropRect.h*scaleY);
+      const crop=document.createElement('canvas');
+      crop.width=ow; crop.height=oh;
+      const ctx=crop.getContext('2d');
+      const src=new Image(); src.src=imgUrl;
+      src.onload=()=>{
+        ctx.drawImage(src,ox,oy,ow,oh,0,0,ow,oh);
+        const cropped=crop.toDataURL('image/png');
+        S.photoB64=cropped.split(',')[1];
+        document.getElementById('pp').src=cropped;
+        document.getElementById('ppw').style.display='block';
+        document.getElementById('photo-result').style.display='none';
+        overlay.remove();
+        toast('✓ 範圍截圖完成，點「辨識營養標示」或「辨識食物」繼續');
+      };
+    };
+    // Remove old confirm if any
+    btnRow.querySelectorAll('.confirm-crop').forEach(b=>b.remove());
+    confirmBtn.classList.add('confirm-crop');
+    btnRow.insertBefore(confirmBtn,cancelBtn);
+  });
 }
 
 function clearPic(){S.photoB64=null;document.getElementById('ppw').style.display='none';document.getElementById('pi').value='';}
@@ -796,7 +904,12 @@ async function analyzeAs(mode){
   try{
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':CFG.claudeKey,'anthropic-version':'2023-06-01'},
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':getKey(),
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:[
         {type:'image',source:{type:'base64',media_type:'image/jpeg',data:S.photoB64}},
         {type:'text',text:prompt}
@@ -1078,13 +1191,14 @@ async function genSummary(){
 
 // ══ CLAUDE AI HELPER ═════════════════════════════
 async function claudeAI(prompt, maxTokens=1000){
-  if(!CFG.claudeKey) throw new Error('未設定 Claude API Key');
+  const key = getKey();
+  if(!key) throw new Error('請先在「設定」填入 Claude API Key');
   const body={model:'claude-sonnet-4-20250514',max_tokens:maxTokens,messages:[{role:'user',content:prompt}]};
   const resp=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{
       'Content-Type':'application/json',
-      'x-api-key':CFG.claudeKey,
+      'x-api-key':key,
       'anthropic-version':'2023-06-01',
       'anthropic-dangerous-direct-browser-access':'true'
     },
