@@ -284,6 +284,16 @@ a{color:var(--accent-md)}
     </div>
     <div id="ppw" style="display:none;margin-top:.75rem">
       <img id="pp" class="prev-img" src="" alt="預覽">
+        <div class="fg fg2" style="margin-top:.75rem;margin-bottom:.5rem">
+        <div class="f">
+          <label>實際攝取量補充說明（選填）</label>
+          <input type="text" id="photo-note" placeholder="例：只吃50克、喝了半杯200ml、吃了3顆">
+        </div>
+        <div class="f">
+          <label>每份份量說明（選填）</label>
+          <input type="text" id="photo-serving" placeholder="例：標示每100克、每份35克共吃2份">
+        </div>
+      </div>
       <div style="display:flex;gap:8px;margin-bottom:.5rem;flex-wrap:wrap">
         <button class="btn sm p" id="abtn-food" onclick="analyzeAs('food')"><i class="ti ti-sparkles"></i>辨識食物</button>
         <button class="btn sm info-btn" id="abtn-label" onclick="analyzeAs('label')"><i class="ti ti-sparkles"></i>辨識營養標示</button>
@@ -951,9 +961,13 @@ async function analyzeAs(mode){
   document.getElementById('photo-content').innerHTML='<p style="color:var(--muted)"><span class="spin"></span>AI 分析中…</p>';
   document.getElementById('photo-add-row').style.display='none';
 
+  const userNote    = document.getElementById('photo-note').value.trim();
+  const userServing = document.getElementById('photo-serving').value.trim();
+  const noteCtx = [userNote && `用戶說明：${userNote}`, userServing && `份量說明：${userServing}`].filter(Boolean).join('。');
+
   const prompt = isLabel
-    ? '這是一張食品營養標示的圖片。請仔細讀取標示上所有數值，只回傳JSON不含markdown：{"items":[{"name":"食品名稱","amount":100,"cal":0,"prot":0,"carb":0,"fat":0,"sug":0,"fib":0}]}。amount為每份份量g，其他單位g或kcal。'
-    : '辨識照片中所有食物，估算份量與營養素。只回傳JSON不含markdown：{"items":[{"name":"食物","amount":100,"cal":150,"prot":10,"carb":20,"fat":5,"sug":3,"fib":2}]}';
+    ? `這是一張食品營養標示的圖片。請仔細讀取標示上所有數值。${noteCtx ? noteCtx+'。' : ''}請依照實際攝取量計算後回傳，只回傳JSON不含markdown：{"items":[{"name":"食品名稱（含份量說明）","amount":50,"cal":0,"prot":0,"carb":0,"fat":0,"sug":0,"fib":0}],"note":"計算說明"}。amount為實際攝取克數，其他單位g或kcal。`
+    : `辨識照片中所有食物，估算份量與營養素。${noteCtx ? noteCtx+'。' : ''}只回傳JSON不含markdown：{"items":[{"name":"食物","amount":100,"cal":150,"prot":10,"carb":20,"fat":5,"sug":3,"fib":2}],"note":""}`;
 
   // Detect image type from stored data URL prefix or default to png for screenshots
   const mediaType = S.photoMediaType || 'image/png';
@@ -964,8 +978,10 @@ async function analyzeAs(mode){
     const text = vr.text;
     const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
     S.aiItems=parsed.items;
+    const noteHtml = parsed.note ? `<div style="font-size:12px;color:var(--accent-md);margin-bottom:.75rem;padding:6px 10px;background:var(--accent-lt);border-radius:var(--radius-sm)">📝 ${parsed.note}</div>` : '';
     document.getElementById('photo-content').innerHTML=
-      (isLabel?'<div class="badge b" style="margin-bottom:.75rem">📋 營養標示辨識結果</div><br>':'')+
+      (isLabel?'<div class="badge b" style="margin-bottom:.5rem">📋 營養標示辨識結果</div><br>':'')+
+      noteHtml +
       parsed.items.map(item=>`
       <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:5px;border:1px solid var(--border)">
         <div><div style="font-weight:500">${item.name}</div><div style="font-size:11px;color:var(--muted)">${item.amount}g · ${item.cal}kcal</div></div>
