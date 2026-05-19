@@ -949,6 +949,53 @@ function showCropOverlay(imgUrl, imgW, imgH){
 
 function clearPic(){S.photoB64=null;document.getElementById('ppw').style.display='none';document.getElementById('pi').value='';}
 
+
+// ── 手動輸入表單（圖片辨識不可用時顯示）─────────────────────
+function manualInputForm() {
+  return `
+    <div style="background:var(--bg);border:1px solid var(--warn);border-radius:var(--radius-sm);padding:1rem;margin-bottom:.75rem">
+      <div style="font-size:12px;color:var(--warn);margin-bottom:.75rem">⚠️ 圖片辨識目前使用免費方案不支援，請對照圖片手動填入營養數值</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px">食品名稱</label>
+          <input id="mv-name" type="text" placeholder="例：燕麥棒" style="width:100%;padding:6px 9px;font-size:13px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text)"></div>
+        <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px">份量 (g)</label>
+          <input id="mv-amount" type="number" value="100" style="width:100%;padding:6px 9px;font-size:13px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text)"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px">
+        <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px">熱量 (kcal)</label>
+          <input id="mv-cal" type="number" value="0" style="width:100%;padding:6px 9px;font-size:13px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text)"></div>
+        <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px">蛋白質 (g)</label>
+          <input id="mv-prot" type="number" value="0" step="0.1" style="width:100%;padding:6px 9px;font-size:13px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text)"></div>
+        <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px">碳水 (g)</label>
+          <input id="mv-carb" type="number" value="0" step="0.1" style="width:100%;padding:6px 9px;font-size:13px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text)"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:.75rem">
+        <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px">脂肪 (g)</label>
+          <input id="mv-fat" type="number" value="0" step="0.1" style="width:100%;padding:6px 9px;font-size:13px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text)"></div>
+        <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px">糖 (g)</label>
+          <input id="mv-sug" type="number" value="0" step="0.1" style="width:100%;padding:6px 9px;font-size:13px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text)"></div>
+        <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px">纖維 (g)</label>
+          <input id="mv-fib" type="number" value="0" step="0.1" style="width:100%;padding:6px 9px;font-size:13px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text)"></div>
+      </div>
+      <button onclick="addManualVision()" style="padding:7px 14px;border-radius:var(--radius-sm);border:none;background:var(--accent);color:#d8f3dc;font-size:13px;cursor:pointer">加入今日記錄</button>
+    </div>`;
+}
+
+function addManualVision() {
+  const name = document.getElementById('mv-name').value.trim();
+  if (!name) { alert('請填入食品名稱'); return; }
+  S.aiItems = [{
+    name, amount: +document.getElementById('mv-amount').value,
+    cal: +document.getElementById('mv-cal').value,
+    prot: +document.getElementById('mv-prot').value,
+    carb: +document.getElementById('mv-carb').value,
+    fat: +document.getElementById('mv-fat').value,
+    sug: +document.getElementById('mv-sug').value,
+    fib: +document.getElementById('mv-fib').value,
+  }];
+  addAI();
+}
+
 async function analyzeAs(mode){
   if(!S.photoB64){alert('請先上傳圖片');return;}
   const key=getGeminiKey();
@@ -974,6 +1021,14 @@ async function analyzeAs(mode){
 
   try{
     const vr = await gasCallVision(prompt, S.photoB64, mediaType);
+    if(vr && vr.noVision) {
+      // Vision not supported — show manual input form
+      document.getElementById('photo-content').innerHTML = manualInputForm();
+      document.getElementById('photo-add-row').style.display = 'none';
+      btn.innerHTML = isLabel ? '<i class="ti ti-sparkles"></i>辨識營養標示' : '<i class="ti ti-sparkles"></i>辨識食物';
+      btn.disabled = false;
+      return;
+    }
     if(!vr || !vr.ok) throw new Error(vr?.error || '辨識失敗');
     const text = vr.text;
     const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
