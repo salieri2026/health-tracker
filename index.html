@@ -31,8 +31,99 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 /* ── Dashboard 3欄佈局 ── */
 .dashboard{display:grid;grid-template-columns:280px 1fr 280px;gap:1rem;align-items:start}
-@media(max-width:1200px){.dashboard{grid-template-columns:1fr 1fr}.dash-right{grid-column:1/-1}}
-@media(max-width:768px){.dashboard{grid-template-columns:1fr}.sidebar{width:100%;position:static}.main{margin-left:0}}
+
+/* ── 大螢幕 1400px+ ── */
+@media(min-width:1400px){
+  .main{padding:2rem 2.5rem}
+  .dashboard{grid-template-columns:300px 1fr 300px;gap:1.25rem}
+}
+
+/* ── 中型桌機 1024~1399px ── */
+@media(max-width:1399px) and (min-width:1024px){
+  .dashboard{grid-template-columns:260px 1fr 260px;gap:.875rem}
+}
+
+/* ── 小桌機 / 大平板 768~1023px ── */
+@media(max-width:1023px) and (min-width:768px){
+  .sidebar{width:180px}
+  .main{margin-left:180px;padding:1.25rem}
+  .dashboard{grid-template-columns:1fr 1fr;gap:.875rem}
+  .dash-left{grid-column:1/2;grid-row:1}
+  .dash-center{grid-column:2/3;grid-row:1/3}
+  .dash-right{grid-column:1/2;grid-row:2}
+  .logo{flex-direction:column;gap:1px}
+}
+
+/* ── 平板直向 600~767px ── */
+@media(max-width:767px) and (min-width:600px){
+  .sidebar{
+    width:100%;position:fixed;top:0;left:0;right:0;bottom:auto;
+    flex-direction:row;flex-wrap:wrap;padding:.5rem .75rem;
+    z-index:200;border-bottom:1px solid rgba(255,255,255,.1);
+    gap:2px;height:auto;overflow:visible;
+    box-shadow:0 2px 12px rgba(0,0,0,.2);
+  }
+  .logo{flex-direction:row;padding:0;border-bottom:none;margin-bottom:0;font-size:13px;white-space:nowrap}
+  .logo-sub,.logo .ver{display:none}
+  .nav-section{display:none}
+  .nav-btn{padding:5px 8px;font-size:11px;width:auto;border-radius:6px}
+  .nav-btn i{width:14px;font-size:13px}
+  .main{margin-left:0;padding:1rem;padding-top:3.5rem}
+  .dashboard{grid-template-columns:1fr;gap:.75rem}
+  .dash-left,.dash-center,.dash-right{grid-column:1/-1}
+  .fg3{grid-template-columns:1fr 1fr}
+}
+
+/* ── 手機 ~599px ── */
+@media(max-width:599px){
+  .sidebar{
+    width:100%;position:fixed;top:0;left:0;right:0;bottom:auto;
+    flex-direction:row;align-items:center;justify-content:space-between;
+    padding:.5rem .875rem;height:52px;overflow:hidden;z-index:200;
+    box-shadow:0 2px 12px rgba(0,0,0,.25);
+  }
+  .logo{padding:0;border-bottom:none;margin-bottom:0;font-size:14px;flex-direction:row;align-items:center}
+  .logo-sub,.logo .ver,.nav-section{display:none}
+  .nav-btn:not(.active){display:none}
+  .nav-btn.active{display:flex;padding:6px 12px;font-size:12px;width:auto;background:rgba(20,184,166,.25)}
+  /* 手機底部導航 */
+  .mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--sidebar);z-index:200;border-top:1px solid rgba(255,255,255,.1);box-shadow:0 -2px 12px rgba(0,0,0,.2);height:58px;padding-bottom:env(safe-area-inset-bottom)}
+  .mobile-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;cursor:pointer;color:rgba(255,255,255,.5);font-size:9px;font-family:inherit;padding:6px 2px;transition:all .15s}
+  .mobile-nav-btn i{font-size:18px;line-height:1}
+  .mobile-nav-btn.active{color:var(--accent-md)}
+  .main{margin-left:0;padding:.875rem;padding-top:60px;padding-bottom:70px}
+  .dashboard{grid-template-columns:1fr;gap:.75rem}
+  .dash-left,.dash-center,.dash-right{grid-column:1/-1}
+  /* 卡片優化 */
+  .card{padding:1rem;border-radius:10px}
+  .card-title{font-size:11px}
+  .omnibox{min-height:80px;font-size:13px;padding:10px 44px 10px 12px}
+  .signal-grid{grid-template-columns:1fr 1fr}
+  .fg2{grid-template-columns:1fr 1fr}.fg3{grid-template-columns:1fr 1fr}
+  /* 觸控友好 */
+  .btn{min-height:38px}.btn.sm{min-height:32px}
+  .del-btn{min-width:32px;min-height:32px}
+  .sig-btn{min-height:38px}
+  .suggest-item{padding:11px 12px}
+  /* 頁面標題 */
+  #page-body > div:first-child,
+  #page-history > div:first-child,
+  #page-supp > div:first-child,
+  #page-summary > div:first-child,
+  #page-setup > div:first-child{font-size:18px}
+  /* 雙欄折疊 */
+  #page-body > div:nth-child(2),
+  #page-supp > div:nth-child(2){grid-template-columns:1fr}
+}
+
+/* ── 超小手機 ~374px ── */
+@media(max-width:374px){
+  .main{padding:.75rem;padding-top:58px;padding-bottom:68px}
+  .card{padding:.875rem}
+  .fg2,.fg3{grid-template-columns:1fr}
+  .signal-grid{grid-template-columns:1fr}
+  .metric-value{font-size:13px}
+}
 
 /* ── Cards ── */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.125rem;margin-bottom:.875rem;box-shadow:0 1px 4px rgba(0,0,0,.05)}
@@ -487,6 +578,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 </main>
 </div>
+
+<!-- 手機底部導航 -->
+<nav class="mobile-nav" id="mobile-nav" style="display:none">
+  <button class="mobile-nav-btn active" id="mnav-dash" onclick="sw('dash');setMNav('dash')">
+    <i class="ti ti-layout-dashboard"></i>總覽
+  </button>
+  <button class="mobile-nav-btn" id="mnav-body" onclick="sw('body');setMNav('body')">
+    <i class="ti ti-body-scan"></i>身體
+  </button>
+  <button class="mobile-nav-btn" id="mnav-history" onclick="sw('history');setMNav('history')">
+    <i class="ti ti-chart-line"></i>趨勢
+  </button>
+  <button class="mobile-nav-btn" id="mnav-supp" onclick="sw('supp');setMNav('supp')">
+    <i class="ti ti-pill"></i>補給
+  </button>
+  <button class="mobile-nav-btn" id="mnav-summary" onclick="sw('summary');setMNav('summary')">
+    <i class="ti ti-report-analytics"></i>總結
+  </button>
+</nav>
 
 <script>
 // ══ 本機食物資料庫 ════════════════════════════════════════════
@@ -1146,8 +1256,32 @@ async function genSummary(){
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
 
 // ══ INIT ════════════════════════════════════════════════════
+// ── 響應式偵測 ───────────────────────────────────────────────
+function checkMobile(){
+  const isMobile=window.innerWidth<=599;
+  const mobileNav=document.getElementById('mobile-nav');
+  if(mobileNav)mobileNav.style.display=isMobile?'flex':'none';
+}
+
+function setMNav(id){
+  document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('mnav-'+id);
+  if(btn)btn.classList.add('active');
+}
+
+// 覆寫 sw() 同步更新手機底部導航
+const _sw=sw;
+function sw(id){
+  _sw(id);
+  setMNav(id);
+  // 捲回頂部
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
 window.addEventListener('DOMContentLoaded',()=>{
   toggleStairs();
+  checkMobile();
+  window.addEventListener('resize',checkMobile);
   if(CFG.gasUrl){loadAll();}else{sw('setup');}
 });
 </script>
