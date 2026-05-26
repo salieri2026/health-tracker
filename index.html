@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>飲控記錄小工具</title>
+<title>ACA 3.0 健康指揮中樞</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css">
 <style>
@@ -380,7 +380,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
       <div class="discomfort-grid" id="discomfort-grid">
         <!-- 腸道 -->
         <button class="dc-btn" onclick="toggleDC(this,'rumble','red')">🫃 腹鳴</button>
-        <button class="dc-btn" onclick="toggleDC(this,'gas','red')">💨 臭屁/雞蛋屁</button>
+        <button class="dc-btn" onclick="toggleDC(this,'gas','red')">💨 排氣/雞蛋屁</button>
         <button class="dc-btn" onclick="toggleDC(this,'loose','red')">🚽 軟便/未成型</button>
         <button class="dc-btn" onclick="toggleDC(this,'bloat','red')">🎈 腹脹</button>
         <!-- 呼吸道 -->
@@ -993,8 +993,53 @@ async function parseOmni(){
 }
 
 function tryLocalMatch(text){
-  const words=text.split(/[\s,，、\n]+/).filter(Boolean);const results=[];
-  for(const w of words){const hits=dbSearch(w);if(hits.length&&hits[0].score>=5)results.push({...hits[0],amount:100,matched:true});}
+  const results=[];
+  const unitMap={'克':1,'g':1,'公克':1,'毫升':1,'ml':1,
+    '碗':200,'小碗':150,'大碗':250,'塊':150,'片':30,
+    '顆':60,'粒':5,'條':120,'杯':240,'小杯':150,'大杯':350,
+    '份':100,'匙':15,'茶匙':5,'湯匙':15,'瓶':500,'罐':330};
+  const fracMap={'半':0.5,'1/2':0.5,'1/4':0.25,'1/3':0.33,'2/3':0.67,'3/4':0.75,'一':1,'二':2,'兩':2,'三':3,'四':4};
+
+  // 以逗號/頓號/換行切段
+  const segments=text.split(/[,，、\n]+/).map(s=>s.trim()).filter(Boolean);
+
+  for(const seg of segments){
+    let amount=null;
+
+    // 模式A: 阿拉伯數字+單位  例: 50克、50g、2碗
+    const mA=seg.match(/(\d+(?:\.\d+)?)\s*(克|公克|g|毫升|ml|碗|塊|片|顆|粒|條|杯|份|匙)/i);
+    if(mA){
+      const num=parseFloat(mA[1]);
+      const unit=mA[2].toLowerCase();
+      amount=Math.round(num*(unitMap[mA[2]]||unitMap[unit]||1));
+    }
+
+    // 模式B: 中文量詞+單位  例: 半碗、一塊、兩片
+    if(amount===null){
+      const mB=seg.match(/(半|一|兩|二|三|四|1\/2|1\/4|1\/3|2\/3|3\/4)\s*(碗|塊|片|顆|條|杯|份)/);
+      if(mB){amount=Math.round((fracMap[mB[1]]||1)*(unitMap[mB[2]]||100));}
+    }
+
+    // 模式C: 純數字視為克  例: 「燕麥 50」
+    if(amount===null){
+      const mC=seg.match(/\b(\d+)\b/);
+      if(mC&&+mC[1]>=5&&+mC[1]<=2000)amount=+mC[1];
+    }
+
+    // 去除數字/單位/形容詞後搜尋食物名
+    const stripped=seg
+      .replace(/(\d+(?:\.\d+)?)\s*(克|公克|g|毫升|ml|碗|塊|片|顆|粒|條|杯|份|匙)/gi,'')
+      .replace(/\b\d+\b/g,'')
+      .replace(/(半|一|兩|二|三|四)\s*(碗|塊|片|顆|條|杯|份)/g,'')
+      .replace(/無糖|低糖|低脂|高纖|冷凍|即食|水煮|清蒸|烤/g,'')
+      .trim();
+
+    let hits=dbSearch(stripped);
+    if(!hits.length)hits=dbSearch(seg.replace(/\d+/g,'').trim());
+    if(hits.length&&hits[0].score>=5){
+      results.push({...hits[0],amount:amount||100,matched:true});
+    }
+  }
   return results;
 }
 
