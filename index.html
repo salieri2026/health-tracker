@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ACA 3.0 健康指揮中樞</title>
+<title>飲控小幫手</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css">
 <style>
@@ -170,6 +170,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .tl-form{background:var(--bg);border:1.5px dashed var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:.75rem}
 .setup-banner{background:#FEF9C3;border:1px solid var(--warn);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;font-size:.8125rem;line-height:1.9}
 .time-chip{display:inline-block;font-size:.625rem;padding:2px 7px;border-radius:99px;background:var(--accent-lt);color:var(--accent);margin-left:4px;font-weight:600}
+.daily-panel{display:grid;grid-template-columns:1.1fr .9fr;gap:1rem;margin-bottom:1.25rem}
+.quick-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:.875rem}
+.quick-metric{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.75rem;text-align:center;min-width:0}
+.quick-metric strong{display:block;font-size:1.15rem;line-height:1.2}
+.quick-metric span{display:block;font-size:.6875rem;color:var(--muted);margin-top:2px}
+.quick-actions{display:flex;gap:6px;flex-wrap:wrap}
+.import-box{width:100%;min-height:120px;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);font-family:inherit;font-size:.8125rem;line-height:1.6;resize:vertical}
+.template-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:.75rem}
+.template-btn{border:1px solid var(--border);background:var(--bg);border-radius:var(--radius-sm);padding:8px;text-align:left;cursor:pointer;font-family:inherit;font-size:.75rem;line-height:1.35;transition:all .15s}
+.template-btn:hover{border-color:var(--accent-md);background:#fff}
+.template-btn b{display:block;color:var(--text);font-size:.75rem}
+.template-btn span{display:block;color:var(--muted);font-size:.6875rem;margin-top:2px}
+.sticky-import{scroll-margin-top:70px}
 
 /* ══ RESPONSIVE ══════════════════════════════════════════════
 
@@ -193,6 +206,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   .nav-btn:hover::after,.nav-anchor:hover::after{content:attr(data-label);position:absolute;left:52px;top:50%;transform:translateY(-50%);background:#1E293B;color:#fff;padding:4px 10px;border-radius:6px;font-size:.75rem;white-space:nowrap;pointer-events:none;z-index:999;box-shadow:2px 2px 8px rgba(0,0,0,.2)}
   .main{margin-left:var(--sidebar-w);padding:1.25rem}
   .grid2,.grid3{grid-template-columns:1fr}
+  .daily-panel{grid-template-columns:1fr}
+  .quick-metrics{grid-template-columns:repeat(2,1fr)}
   .grid-body{grid-template-columns:1fr}
   .signal-grid{grid-template-columns:repeat(2,1fr)}
   .discomfort-grid{grid-template-columns:repeat(3,1fr)}
@@ -210,6 +225,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   .tb-btn.active{background:rgba(20,184,166,.25);color:var(--accent-md);font-weight:600}
   .main{margin-left:0;padding:1rem;padding-top:60px}
   .grid2,.grid3{grid-template-columns:1fr}
+  .daily-panel{grid-template-columns:1fr}
+  .quick-metrics{grid-template-columns:repeat(2,1fr)}
   .grid-body{grid-template-columns:1fr}
   .signal-grid{grid-template-columns:repeat(2,1fr)}
   .discomfort-grid{grid-template-columns:repeat(2,1fr)}
@@ -229,6 +246,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   .mnav-btn.active{color:var(--accent-md)}
   .main{margin-left:0;padding:.875rem;padding-top:60px;padding-bottom:68px}
   .grid2,.grid3{grid-template-columns:1fr}
+  .daily-panel{grid-template-columns:1fr}
+  .quick-metrics{grid-template-columns:repeat(2,1fr)}
+  .template-grid{grid-template-columns:1fr}
   .grid-body{grid-template-columns:1fr}
   .card{padding:.875rem;border-radius:10px}
   .signal-grid{grid-template-columns:1fr 1fr}
@@ -262,6 +282,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <button class="nav-btn" data-label="設定" onclick="swPage('setup')"><i class="ti ti-settings"></i><span class="nav-label">設定</span></button>
   <div class="nav-section" style="margin-top:.5rem">快速跳轉</div>
   <a class="nav-anchor" href="#sec-body" data-label="身體數據"><i class="ti ti-body-scan"></i><span class="nav-label">身體數據</span></a>
+  <a class="nav-anchor" href="#sec-import" data-label="SpeakFit 匯入"><i class="ti ti-clipboard-text"></i><span class="nav-label">SpeakFit 匯入</span></a>
   <a class="nav-anchor" href="#sec-signal" data-label="生理燈號"><i class="ti ti-traffic-lights"></i><span class="nav-label">生理燈號</span></a>
   <a class="nav-anchor" href="#sec-meal" data-label="餐食推薦"><i class="ti ti-chef-hat"></i><span class="nav-label">餐食推薦</span></a>
   <a class="nav-anchor" href="#sec-supp" data-label="保健食品"><i class="ti ti-pill"></i><span class="nav-label">保健食品</span></a>
@@ -282,7 +303,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <!-- ══ Mobile Bottom Nav ══ -->
 <nav class="mobile-nav" id="mobile-nav">
   <button class="mnav-btn active" id="mn-home" onclick="swPage('home')"><i class="ti ti-home"></i>總覽</button>
-  <button class="mnav-btn" onclick="scrollTo('#sec-body')"><i class="ti ti-body-scan"></i>身體</button>
+  <button class="mnav-btn" onclick="scrollTo('#sec-import')"><i class="ti ti-clipboard-text"></i>匯入</button>
   <button class="mnav-btn" onclick="scrollTo('#sec-meal')"><i class="ti ti-chef-hat"></i>餐食</button>
   <button class="mnav-btn" onclick="scrollTo('#sec-today')"><i class="ti ti-chart-bar"></i>進度</button>
   <button class="mnav-btn" id="mn-setup" onclick="swPage('setup')"><i class="ti ti-settings"></i>設定</button>
@@ -303,6 +324,34 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
       <div style="font-size:.75rem;color:var(--muted)" id="dash-date"></div>
     </div>
     <div id="global-light" class="badge g" style="font-size:.875rem;padding:6px 16px">🟢 生理狀態：正常</div>
+  </div>
+
+  <!-- 每日快速面板 -->
+  <div class="daily-panel" id="sec-daily">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title"><i class="ti ti-dashboard"></i>今天只做這幾件事</div>
+      <div class="quick-metrics">
+        <div class="quick-metric"><strong id="quick-cal">0</strong><span id="quick-cal-sub">/ 0 kcal</span></div>
+        <div class="quick-metric"><strong id="quick-prot">0g</strong><span id="quick-prot-sub">/ 0g 蛋白</span></div>
+        <div class="quick-metric"><strong id="quick-water">0</strong><span id="quick-water-sub">/ 0ml 水分</span></div>
+        <div class="quick-metric"><strong id="quick-left">0</strong><span>剩餘 kcal</span></div>
+      </div>
+      <div class="quick-actions">
+        <button class="btn sm p" onclick="scrollTo('#sec-import')"><i class="ti ti-clipboard-text"></i>貼上 SpeakFit</button>
+        <button class="btn sm" onclick="scrollTo('#sec-meal')"><i class="ti ti-keyboard"></i>手動記餐</button>
+        <button class="btn sm" onclick="addWater(250)"><i class="ti ti-droplet-plus"></i>+250 水</button>
+        <button class="btn sm" onclick="genSummary()"><i class="ti ti-sparkles"></i>今日建議</button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title"><i class="ti ti-bolt"></i>常用餐點</div>
+      <div class="template-grid">
+        <button class="template-btn" onclick="addMealTemplate('chicken-rice')"><b>雞胸白飯</b><span>訓練日主餐</span></button>
+        <button class="template-btn" onclick="addMealTemplate('egg-toast')"><b>蛋吐司早餐</b><span>早上快速記</span></button>
+        <button class="template-btn" onclick="addMealTemplate('convenience')"><b>超商高蛋白</b><span>茶葉蛋 + 雞胸</span></button>
+        <button class="template-btn" onclick="addMealTemplate('gut-safe')"><b>腸胃穩定餐</b><span>白飯 + 蛋 + 魚</span></button>
+      </div>
+    </div>
   </div>
 
   <!-- ① 身體數據 -->
@@ -412,6 +461,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <div class="section-header">
       <div><div class="section-title"><i class="ti ti-chef-hat"></i>動態餐食推薦與飲食記錄</div></div>
     </div>
+    <div class="card sticky-import" id="sec-import">
+      <div class="card-title"><i class="ti ti-clipboard-text"></i>SpeakFit 匯入
+        <span class="badge b" style="font-size:.625rem">不用搬家，先貼上同步</span></div>
+      <textarea class="import-box" id="speakfit-text" placeholder="把 SpeakFit AI 的今日飲食、總結或匯出文字貼在這裡。例：早餐 無糖豆漿 400ml、茶葉蛋2顆；午餐 雞胸150g、白飯一碗；今日共 1450 kcal，蛋白質 112g。"></textarea>
+      <div id="speakfit-status" style="font-size:.6875rem;color:var(--muted);min-height:16px;margin:.375rem 0"></div>
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn sm" onclick="clearSpeakFit()"><i class="ti ti-eraser"></i>清空</button>
+        <button class="btn sm p" id="speakfit-btn" onclick="importSpeakFit()"><i class="ti ti-sparkles"></i>解析並加入今天</button>
+      </div>
+    </div>
     <div class="grid2">
       <!-- 左：輸入 -->
       <div>
@@ -443,6 +502,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
             <button class="btn sm" onclick="addWater(250)">+250</button>
             <button class="btn sm" onclick="addWater(350)">+350</button>
             <button class="btn sm" onclick="addWater(500)">+500</button>
+            <button class="btn sm" onclick="undoWater()"><i class="ti ti-arrow-back-up"></i>撤銷水分</button>
+            <button class="btn sm" onclick="resetWater()"><i class="ti ti-rotate-clockwise"></i>重設</button>
             <div style="display:flex;gap:4px">
               <input type="number" id="custom-water" value="200" style="width:60px;padding:5px 7px;font-size:.75rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text)">
               <button class="btn sm p" onclick="addWater(+document.getElementById('custom-water').value)">+自訂</button>
@@ -735,6 +796,7 @@ const S={
   profile:{weight:70,bf:20,muscle:52,vf:7},
   signal:'normal',discomforts:new Set(),
   lastMealTime:null,lastMealProt:0,
+  lastWaterAdd:0,
   chartInst:null,chartType:'weight',
 };
 
@@ -765,6 +827,17 @@ async function gasCall(body){
   if(!CFG.gasUrl){toast('⚠️ 請先在設定填入 Apps Script 網址');return null;}
   try{
     const action=body.action;const data=Object.assign({},body);delete data.action;
+    try{
+      const post=await fetch(CFG.gasUrl,{
+        method:'POST',
+        redirect:'follow',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body:JSON.stringify({action,data})
+      });
+      return JSON.parse(await post.text());
+    }catch(postErr){
+      console.warn('POST failed, fallback to GET',postErr);
+    }
     const p=new URLSearchParams({action});
     if(Object.keys(data).length)p.append('data',encodeURIComponent(JSON.stringify(data)));
     const r=await fetch(CFG.gasUrl+'?'+p.toString(),{redirect:'follow'});
@@ -966,6 +1039,63 @@ function applySuggest(name){
 function onOmniKey(e){if(e.key==='Enter'&&e.ctrlKey){e.preventDefault();parseOmni();}}
 function clearOmni(){document.getElementById('omnibox').value='';document.getElementById('omni-status').textContent='';hideSuggest();}
 
+function clearSpeakFit(){
+  document.getElementById('speakfit-text').value='';
+  document.getElementById('speakfit-status').textContent='';
+}
+
+async function importSpeakFit(){
+  const text=document.getElementById('speakfit-text').value.trim();
+  if(!text){toast('先貼上 SpeakFit 的今日內容');return;}
+  const btn=document.getElementById('speakfit-btn');
+  const status=document.getElementById('speakfit-status');
+  btn.innerHTML='<span class="spin"></span>解析中…';btn.disabled=true;
+  status.innerHTML='<span class="spin"></span>正在把 SpeakFit 文字轉成今天的記錄';
+  const prompt=`你是飲食紀錄匯入器。把 SpeakFit AI 或其他飲控 App 的文字整理成 JSON。只輸出 JSON，不要 markdown。若文字有總熱量或總蛋白但沒有食物明細，也請產生一筆 name 為「SpeakFit 匯入總計」的項目。欄位格式：{"items":[{"name":"食物名稱","amount":100,"cal":0,"prot":0,"carb":0,"fat":0,"sug":0,"fib":0}],"waterMl":0,"activities":[{"type":"walk","typeLabel":"散步","min":30,"intensity":"low","cal":100,"note":"SpeakFit匯入"}],"note":"一句匯入摘要"}。用繁體中文食物名，數字用 number。原文：\n${text}`;
+  try{
+    const raw=await aiText(prompt,1000);
+    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    if(parsed.items&&parsed.items.length)await addFoods(parsed.items);
+    if(parsed.waterMl&&+parsed.waterMl>0)await addWater(+parsed.waterMl);
+    if(parsed.activities&&parsed.activities.length){
+      for(const act of parsed.activities){
+        const clean={type:act.type||'walk',typeLabel:act.typeLabel||'運動',min:+act.min||0,intensity:act.intensity||'low',cal:+act.cal||0,stairsInfo:null,note:act.note||'SpeakFit匯入',id:Date.now()+Math.random()};
+        S.activities.push(clean);gasCall({action:'addActivity',data:clean});
+      }
+      renderActList();updateProgress();
+    }
+    status.innerHTML='<span style="color:var(--accent-md)">✓ 已匯入'+((parsed.items||[]).length||0)+'筆餐食'+(parsed.waterMl?'、水分 '+parsed.waterMl+'ml':'')+'</span>';
+    toast('✓ SpeakFit 內容已加入今天');
+  }catch(e){
+    status.innerHTML=`<span style="color:var(--danger)">匯入失敗：${e.message}</span>`;
+  }
+  btn.innerHTML='<i class="ti ti-sparkles"></i>解析並加入今天';btn.disabled=false;
+}
+
+async function addMealTemplate(kind){
+  const templates={
+    'chicken-rice':[
+      {name:'雞胸肉',amount:150,cal:165,prot:31,carb:0,fat:3.6,sug:0,fib:0},
+      {name:'白飯',amount:200,cal:130,prot:2.4,carb:28,fat:0.3,sug:0.1,fib:0.4}
+    ],
+    'egg-toast':[
+      {name:'水煮蛋',amount:120,cal:155,prot:13,carb:1.1,fat:11,sug:1.1,fib:0},
+      {name:'吐司',amount:60,cal:265,prot:9,carb:49,fat:3.2,sug:5,fib:2.7}
+    ],
+    'convenience':[
+      {name:'雞胸肉',amount:115,cal:165,prot:31,carb:0,fat:3.6,sug:0,fib:0},
+      {name:'茶葉蛋',amount:60,cal:155,prot:13,carb:1.1,fat:11,sug:1.1,fib:0}
+    ],
+    'gut-safe':[
+      {name:'白飯',amount:180,cal:130,prot:2.4,carb:28,fat:0.3,sug:0.1,fib:0.4},
+      {name:'水煮蛋',amount:60,cal:155,prot:13,carb:1.1,fat:11,sug:1.1,fib:0},
+      {name:'鯛魚片',amount:120,cal:105,prot:20,carb:0,fat:2,sug:0,fib:0}
+    ]
+  };
+  await addFoods(templates[kind]||[]);
+  toast('✓ 已加入常用餐點');
+}
+
 async function parseOmni(){
   const text=document.getElementById('omnibox').value.trim();if(!text)return;
   const btn=document.getElementById('parse-btn');
@@ -1097,6 +1227,20 @@ function updateProgress(){
   const sw2=document.getElementById('sum-water');if(sw2)sw2.textContent=S.water;
   const swt=document.getElementById('sum-water-t');if(swt)swt.textContent='/'+S.waterGoal+'ml';
   const sn=document.getElementById('sum-net');if(sn)sn.textContent=Math.round(t.cal-actCal);
+  updateQuickPanel();
+}
+
+function updateQuickPanel(){
+  const t=getTotals(),g=S.targets,actCal=S.activities.reduce((a,x)=>a+x.cal,0);
+  const left=Math.max(0,Math.round((g.cal||0)-t.cal+actCal));
+  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
+  set('quick-cal',Math.round(t.cal));
+  set('quick-cal-sub','/ '+(g.cal||0)+' kcal');
+  set('quick-prot',Math.round(t.prot)+'g');
+  set('quick-prot-sub','/ '+(g.prot||0)+'g 蛋白');
+  set('quick-water',S.water);
+  set('quick-water-sub','/ '+S.waterGoal+'ml 水分');
+  set('quick-left',left);
 }
 
 function renderFoodList(){
@@ -1112,20 +1256,36 @@ function renderFoodList(){
 }
 async function removeFood(id){
   const idx=S.foods.findIndex(f=>f.id===id);if(idx<0)return;
+  const rowIndex=S.foods[idx].rowNumber ?? S.foods[idx]._rowIndex ?? idx;
   S.foods.splice(idx,1);renderFoodList();updateProgress();checkGutAlert();
-  await gasCall({action:'deleteFood',rowIndex:idx});
+  await gasCall({action:'deleteFood',rowIndex});
 }
 
 // ══ 水分 ════════════════════════════════════════════════════
 async function addWater(ml){
+  if(!ml||ml<0)return;
+  S.lastWaterAdd=ml;
   S.water=Math.min(S.water+ml,9999);updateWaterUI();updateProgress();
   addTLAuto('water',ml+'ml 補水');
   await gasCall({action:'setWater',ml:S.water});
+}
+async function undoWater(){
+  if(!S.lastWaterAdd){toast('沒有可撤銷的補水');return;}
+  S.water=Math.max(0,S.water-S.lastWaterAdd);updateWaterUI();updateProgress();
+  await gasCall({action:'setWater',ml:S.water});
+  toast('✓ 已撤銷 '+S.lastWaterAdd+'ml');
+  S.lastWaterAdd=0;
+}
+async function resetWater(){
+  S.water=0;S.lastWaterAdd=0;updateWaterUI();updateProgress();
+  await gasCall({action:'setWater',ml:S.water});
+  toast('✓ 今日水分已重設');
 }
 function updateWaterUI(){
   const el=document.getElementById('water-display');if(el)el.textContent=S.water+' / '+S.waterGoal+' ml';
   const pb=document.getElementById('water-pb');if(pb)pb.style.width=Math.min(Math.round(S.water/S.waterGoal*100),100)+'%';
   const sw2=document.getElementById('sum-water');if(sw2)sw2.textContent=S.water;
+  updateQuickPanel();
 }
 
 // ══ 餐食推薦 ════════════════════════════════════════════════
@@ -1246,7 +1406,7 @@ async function addAct(){
   addTLAuto('exercise',`${label} ${min}分鐘（消耗${cal}kcal）`);
   await gasCall({action:'addActivity',data:act});toast('✓ 運動記錄 消耗 '+cal+' kcal');
 }
-async function removeAct(id){const idx=S.activities.findIndex(a=>a.id===id);if(idx<0)return;S.activities.splice(idx,1);renderActList();updateProgress();await gasCall({action:'deleteActivity',rowIndex:idx});}
+async function removeAct(id){const idx=S.activities.findIndex(a=>a.id===id);if(idx<0)return;const rowIndex=S.activities[idx].rowNumber ?? S.activities[idx]._rowIndex ?? idx;S.activities.splice(idx,1);renderActList();updateProgress();await gasCall({action:'deleteActivity',rowIndex});}
 function renderActList(){
   const el=document.getElementById('act-list');if(!el)return;
   if(!S.activities.length){el.innerHTML='<p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚未記錄</p>';return;}
@@ -1311,6 +1471,7 @@ window.addEventListener('resize',()=>{clearTimeout(_rt);_rt=setTimeout(()=>{if(S
 window.addEventListener('DOMContentLoaded',()=>{
   toggleStairs();
   document.getElementById('sig-normal').classList.add('on-green');
+  updateQuickPanel();
   if(CFG.gasUrl){loadAll();}else{swPage('setup');}
 });
 </script>
