@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>飲控小幫手</title>
+<title>ACA 3.0 健康指揮中樞</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css">
 <style>
@@ -182,7 +182,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .template-btn:hover{border-color:var(--accent-md);background:#fff}
 .template-btn b{display:block;color:var(--text);font-size:.75rem}
 .template-btn span{display:block;color:var(--muted);font-size:.6875rem;margin-top:2px}
-.sticky-import{scroll-margin-top:70px}
+.sticky-tool{scroll-margin-top:70px}
+.draft-list{display:grid;gap:7px;margin-top:.75rem}
+.draft-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 10px;font-size:.75rem;line-height:1.5}
+.scan-file{width:100%;padding:9px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);background:var(--bg);font-size:.75rem}
 
 /* ══ RESPONSIVE ══════════════════════════════════════════════
 
@@ -282,9 +285,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <button class="nav-btn" data-label="設定" onclick="swPage('setup')"><i class="ti ti-settings"></i><span class="nav-label">設定</span></button>
   <div class="nav-section" style="margin-top:.5rem">快速跳轉</div>
   <a class="nav-anchor" href="#sec-body" data-label="身體數據"><i class="ti ti-body-scan"></i><span class="nav-label">身體數據</span></a>
-  <a class="nav-anchor" href="#sec-import" data-label="SpeakFit 匯入"><i class="ti ti-clipboard-text"></i><span class="nav-label">SpeakFit 匯入</span></a>
+  <a class="nav-anchor" href="#sec-label" data-label="營養標示"><i class="ti ti-scan"></i><span class="nav-label">營養標示</span></a>
   <a class="nav-anchor" href="#sec-signal" data-label="生理燈號"><i class="ti ti-traffic-lights"></i><span class="nav-label">生理燈號</span></a>
   <a class="nav-anchor" href="#sec-meal" data-label="餐食推薦"><i class="ti ti-chef-hat"></i><span class="nav-label">餐食推薦</span></a>
+  <a class="nav-anchor" href="#sec-food-db" data-label="外食資料庫"><i class="ti ti-database"></i><span class="nav-label">外食資料庫</span></a>
   <a class="nav-anchor" href="#sec-supp" data-label="保健食品"><i class="ti ti-pill"></i><span class="nav-label">保健食品</span></a>
   <a class="nav-anchor" href="#sec-timeline" data-label="時間軸"><i class="ti ti-clock"></i><span class="nav-label">時間軸</span></a>
   <a class="nav-anchor" href="#sec-activity" data-label="運動記錄"><i class="ti ti-stairs"></i><span class="nav-label">運動記錄</span></a>
@@ -303,7 +307,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <!-- ══ Mobile Bottom Nav ══ -->
 <nav class="mobile-nav" id="mobile-nav">
   <button class="mnav-btn active" id="mn-home" onclick="swPage('home')"><i class="ti ti-home"></i>總覽</button>
-  <button class="mnav-btn" onclick="scrollTo('#sec-import')"><i class="ti ti-clipboard-text"></i>匯入</button>
+  <button class="mnav-btn" onclick="scrollTo('#sec-label')"><i class="ti ti-scan"></i>掃描</button>
   <button class="mnav-btn" onclick="scrollTo('#sec-meal')"><i class="ti ti-chef-hat"></i>餐食</button>
   <button class="mnav-btn" onclick="scrollTo('#sec-today')"><i class="ti ti-chart-bar"></i>進度</button>
   <button class="mnav-btn" id="mn-setup" onclick="swPage('setup')"><i class="ti ti-settings"></i>設定</button>
@@ -337,19 +341,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
         <div class="quick-metric"><strong id="quick-left">0</strong><span>剩餘 kcal</span></div>
       </div>
       <div class="quick-actions">
-        <button class="btn sm p" onclick="scrollTo('#sec-import')"><i class="ti ti-clipboard-text"></i>貼上 SpeakFit</button>
-        <button class="btn sm" onclick="scrollTo('#sec-meal')"><i class="ti ti-keyboard"></i>手動記餐</button>
+        <button class="btn sm p" onclick="scrollTo('#sec-meal')"><i class="ti ti-keyboard"></i>語音/文字記餐</button>
+        <button class="btn sm" onclick="scrollTo('#sec-label')"><i class="ti ti-scan"></i>掃營養標示</button>
         <button class="btn sm" onclick="addWater(250)"><i class="ti ti-droplet-plus"></i>+250 水</button>
         <button class="btn sm" onclick="genSummary()"><i class="ti ti-sparkles"></i>今日建議</button>
       </div>
     </div>
     <div class="card" style="margin-bottom:0">
-      <div class="card-title"><i class="ti ti-bolt"></i>常用餐點</div>
-      <div class="template-grid">
-        <button class="template-btn" onclick="addMealTemplate('chicken-rice')"><b>雞胸白飯</b><span>訓練日主餐</span></button>
-        <button class="template-btn" onclick="addMealTemplate('egg-toast')"><b>蛋吐司早餐</b><span>早上快速記</span></button>
-        <button class="template-btn" onclick="addMealTemplate('convenience')"><b>超商高蛋白</b><span>茶葉蛋 + 雞胸</span></button>
-        <button class="template-btn" onclick="addMealTemplate('gut-safe')"><b>腸胃穩定餐</b><span>白飯 + 蛋 + 魚</span></button>
+      <div class="card-title"><i class="ti ti-bolt"></i>常用組合</div>
+      <div class="template-grid" id="combo-list"></div>
+      <div style="display:flex;gap:6px;margin-top:.75rem">
+        <input id="combo-name" placeholder="把今天餐點存成組合" style="flex:1;padding:7px 10px;font-size:.8125rem;border-radius:var(--radius-sm);border:1.5px solid var(--border)">
+        <button class="btn sm p" onclick="saveTodayCombo()"><i class="ti ti-device-floppy"></i>儲存</button>
       </div>
     </div>
   </div>
@@ -461,14 +464,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <div class="section-header">
       <div><div class="section-title"><i class="ti ti-chef-hat"></i>動態餐食推薦與飲食記錄</div></div>
     </div>
-    <div class="card sticky-import" id="sec-import">
-      <div class="card-title"><i class="ti ti-clipboard-text"></i>SpeakFit 匯入
-        <span class="badge b" style="font-size:.625rem">不用搬家，先貼上同步</span></div>
-      <textarea class="import-box" id="speakfit-text" placeholder="把 SpeakFit AI 的今日飲食、總結或匯出文字貼在這裡。例：早餐 無糖豆漿 400ml、茶葉蛋2顆；午餐 雞胸150g、白飯一碗；今日共 1450 kcal，蛋白質 112g。"></textarea>
-      <div id="speakfit-status" style="font-size:.6875rem;color:var(--muted);min-height:16px;margin:.375rem 0"></div>
+    <div class="card sticky-tool" id="sec-label">
+      <div class="card-title"><i class="ti ti-scan"></i>掃營養標示
+        <span class="badge b" style="font-size:.625rem">包裝食品 / 超商品項</span></div>
+      <input class="scan-file" id="label-file" type="file" accept="image/*" capture="environment">
+      <textarea class="import-box" id="label-manual" placeholder="也可以直接貼上營養標示文字，例如：每份熱量 180 大卡、蛋白質 12g、脂肪 4g、碳水 25g、糖 6g。" style="margin-top:.5rem;min-height:70px"></textarea>
+      <div id="label-status" style="font-size:.6875rem;color:var(--muted);min-height:16px;margin:.375rem 0"></div>
+      <div id="label-draft" class="draft-list"></div>
       <div class="btn-row" style="margin-top:0">
-        <button class="btn sm" onclick="clearSpeakFit()"><i class="ti ti-eraser"></i>清空</button>
-        <button class="btn sm p" id="speakfit-btn" onclick="importSpeakFit()"><i class="ti ti-sparkles"></i>解析並加入今天</button>
+        <button class="btn sm" onclick="clearNutritionLabel()"><i class="ti ti-eraser"></i>清空</button>
+        <button class="btn sm p" id="label-btn" onclick="scanNutritionLabel()"><i class="ti ti-sparkles"></i>解析標示</button>
       </div>
     </div>
     <div class="grid2">
@@ -539,6 +544,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
           <div id="meal-recs"><p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">點「更新」生成建議</p></div>
         </div>
       </div>
+    </div>
+    <div class="card" id="sec-food-db">
+      <div class="card-title"><i class="ti ti-database"></i>我的外食資料庫
+        <span class="badge b" style="font-size:.625rem">常吃店家 / 便當 / 超商品項</span></div>
+      <div class="fg fg4">
+        <div class="f"><label>品項名稱</label><input id="db-food-name" placeholder="例：XX便當雞腿飯"></div>
+        <div class="f"><label>熱量 kcal/100g</label><input id="db-food-cal" type="number" value="0"></div>
+        <div class="f"><label>蛋白 g/100g</label><input id="db-food-prot" type="number" value="0" step="0.1"></div>
+        <div class="f"><label>碳水 g/100g</label><input id="db-food-carb" type="number" value="0" step="0.1"></div>
+      </div>
+      <div class="fg fg3">
+        <div class="f"><label>脂肪 g/100g</label><input id="db-food-fat" type="number" value="0" step="0.1"></div>
+        <div class="f"><label>糖 g/100g</label><input id="db-food-sug" type="number" value="0" step="0.1"></div>
+        <div class="f"><label>纖維 g/100g</label><input id="db-food-fib" type="number" value="0" step="0.1"></div>
+      </div>
+      <div class="btn-row" style="margin-top:0"><button class="btn sm p" onclick="addCustomFoodFromForm()"><i class="ti ti-plus"></i>加入資料庫</button></div>
+      <div id="custom-food-list" class="draft-list"></div>
     </div>
   </div>
 
@@ -702,7 +724,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <strong>⚡ 首次使用設定</strong><br>
     1. 從「健康追蹤」Google Sheets → 擴充功能 → Apps Script → 貼入 Code.gs<br>
     2. 執行 <code>authorizeAll</code> 函式完成授權<br>
-    3. 部署為 Web App（執行身分：我 / 存取：所有人）→ 複製網址
+    3. Script Properties 需設定 <code>GROQ_KEY</code>、<code>SPREADSHEET_ID</code>；要掃營養標示再加免費 <code>OCR_SPACE_KEY</code><br>
+    4. 部署為 Web App（執行身分：我 / 存取：所有人）→ 複製網址
   </div>
   <div class="card" style="max-width:600px">
     <div class="card-title"><i class="ti ti-link"></i>API 連線設定</div>
@@ -757,13 +780,55 @@ function dbSearch(q){
   if(!q||q.length<1)return[];
   q=q.toLowerCase();
   const res=[];
-  for(const f of FOODS_DB){
+  for(const f of [...FOODS_DB,...getCustomFoodRows()]){
     const n=f[0].toLowerCase();let s=0;
     if(n===q)s=10;else if(n.includes(q))s=7;else if(q.includes(n)&&n.length>1)s=5;
     else{let m=0;for(const c of q)if(n.includes(c))m++;if(m/q.length>0.65)s=2;}
     if(s>0)res.push({name:f[0],cal:f[1],prot:f[2],carb:f[3],fat:f[4],sug:f[5],fib:f[6],score:s});
   }
   return res.sort((a,b)=>b.score-a.score).slice(0,5);
+}
+function getCustomFoodRows(){
+  try{return JSON.parse(localStorage.getItem('ht_custom_foods')||'[]');}
+  catch(e){return[];}
+}
+function saveCustomFood(item){
+  const rows=getCustomFoodRows();
+  if(!item.name||rows.some(r=>r[0]===item.name))return;
+  rows.push([item.name,+item.cal||0,+item.prot||0,+item.carb||0,+item.fat||0,+item.sug||0,+item.fib||0]);
+  localStorage.setItem('ht_custom_foods',JSON.stringify(rows.slice(-120)));
+  renderCustomFoodList();
+}
+function addCustomFoodFromForm(){
+  const item={
+    name:document.getElementById('db-food-name').value.trim(),
+    cal:+document.getElementById('db-food-cal').value||0,
+    prot:+document.getElementById('db-food-prot').value||0,
+    carb:+document.getElementById('db-food-carb').value||0,
+    fat:+document.getElementById('db-food-fat').value||0,
+    sug:+document.getElementById('db-food-sug').value||0,
+    fib:+document.getElementById('db-food-fib').value||0
+  };
+  if(!item.name){toast('請輸入品項名稱');return;}
+  saveCustomFood(item);
+  ['db-food-name','db-food-cal','db-food-prot','db-food-carb','db-food-fat','db-food-sug','db-food-fib'].forEach((id,i)=>document.getElementById(id).value=i?'0':'');
+  toast('✓ 已加入外食資料庫');
+}
+function removeCustomFood(name){
+  const rows=getCustomFoodRows().filter(r=>r[0]!==name);
+  localStorage.setItem('ht_custom_foods',JSON.stringify(rows));
+  renderCustomFoodList();
+}
+function renderCustomFoodList(){
+  const el=document.getElementById('custom-food-list');if(!el)return;
+  const rows=getCustomFoodRows();
+  if(!rows.length){el.innerHTML='<p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚未建立外食資料</p>';return;}
+  el.innerHTML=rows.slice(-12).reverse().map(r=>`
+    <div class="draft-item"><b>${r[0]}</b><br>${r[1]} kcal/100g · 蛋白 ${r[2]}g · 碳水 ${r[3]}g · 脂肪 ${r[4]}g
+      <div class="btn-row" style="margin-top:.35rem">
+        <button class="btn xs" onclick="removeCustomFood('${String(r[0]).replace(/'/g,'\\\'')}')"><i class="ti ti-x"></i>刪除</button>
+      </div>
+    </div>`).join('');
 }
 function osmoticRisk(foods){
   let r=0;
@@ -797,6 +862,8 @@ const S={
   signal:'normal',discomforts:new Set(),
   lastMealTime:null,lastMealProt:0,
   lastWaterAdd:0,
+  labelDraft:null,
+  combos:[],
   chartInst:null,chartType:'weight',
 };
 
@@ -1039,41 +1106,7 @@ function applySuggest(name){
 function onOmniKey(e){if(e.key==='Enter'&&e.ctrlKey){e.preventDefault();parseOmni();}}
 function clearOmni(){document.getElementById('omnibox').value='';document.getElementById('omni-status').textContent='';hideSuggest();}
 
-function clearSpeakFit(){
-  document.getElementById('speakfit-text').value='';
-  document.getElementById('speakfit-status').textContent='';
-}
-
-async function importSpeakFit(){
-  const text=document.getElementById('speakfit-text').value.trim();
-  if(!text){toast('先貼上 SpeakFit 的今日內容');return;}
-  const btn=document.getElementById('speakfit-btn');
-  const status=document.getElementById('speakfit-status');
-  btn.innerHTML='<span class="spin"></span>解析中…';btn.disabled=true;
-  status.innerHTML='<span class="spin"></span>正在把 SpeakFit 文字轉成今天的記錄';
-  const prompt=`你是飲食紀錄匯入器。把 SpeakFit AI 或其他飲控 App 的文字整理成 JSON。只輸出 JSON，不要 markdown。若文字有總熱量或總蛋白但沒有食物明細，也請產生一筆 name 為「SpeakFit 匯入總計」的項目。欄位格式：{"items":[{"name":"食物名稱","amount":100,"cal":0,"prot":0,"carb":0,"fat":0,"sug":0,"fib":0}],"waterMl":0,"activities":[{"type":"walk","typeLabel":"散步","min":30,"intensity":"low","cal":100,"note":"SpeakFit匯入"}],"note":"一句匯入摘要"}。用繁體中文食物名，數字用 number。原文：\n${text}`;
-  try{
-    const raw=await aiText(prompt,1000);
-    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
-    if(parsed.items&&parsed.items.length)await addFoods(parsed.items);
-    if(parsed.waterMl&&+parsed.waterMl>0)await addWater(+parsed.waterMl);
-    if(parsed.activities&&parsed.activities.length){
-      for(const act of parsed.activities){
-        const clean={type:act.type||'walk',typeLabel:act.typeLabel||'運動',min:+act.min||0,intensity:act.intensity||'low',cal:+act.cal||0,stairsInfo:null,note:act.note||'SpeakFit匯入',id:Date.now()+Math.random()};
-        S.activities.push(clean);gasCall({action:'addActivity',data:clean});
-      }
-      renderActList();updateProgress();
-    }
-    status.innerHTML='<span style="color:var(--accent-md)">✓ 已匯入'+((parsed.items||[]).length||0)+'筆餐食'+(parsed.waterMl?'、水分 '+parsed.waterMl+'ml':'')+'</span>';
-    toast('✓ SpeakFit 內容已加入今天');
-  }catch(e){
-    status.innerHTML=`<span style="color:var(--danger)">匯入失敗：${e.message}</span>`;
-  }
-  btn.innerHTML='<i class="ti ti-sparkles"></i>解析並加入今天';btn.disabled=false;
-}
-
-async function addMealTemplate(kind){
-  const templates={
+const DEFAULT_COMBOS={
     'chicken-rice':[
       {name:'雞胸肉',amount:150,cal:165,prot:31,carb:0,fat:3.6,sug:0,fib:0},
       {name:'白飯',amount:200,cal:130,prot:2.4,carb:28,fat:0.3,sug:0.1,fib:0.4}
@@ -1091,9 +1124,104 @@ async function addMealTemplate(kind){
       {name:'水煮蛋',amount:60,cal:155,prot:13,carb:1.1,fat:11,sug:1.1,fib:0},
       {name:'鯛魚片',amount:120,cal:105,prot:20,carb:0,fat:2,sug:0,fib:0}
     ]
-  };
-  await addFoods(templates[kind]||[]);
-  toast('✓ 已加入常用餐點');
+};
+const DEFAULT_COMBO_META={
+  'chicken-rice':{name:'雞胸白飯',desc:'訓練日主餐'},
+  'egg-toast':{name:'蛋吐司早餐',desc:'早上快速記'},
+  'convenience':{name:'超商高蛋白',desc:'茶葉蛋 + 雞胸'},
+  'gut-safe':{name:'腸胃穩定餐',desc:'白飯 + 蛋 + 魚'}
+};
+
+function loadCombos(){
+  try{S.combos=JSON.parse(localStorage.getItem('ht_combos')||'[]');}
+  catch(e){S.combos=[];}
+  renderCombos();
+}
+function renderCombos(){
+  const el=document.getElementById('combo-list');if(!el)return;
+  const built=Object.keys(DEFAULT_COMBOS).map(id=>({id,name:DEFAULT_COMBO_META[id].name,desc:DEFAULT_COMBO_META[id].desc,items:DEFAULT_COMBOS[id],builtin:true}));
+  const all=[...built,...S.combos];
+  el.innerHTML=all.map(c=>`
+    <button class="template-btn" onclick="addCombo('${c.id}')">
+      <b>${c.name}</b><span>${c.desc||comboMacroText(c.items)}${c.builtin?'':' · 自訂'}</span>
+    </button>`).join('');
+}
+function comboMacroText(items){
+  const t=(items||[]).reduce((a,x)=>({cal:a.cal+(+x.cal||0)*(+x.amount||100)/100,prot:a.prot+(+x.prot||0)*(+x.amount||100)/100}),{cal:0,prot:0});
+  return `${Math.round(t.cal)} kcal · 蛋白 ${Math.round(t.prot)}g`;
+}
+async function addCombo(id){
+  const combo=S.combos.find(c=>c.id===id);
+  const items=combo?combo.items:DEFAULT_COMBOS[id];
+  await addFoods(items||[]);
+  toast('✓ 已加入常用組合');
+}
+async function addMealTemplate(kind){await addCombo(kind);}
+function saveTodayCombo(){
+  const name=document.getElementById('combo-name').value.trim();
+  if(!name){toast('先輸入組合名稱');return;}
+  if(!S.foods.length){toast('今天還沒有餐點可以儲存');return;}
+  const items=S.foods.map(f=>({name:f.name,amount:f.amount,cal:f.cal/(f.amount/100||1),prot:f.prot/(f.amount/100||1),carb:f.carb/(f.amount/100||1),fat:f.fat/(f.amount/100||1),sug:(f.sug||0)/(f.amount/100||1),fib:(f.fib||0)/(f.amount/100||1)}));
+  S.combos.push({id:'custom-'+Date.now(),name,desc:comboMacroText(items),items});
+  localStorage.setItem('ht_combos',JSON.stringify(S.combos.slice(-20)));
+  document.getElementById('combo-name').value='';
+  renderCombos();toast('✓ 已儲存常用組合');
+}
+
+function clearNutritionLabel(){
+  document.getElementById('label-file').value='';
+  document.getElementById('label-manual').value='';
+  document.getElementById('label-status').textContent='';
+  document.getElementById('label-draft').innerHTML='';
+  S.labelDraft=null;
+}
+function fileToDataUrl(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+async function scanNutritionLabel(){
+  const file=document.getElementById('label-file').files[0];
+  const manual=document.getElementById('label-manual').value.trim();
+  if(!file&&!manual){toast('請拍攝營養標示，或貼上標示文字');return;}
+  const btn=document.getElementById('label-btn'),status=document.getElementById('label-status');
+  btn.innerHTML='<span class="spin"></span>解析中…';btn.disabled=true;
+  status.innerHTML='<span class="spin"></span>'+(file?'OCR 讀取營養標示中':'解析文字中');
+  try{
+    const imageBase64=file?await fileToDataUrl(file):'';
+    const r=await gasCall({action:'ocrNutritionLabel',imageBase64,rawText:manual});
+    if(!r||!r.ok)throw new Error(r?.error||'解析失敗');
+    S.labelDraft=r.item;
+    renderNutritionDraft(r.item,r.rawText);
+    status.innerHTML='<span style="color:var(--accent-md)">✓ 已產生確認卡，請確認後加入今天</span>';
+  }catch(e){
+    status.innerHTML=`<span style="color:var(--danger)">解析失敗：${e.message}</span>`;
+  }
+  btn.innerHTML='<i class="ti ti-sparkles"></i>解析標示';btn.disabled=false;
+}
+function renderNutritionDraft(item,rawText){
+  const el=document.getElementById('label-draft');
+  if(!item){el.innerHTML='';return;}
+  el.innerHTML=`
+    <div class="draft-item">
+      <b>${item.name||'營養標示食品'}</b><br>
+      份量 ${item.amount||100}g · ${Math.round(item.cal||0)} kcal · 蛋白 ${item.prot||0}g · 碳水 ${item.carb||0}g · 脂肪 ${item.fat||0}g
+      <div class="btn-row" style="margin-top:.5rem">
+        <button class="btn xs" onclick="saveCustomFood(S.labelDraft)"><i class="ti ti-database-plus"></i>存入外食資料庫</button>
+        <button class="btn xs p" onclick="confirmNutritionDraft()"><i class="ti ti-plus"></i>加入今天</button>
+      </div>
+    </div>
+    ${rawText?`<div class="draft-item" style="color:var(--muted)">OCR：${String(rawText).slice(0,260)}</div>`:''}`;
+}
+async function confirmNutritionDraft(){
+  if(!S.labelDraft)return;
+  await addFoods([S.labelDraft]);
+  saveCustomFood(S.labelDraft);
+  clearNutritionLabel();
+  toast('✓ 營養標示已加入今天');
 }
 
 async function parseOmni(){
@@ -1471,6 +1599,8 @@ window.addEventListener('resize',()=>{clearTimeout(_rt);_rt=setTimeout(()=>{if(S
 window.addEventListener('DOMContentLoaded',()=>{
   toggleStairs();
   document.getElementById('sig-normal').classList.add('on-green');
+  loadCombos();
+  renderCustomFoodList();
   updateQuickPanel();
   if(CFG.gasUrl){loadAll();}else{swPage('setup');}
 });
