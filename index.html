@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ACA 3.0 健康指揮中樞</title>
+<title>飲控小幫手</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css">
 <style>
@@ -273,6 +273,28 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 </head>
 <body>
 <div id="toast"></div>
+<!-- ══ 使用者 Modal ══ -->
+<div id="user-modal" style="position:fixed;inset:0;background:rgba(15,23,42,.75);z-index:9998;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:#fff;border-radius:16px;padding:2rem;width:90%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div style="font-size:2.5rem">🥗</div>
+      <div style="font-size:1.25rem;font-weight:700;color:#1E293B;margin-top:.5rem">飲控小幫手</div>
+      <div style="font-size:.8125rem;color:#64748B;margin-top:4px">輸入名稱以載入你的記錄</div>
+    </div>
+    <div id="existing-user-btns" style="display:none;margin-bottom:1rem">
+      <div style="font-size:.75rem;color:#64748B;margin-bottom:6px">選擇使用者</div>
+      <div id="existing-users" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.75rem"></div>
+      <div style="text-align:center;font-size:.75rem;color:#94A3B8">或輸入新名稱</div>
+    </div>
+    <input id="user-input" type="text" placeholder="你的名稱" maxlength="20"
+      style="width:100%;padding:10px 14px;font-size:1rem;border-radius:8px;border:2px solid #E2E8F0;font-family:inherit;margin-bottom:.75rem;outline:none"
+      onkeydown="if(event.key==='Enter')confirmUser()">
+    <button onclick="confirmUser()"
+      style="width:100%;padding:11px;background:linear-gradient(135deg,#0F766E,#14B8A6);color:#fff;border:none;border-radius:8px;font-size:.9375rem;font-weight:600;cursor:pointer;font-family:inherit">
+      進入
+    </button>
+  </div>
+</div>
 
 <!-- ══ Sidebar ══ -->
 <nav class="sidebar" id="sidebar">
@@ -282,6 +304,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   </div>
   <div class="nav-section">頁面</div>
   <button class="nav-btn active" data-label="今日總覽" onclick="swPage('home')"><i class="ti ti-home"></i><span class="nav-label">今日總覽</span></button>
+  <button class="nav-btn" onclick="switchUser()" id="switch-user-btn"><i class="ti ti-user-circle"></i><span class="nav-label" id="current-user-label">使用者</span></button>
   <button class="nav-btn" data-label="設定" onclick="swPage('setup')"><i class="ti ti-settings"></i><span class="nav-label">設定</span></button>
   <div class="nav-section" style="margin-top:.5rem">快速跳轉</div>
   <a class="nav-anchor" href="#sec-body" data-label="身體數據"><i class="ti ti-body-scan"></i><span class="nav-label">身體數據</span></a>
@@ -432,7 +455,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
       <div class="discomfort-grid" id="discomfort-grid">
         <!-- 腸道 -->
         <button class="dc-btn" onclick="toggleDC(this,'rumble','red')">🫃 腹鳴</button>
-        <button class="dc-btn" onclick="toggleDC(this,'gas','red')">💨 排氣/雞蛋屁</button>
+        <button class="dc-btn" onclick="toggleDC(this,'gas','red')">💨 雞蛋味臭屁</button>
         <button class="dc-btn" onclick="toggleDC(this,'loose','red')">🚽 軟便/未成型</button>
         <button class="dc-btn" onclick="toggleDC(this,'bloat','red')">🎈 腹脹</button>
         <!-- 呼吸道 -->
@@ -850,6 +873,143 @@ const VER=(()=>{
 document.getElementById('ver-display').textContent='v'+VER;
 document.getElementById('dash-date').textContent=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
 
+
+// ══ 使用者系統 ═══════════════════════════════════════════════
+const USER = { current: '' };
+
+function initUser(){
+  const users = JSON.parse(localStorage.getItem('ht_users')||'[]');
+  const last  = localStorage.getItem('ht_current_user')||'';
+  const existing = document.getElementById('existing-users');
+  const wrap     = document.getElementById('existing-user-btns');
+  if(users.length){
+    wrap.style.display='block';
+    existing.innerHTML = users.map(u=>
+      `<button onclick="selectUser('${u}')"
+        style="padding:5px 14px;border-radius:99px;border:1.5px solid #E2E8F0;
+               background:#F0F4F8;cursor:pointer;font-size:.8125rem;font-family:inherit">${u}</button>`
+    ).join('');
+  }
+  if(last){ selectUser(last); }
+  else { showUserModal(); }
+}
+
+function showUserModal(){
+  document.getElementById('user-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('user-input').focus(),100);
+}
+
+function selectUser(name){
+  document.getElementById('user-input').value=name;
+  confirmUser();
+}
+
+function confirmUser(){
+  const name = document.getElementById('user-input').value.trim();
+  if(!name){ document.getElementById('user-input').style.outline='2px solid #EF4444'; return; }
+  const users = JSON.parse(localStorage.getItem('ht_users')||'[]');
+  if(!users.includes(name)) users.push(name);
+  localStorage.setItem('ht_users', JSON.stringify(users));
+  localStorage.setItem('ht_current_user', name);
+  USER.current = name;
+  const label = document.getElementById('current-user-label');
+  if(label) label.textContent = name;
+  document.getElementById('user-modal').style.display='none';
+  // 先從快取還原，再從 Sheets 同步最新
+  restoreFromCache();
+  if(CFG.gasUrl) loadAll(); else swPage('setup');
+}
+
+function switchUser(){
+  localStorage.removeItem('ht_current_user');
+  USER.current = '';
+  document.getElementById('user-input').value='';
+  clearStateAndUI();
+  const users = JSON.parse(localStorage.getItem('ht_users')||'[]');
+  const wrap=document.getElementById('existing-user-btns');
+  const existing=document.getElementById('existing-users');
+  if(users.length){
+    wrap.style.display='block';
+    existing.innerHTML=users.map(u=>
+      `<button onclick="selectUser('${u}')"
+        style="padding:5px 14px;border-radius:99px;border:1.5px solid #E2E8F0;
+               background:#F0F4F8;cursor:pointer;font-size:.8125rem;font-family:inherit">${u}</button>`
+    ).join('');
+  } else { wrap.style.display='none'; }
+  showUserModal();
+}
+
+function clearStateAndUI(){
+  S.foods=[];S.activities=[];S.timeline=[];S.water=0;S.history=[];S.supps=[];
+  S.lastMealTime=null;S.lastMealProt=0;S.signal='normal';S.discomforts=new Set();
+  ['normal','yellow','red','immune'].forEach(k=>{const b=document.getElementById('sig-'+k);if(b)b.className='sig-btn';});
+  const nb=document.getElementById('sig-normal');if(nb)nb.classList.add('on-green');
+  const gl=document.getElementById('global-light');
+  if(gl){gl.textContent='🟢 生理狀態：正常';gl.className='badge g';}
+  renderFoodList(); renderActList(); renderSuppList(); renderTimeline();
+  updateProgress(); updateWaterUI();
+}
+
+// ══ localStorage 快取（解決重整後資料消失）═══════════════════
+const CACHE_VER = 3;
+
+function cacheKey(suffix){ return 'ht_' + (USER.current||'_') + '_' + suffix; }
+
+function saveToCache(){
+  if(!USER.current) return;
+  const today = new Date().toLocaleDateString('zh-TW');
+  try{
+    localStorage.setItem(cacheKey('state'), JSON.stringify({
+      v: CACHE_VER, date: today,
+      foods: S.foods, water: S.water, waterGoal: S.waterGoal,
+      activities: S.activities, targets: S.targets, profile: S.profile,
+      supps: S.supps, history: S.history.slice(-30),
+      signal: S.signal, discomforts: Array.from(S.discomforts),
+      lastMealTime: S.lastMealTime, lastMealProt: S.lastMealProt,
+    }));
+  }catch(e){ console.warn('saveToCache failed',e); }
+}
+
+function restoreFromCache(){
+  if(!USER.current) return;
+  try{
+    const raw = localStorage.getItem(cacheKey('state'));
+    if(!raw) return;
+    const d = JSON.parse(raw);
+    if(d.v !== CACHE_VER) return;
+    const today = new Date().toLocaleDateString('zh-TW');
+    // 永遠還原設定類資料
+    if(d.targets)  S.targets  = d.targets;
+    if(d.profile)  S.profile  = d.profile;
+    if(d.supps)    S.supps    = d.supps;
+    if(d.history)  S.history  = d.history;
+    if(d.waterGoal)S.waterGoal= d.waterGoal;
+    if(d.date === today){
+      // 同一天：還原今日記錄
+      S.foods        = d.foods    || [];
+      S.water        = d.water    || 0;
+      S.activities   = d.activities || [];
+      S.lastMealTime = d.lastMealTime || null;
+      S.lastMealProt = d.lastMealProt || 0;
+      if(d.signal) setSignal(d.signal);
+      (d.discomforts||[]).forEach(key=>{
+        S.discomforts.add(key);
+        const btn = document.getElementById('dc-'+key);
+        if(btn) btn.className='dc-btn '+(key.match(/^(rumble|gas|loose|bloat|fever|nausea)$/)?'on':'on-y');
+      });
+    } else {
+      // 跨日：清空今日，保留設定
+      S.foods=[]; S.activities=[]; S.water=0;
+    }
+    // 刷新 UI
+    renderBodyMetrics && renderBodyMetrics();
+    renderFoodList(); updateProgress(); updateWaterUI();
+    renderActList(); renderSuppList(); renderTimeline();
+    checkProtProtocol && checkProtProtocol();
+    checkGutAlert && checkGutAlert();
+  }catch(e){ console.warn('restoreFromCache failed',e); }
+}
+
 // ══ CONFIG & STATE ════════════════════════════════════════════
 const CFG={gasUrl:localStorage.getItem('ht_gas')||''};
 if(CFG.gasUrl)document.getElementById('cfg-gas').value=CFG.gasUrl;
@@ -905,7 +1065,7 @@ async function gasCall(body){
     }catch(postErr){
       console.warn('POST failed, fallback to GET',postErr);
     }
-    const p=new URLSearchParams({action});
+    const p=new URLSearchParams({action, user: USER.current||'default'});
     if(Object.keys(data).length)p.append('data',encodeURIComponent(JSON.stringify(data)));
     const r=await fetch(CFG.gasUrl+'?'+p.toString(),{redirect:'follow'});
     return JSON.parse(await r.text());
@@ -946,6 +1106,7 @@ async function loadAll(){
   S.history=(d.history||[]).map(h=>({...h,weight:+h.weight,bf:+h.bf,muscle:+h.muscle,vf:+h.vf,water:+h.water}));
   renderFoodList();updateProgress();updateWaterUI();renderActList();renderSuppList();renderTimeline();
   checkProtProtocol();checkGutAlert();
+  saveToCache();
   setTimeout(()=>renderChart(S.chartType),300);
 }
 
@@ -999,6 +1160,7 @@ async function calcAndSave(){
     await gasCall({action:'addHistory',data:{weight:w,bf,muscle,vf,water:S.water}});
     S.history.push({date:new Date().toLocaleDateString('zh-TW'),weight:w,bf,muscle,vf,water:S.water});
     toast('✓ 身體數據已儲存');
+    saveToCache();
     setTimeout(()=>renderChart(S.chartType),300);
   }
 }
@@ -1317,6 +1479,7 @@ async function addFoods(items){
   S.lastMealTime=Date.now();S.lastMealProt=mealProt;
   addTLAuto('meal',items.map(i=>i.name).join('、'));
   renderFoodList();updateProgress();checkGutAlert();checkProtProtocol();
+  saveToCache();
 }
 
 // ══ 語音輸入 ════════════════════════════════════════════════
@@ -1385,7 +1548,7 @@ function renderFoodList(){
 async function removeFood(id){
   const idx=S.foods.findIndex(f=>f.id===id);if(idx<0)return;
   const rowIndex=S.foods[idx].rowNumber ?? S.foods[idx]._rowIndex ?? idx;
-  S.foods.splice(idx,1);renderFoodList();updateProgress();checkGutAlert();
+  S.foods.splice(idx,1);renderFoodList();updateProgress();checkGutAlert();saveToCache();
   await gasCall({action:'deleteFood',rowIndex});
 }
 
@@ -1396,17 +1559,20 @@ async function addWater(ml){
   S.water=Math.min(S.water+ml,9999);updateWaterUI();updateProgress();
   addTLAuto('water',ml+'ml 補水');
   await gasCall({action:'setWater',ml:S.water});
+  saveToCache();
 }
 async function undoWater(){
   if(!S.lastWaterAdd){toast('沒有可撤銷的補水');return;}
   S.water=Math.max(0,S.water-S.lastWaterAdd);updateWaterUI();updateProgress();
   await gasCall({action:'setWater',ml:S.water});
+  saveToCache();
   toast('✓ 已撤銷 '+S.lastWaterAdd+'ml');
   S.lastWaterAdd=0;
 }
 async function resetWater(){
   S.water=0;S.lastWaterAdd=0;updateWaterUI();updateProgress();
   await gasCall({action:'setWater',ml:S.water});
+  saveToCache();
   toast('✓ 今日水分已重設');
 }
 function updateWaterUI(){
@@ -1449,8 +1615,9 @@ async function addSupp(){
   S.supps.push({name,comp:document.getElementById('supp-comp').value,dose:document.getElementById('supp-dose').value,time:document.getElementById('supp-time').value,id:Date.now()});
   renderSuppList();document.getElementById('supp-name').value='';
   await gasCall({action:'saveSupplements',list:S.supps});toast('✓ 已新增：'+name);
+  saveToCache();
 }
-async function removeSupp(id){S.supps=S.supps.filter(s=>s.id!==id);renderSuppList();await gasCall({action:'saveSupplements',list:S.supps});}
+async function removeSupp(id){S.supps=S.supps.filter(s=>s.id!==id);renderSuppList();await gasCall({action:'saveSupplements',list:S.supps});saveToCache();}
 function renderSuppList(){
   const el=document.getElementById('supp-list');
   const tl={morning:'早餐後',lunch:'午餐後',dinner:'晚餐後',sleep:'睡前',empty:'空腹'};
@@ -1532,9 +1699,10 @@ async function addAct(){
   const act={type,typeLabel:label,min,intensity:intV,cal,stairsInfo:si,note:document.getElementById('act-note').value,id:Date.now()};
   S.activities.push(act);renderActList();updateProgress();
   addTLAuto('exercise',`${label} ${min}分鐘（消耗${cal}kcal）`);
-  await gasCall({action:'addActivity',data:act});toast('✓ 運動記錄 消耗 '+cal+' kcal');
+  await gasCall({action:'addActivity',data:act});
+  saveToCache();toast('✓ 運動記錄 消耗 '+cal+' kcal');
 }
-async function removeAct(id){const idx=S.activities.findIndex(a=>a.id===id);if(idx<0)return;const rowIndex=S.activities[idx].rowNumber ?? S.activities[idx]._rowIndex ?? idx;S.activities.splice(idx,1);renderActList();updateProgress();await gasCall({action:'deleteActivity',rowIndex});}
+async function removeAct(id){const idx=S.activities.findIndex(a=>a.id===id);if(idx<0)return;const rowIndex=S.activities[idx].rowNumber ?? S.activities[idx]._rowIndex ?? idx;S.activities.splice(idx,1);renderActList();updateProgress();saveToCache();await gasCall({action:'deleteActivity',rowIndex});}
 function renderActList(){
   const el=document.getElementById('act-list');if(!el)return;
   if(!S.activities.length){el.innerHTML='<p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚未記錄</p>';return;}
@@ -1599,10 +1767,10 @@ window.addEventListener('resize',()=>{clearTimeout(_rt);_rt=setTimeout(()=>{if(S
 window.addEventListener('DOMContentLoaded',()=>{
   toggleStairs();
   document.getElementById('sig-normal').classList.add('on-green');
-  loadCombos();
-  renderCustomFoodList();
-  updateQuickPanel();
-  if(CFG.gasUrl){loadAll();}else{swPage('setup');}
+  if(typeof loadCombos==='function')loadCombos();
+  if(typeof renderCustomFoodList==='function')renderCustomFoodList();
+  if(typeof updateQuickPanel==='function')updateQuickPanel();
+  initUser();
 });
 </script>
 </body>
