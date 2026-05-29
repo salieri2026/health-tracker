@@ -1053,23 +1053,35 @@ function scrollTo(sel){
 async function gasCall(body){
   if(!CFG.gasUrl){toast('⚠️ 請先在設定填入 Apps Script 網址');return null;}
   try{
-    const action=body.action;const data=Object.assign({},body);delete data.action;
+    const action=body.action;
+    const data=Object.assign({},body);delete data.action;
+    const user=USER.current||'default';
+    // 統一走 POST，讓大 payload（圖片 base64）也能傳送
+    // Apps Script doPost 已支援
+    const resp=await fetch(CFG.gasUrl,{
+      method:'POST',
+      redirect:'follow',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action, user, data})
+    });
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const txt=await resp.text();
+    return JSON.parse(txt);
+  }catch(e){
+    // POST 失敗時 fallback 到 GET（適用小 payload）
     try{
-      const post=await fetch(CFG.gasUrl,{
-        method:'POST',
-        redirect:'follow',
-        headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body:JSON.stringify({action,data})
-      });
-      return JSON.parse(await post.text());
-    }catch(postErr){
-      console.warn('POST failed, fallback to GET',postErr);
+      const action=body.action;
+      const data=Object.assign({},body);delete data.action;
+      const user=USER.current||'default';
+      const p=new URLSearchParams({action,user});
+      const dataStr=JSON.stringify(data);
+      if(dataStr.length<3000) p.append('data',encodeURIComponent(dataStr));
+      const r=await fetch(CFG.gasUrl+'?'+p.toString(),{redirect:'follow'});
+      return JSON.parse(await r.text());
+    }catch(e2){
+      toast('連線失敗：'+e2.message);return null;
     }
-    const p=new URLSearchParams({action, user: USER.current||'default'});
-    if(Object.keys(data).length)p.append('data',encodeURIComponent(JSON.stringify(data)));
-    const r=await fetch(CFG.gasUrl+'?'+p.toString(),{redirect:'follow'});
-    return JSON.parse(await r.text());
-  }catch(e){toast('連線失敗：'+e.message);return null;}
+  }
 }
 async function aiText(prompt,max=2000){
   const r=await gasCall({action:'geminiText',prompt,maxTokens:max});
