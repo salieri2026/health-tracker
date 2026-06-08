@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>飲控小幫手</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css">
@@ -13,50 +13,47 @@
   --accent:#0F766E;--accent-lt:#CCFBF1;--accent-md:#14B8A6;
   --warn:#F59E0B;--danger:#EF4444;--info:#3B82F6;--purple:#8B5CF6;
   --sidebar-w:220px;--radius:12px;--radius-sm:8px;
+  --topbar-h:52px;--bottomnav-h:60px;
 }
 html{font-size:16px;scroll-behavior:smooth}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:.875rem;line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased}
 
 /* ══ LAYOUT ══ */
-.shell{display:flex;min-height:100vh}
-.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:#1E293B;padding:1.25rem .875rem;display:flex;flex-direction:column;gap:3px;overflow-y:auto;z-index:200;box-shadow:2px 0 12px rgba(0,0,0,.08)}
-.main{margin-left:var(--sidebar-w);padding:1.5rem 2rem;max-width:1400px;width:100%}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:#1E293B;padding:1.25rem .875rem;display:flex;flex-direction:column;gap:2px;overflow-y:auto;z-index:200;box-shadow:2px 0 12px rgba(0,0,0,.08)}
+.main{margin-left:var(--sidebar-w);padding:1.5rem 2rem;min-height:100vh;max-width:1400px}
 .topbar{display:none}
 .mobile-nav{display:none}
 
 /* ══ SIDEBAR ══ */
-.logo{font-size:15px;font-weight:700;padding:0 .5rem 1rem;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:.625rem;color:#fff;display:flex;flex-direction:column;gap:2px}
-.logo-sub{font-size:10px;color:rgba(255,255,255,.4);font-weight:400;letter-spacing:.5px}
-.nav-section{font-size:10px;color:rgba(255,255,255,.25);letter-spacing:1px;text-transform:uppercase;padding:1rem .5rem .375rem;font-weight:600}
-.nav-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border:none;background:transparent;border-radius:var(--radius-sm);cursor:pointer;font-size:.8125rem;color:rgba(255,255,255,.55);width:100%;text-align:left;font-family:inherit;transition:all .15s;white-space:nowrap}
+.logo{font-size:15px;font-weight:700;padding:0 .5rem .875rem;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:.5rem;color:#fff;display:flex;flex-direction:column;gap:2px}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.35);font-weight:400;letter-spacing:.5px}
+.nav-section{font-size:10px;color:rgba(255,255,255,.2);letter-spacing:1px;text-transform:uppercase;padding:.75rem .5rem .3rem;font-weight:600}
+.nav-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border:none;background:transparent;border-radius:var(--radius-sm);cursor:pointer;font-size:.8125rem;color:rgba(255,255,255,.55);width:100%;text-align:left;font-family:inherit;transition:all .15s;white-space:nowrap}
 .nav-btn:hover{background:rgba(255,255,255,.08);color:#fff}
 .nav-btn.active{background:rgba(20,184,166,.2);color:var(--accent-md);font-weight:600}
 .nav-btn i{font-size:15px;width:17px;flex-shrink:0}
+.nav-sub{display:flex;align-items:center;gap:8px;padding:6px 10px 6px 24px;border:none;background:transparent;border-radius:var(--radius-sm);cursor:pointer;font-size:.75rem;color:rgba(255,255,255,.4);width:100%;text-align:left;font-family:inherit;transition:all .15s;white-space:nowrap}
+.nav-sub:hover{color:rgba(255,255,255,.75);background:rgba(255,255,255,.05)}
+.nav-sub.active{color:var(--accent-md)}
+.nav-sub i{font-size:12px;width:14px;flex-shrink:0}
 
-/* section anchor links */
-.nav-anchor{display:flex;align-items:center;gap:9px;padding:6px 10px;border:none;background:transparent;border-radius:var(--radius-sm);cursor:pointer;font-size:.75rem;color:rgba(255,255,255,.45);width:100%;text-align:left;font-family:inherit;transition:all .15s;white-space:nowrap;text-decoration:none}
-.nav-anchor:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.75)}
-.nav-anchor i{font-size:13px;width:15px;flex-shrink:0}
-
-/* ══ PAGES ══ */
+/* ══ PAGES & SECTIONS ══ */
 .page{display:none}.page.active{display:block}
-
-/* ══ SECTION BLOCKS ══ */
-.section{margin-bottom:1.5rem}
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:2px solid var(--border)}
-.section-title{font-size:1rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
-.section-title i{font-size:1.1rem;color:var(--accent-md)}
-.section-sub{font-size:.75rem;color:var(--muted);margin-top:2px}
+.sub-section{display:none}.sub-section.active{display:block}
+.page-title{font-size:1.25rem;font-weight:700;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.page-title-text{display:flex;align-items:center;gap:8px}
+.page-title-text i{font-size:1.3rem;color:var(--accent-md)}
+.section-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.stab{padding:6px 14px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:.8125rem;color:var(--muted);border-radius:99px;font-family:inherit;transition:all .15s}
+.stab:hover{background:var(--bg);color:var(--text)}
+.stab.active{background:var(--accent-lt);color:var(--accent);border-color:var(--accent-md);font-weight:600}
 
 /* ══ CARDS ══ */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.125rem;margin-bottom:.75rem;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.125rem;margin-bottom:.875rem;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 .card-title{font-size:.6875rem;font-weight:700;color:var(--muted);margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between;text-transform:uppercase;letter-spacing:.6px}
 .card-title i{font-size:.875rem}
-
-/* ══ GRID LAYOUTS ══ */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
-.grid-body{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem}
 .fg{display:grid;gap:8px;margin-bottom:8px}
 .fg2{grid-template-columns:1fr 1fr}.fg3{grid-template-columns:1fr 1fr 1fr}.fg4{grid-template-columns:repeat(4,1fr)}
 .f label{font-size:.6875rem;color:var(--muted);margin-bottom:3px;display:block}
@@ -70,14 +67,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .btn.p{background:linear-gradient(135deg,var(--accent),#0e9488);color:#fff;border-color:var(--accent);box-shadow:0 2px 6px rgba(15,118,110,.25)}
 .btn.p:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(15,118,110,.3)}
 .btn.sm{padding:5px 10px;font-size:.75rem}.btn.xs{padding:3px 8px;font-size:.6875rem}
+.btn.info-btn{background:var(--info);color:#fff;border-color:var(--info)}
 .btn-row{display:flex;gap:7px;justify-content:flex-end;margin-top:.625rem;flex-wrap:wrap}
 
-/* ══ PROGRESS BARS ══ */
+/* ══ PROGRESS ══ */
 .prog-wrap{margin-bottom:.625rem}
 .prog-label{display:flex;justify-content:space-between;font-size:.6875rem;color:var(--muted);margin-bottom:3px}
 .prog-bar{height:7px;background:#E2E8F0;border-radius:99px;overflow:hidden}
 .prog-fill{height:100%;border-radius:99px;transition:width .5s ease}
-.c-cal{background:var(--accent)}.c-prot{background:var(--accent-md)}.c-carb{background:var(--warn)}.c-fat{background:var(--danger)}.c-sug{background:var(--purple)}.c-fib{background:#34d399}.c-water{background:var(--info)}
+.c-cal{background:var(--accent)}.c-prot{background:var(--accent-md)}.c-carb{background:var(--warn)}.c-fat{background:var(--danger)}.c-water{background:var(--info)}.c-animal{background:#F97316}.c-plant{background:#84cc16}
 .over{background:var(--danger)!important}
 
 /* ══ METRIC ROWS ══ */
@@ -87,18 +85,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .metric-value{font-size:.9375rem;font-weight:700}
 .metric-target{font-size:.625rem;color:var(--muted);margin-top:1px;text-align:right}
 
-/* ══ SIGNAL BUTTONS ══ */
+/* ══ SIGNAL ══ */
 .signal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:.75rem}
 .sig-btn{padding:8px 6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);cursor:pointer;font-size:.75rem;font-family:inherit;transition:all .2s;text-align:center;line-height:1.4}
-.sig-btn:hover{border-color:var(--accent-md)}
 .sig-btn.on-green{background:#D1FAE5;border-color:#10B981;color:#065F46;font-weight:600}
 .sig-btn.on-yellow{background:#FEF9C3;border-color:#F59E0B;color:#92400E;font-weight:600}
 .sig-btn.on-red{background:#FEE2E2;border-color:#EF4444;color:#991B1B;font-weight:600}
 .sig-btn.on-orange{background:#FFEDD5;border-color:#F97316;color:#7C2D12;font-weight:600}
-
-/* 身體不適細部 */
-.discomfort-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.dc-btn{padding:7px 6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);cursor:pointer;font-size:.75rem;font-family:inherit;transition:all .2s;text-align:center;line-height:1.4}
+.discomfort-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.dc-btn{padding:6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);cursor:pointer;font-size:.6875rem;font-family:inherit;transition:all .2s;text-align:center;line-height:1.4}
 .dc-btn:hover{border-color:var(--muted)}
 .dc-btn.on{background:#FEE2E2;border-color:#EF4444;color:#991B1B;font-weight:600}
 .dc-btn.on-y{background:#FEF9C3;border-color:#F59E0B;color:#92400E;font-weight:600}
@@ -110,22 +105,30 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .alert.warn{background:#FEF9C3;border-color:var(--warn)}
 .alert.info{background:#DBEAFE;border-color:var(--info)}
 .alert.success{background:#D1FAE5;border-color:#10B981}
-.prot-protocol{background:#EFF6FF;border-left:3px solid var(--info);border-radius:var(--radius-sm);padding:9px 12px;font-size:.75rem;line-height:1.7;margin-bottom:.75rem;display:none}
 
 /* ══ OMNIBOX ══ */
-.omnibox-wrap{position:relative;margin-bottom:.75rem}
-.omnibox{width:100%;padding:12px 48px 12px 14px;font-size:.875rem;border-radius:var(--radius);border:2px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;resize:none;min-height:80px;line-height:1.6;transition:all .2s}
+.omnibox-wrap{position:relative;margin-bottom:.5rem}
+.omnibox{width:100%;padding:12px 48px 12px 14px;font-size:.875rem;border-radius:var(--radius);border:2px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;resize:none;min-height:72px;line-height:1.6;transition:all .2s}
 .omnibox:focus{outline:none;border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(20,184,166,.12);background:#fff}
 .omni-mic{position:absolute;right:11px;top:11px;background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--muted);padding:4px;border-radius:50%;transition:all .2s}
 .omni-mic:hover{color:var(--accent-md);background:var(--accent-lt)}
 .omni-mic.listening{color:var(--danger);animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.suggest-box{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);margin-top:3px;overflow:hidden;display:none;box-shadow:0 4px 16px rgba(0,0,0,.1);position:relative;z-index:50}
-.suggest-item{padding:8px 12px;cursor:pointer;font-size:.8125rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
-.suggest-item:last-child{border-bottom:none}.suggest-item:hover{background:var(--bg)}
-.suggest-nut{font-size:.6875rem;color:var(--muted)}
 
-/* ══ FOOD LIST ══ */
+/* DB suggestions — show as chips to choose from */
+.db-suggest-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.5rem;min-height:0;transition:all .2s}
+.db-chip{padding:4px 10px;border-radius:99px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:.75rem;color:var(--text);font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:4px}
+.db-chip:hover{border-color:var(--accent-md);background:var(--accent-lt);color:var(--accent)}
+.db-chip .chip-nut{font-size:.625rem;color:var(--muted)}
+.db-chip.blocked{border-color:#FECACA;background:#FEF2F2;color:var(--danger);cursor:not-allowed}
+
+/* AI parse result chips */
+.ai-food-row{display:flex;flex-wrap:wrap;gap:6px;margin:.5rem 0}
+.ai-chip{padding:6px 12px;border-radius:var(--radius-sm);border:1.5px solid var(--accent-md);background:var(--accent-lt);font-size:.75rem;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:5px}
+.ai-chip:hover{background:#A7F3D0}
+.ai-chip .chip-cal{font-size:.625rem;color:var(--accent);font-weight:600}
+
+/* Food List */
 .food-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
 .food-item:last-child{border-bottom:none}
 .food-name{font-size:.8125rem;font-weight:500}
@@ -133,32 +136,40 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .del-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.875rem;padding:4px 6px;border-radius:var(--radius-sm);transition:all .15s;flex-shrink:0}
 .del-btn:hover{background:#FEE2E2;color:var(--danger)}
 
-/* ══ TIMELINE ══ */
+/* Timeline */
 .timeline{position:relative;padding-left:1.5rem}
 .timeline::before{content:'';position:absolute;left:7px;top:0;bottom:0;width:2px;background:var(--border)}
 .tl-item{position:relative;margin-bottom:.875rem}
 .tl-dot{position:absolute;left:-1.5rem;top:3px;width:14px;height:14px;border-radius:50%;border:2px solid var(--surface)}
 .tl-dot.green{background:var(--accent-md)}.tl-dot.yellow{background:var(--warn)}.tl-dot.red{background:var(--danger)}.tl-dot.blue{background:var(--info)}.tl-dot.purple{background:var(--purple)}.tl-dot.gray{background:#94A3B8}
-.tl-content{background:var(--bg);border-radius:var(--radius-sm);padding:8px 11px;border:1px solid var(--border)}
-.tl-time{font-size:.625rem;color:var(--muted);font-weight:600;margin-bottom:2px}
+.tl-content{background:var(--bg);border-radius:var(--radius-sm);padding:7px 10px;border:1px solid var(--border)}
+.tl-time{font-size:.625rem;color:var(--muted);font-weight:600;margin-bottom:1px}
 .tl-title{font-size:.8125rem;font-weight:500}
-.tl-warn{background:#FEF9C3;padding:5px 9px;border-radius:var(--radius-sm);font-size:.6875rem;color:#854D0E;margin-top:4px}
+.tl-warn{background:#FEF9C3;padding:4px 9px;border-radius:var(--radius-sm);font-size:.6875rem;color:#854D0E;margin-top:3px}
 
-/* ══ MEAL CARDS ══ */
+/* Meal Cards */
 .meal-card{background:var(--bg);border-radius:var(--radius-sm);padding:10px;border:1px solid var(--border);margin-bottom:6px}
-.meal-card-title{font-size:.75rem;font-weight:600;margin-bottom:5px}
+.meal-card-title{font-size:.75rem;font-weight:600;margin-bottom:4px}
 .meal-card-sub{font-size:.6875rem;color:var(--muted);line-height:1.6}
-.nut-pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:.5rem}
-.nut-pill{font-size:.6875rem;padding:3px 9px;border-radius:99px;font-weight:500}
+.nut-pills{display:flex;flex-wrap:wrap;gap:4px;margin-top:.375rem}
+.nut-pill{font-size:.625rem;padding:2px 8px;border-radius:99px;font-weight:500}
 .pill-cal{background:#CCFBF1;color:#0F766E}.pill-prot{background:#D1FAE5;color:#065F46}
 .pill-carb{background:#FEF9C3;color:#92400E}.pill-fat{background:#FEE2E2;color:#991B1B}
 
-/* ══ BADGES ══ */
+/* Badges */
 .badge{display:inline-block;font-size:.6875rem;padding:2px 8px;border-radius:99px;font-weight:500}
 .badge.g{background:#D1FAE5;color:#065F46}.badge.w{background:#FEF9C3;color:#92400E}
 .badge.d{background:#FEE2E2;color:#991B1B}.badge.b{background:#DBEAFE;color:#1E40AF}
 
-/* ══ MISC ══ */
+/* User Cards */
+.user-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.25rem;cursor:pointer;transition:all .2s;text-align:center}
+.user-card:hover{border-color:var(--accent-md);box-shadow:0 4px 12px rgba(20,184,136,.15);transform:translateY(-2px)}
+.user-card.current{border-color:var(--accent-md);background:var(--accent-lt)}
+.user-avatar{font-size:2.5rem;margin-bottom:.5rem}
+.user-name{font-size:.9375rem;font-weight:600;color:var(--text)}
+.user-meta{font-size:.75rem;color:var(--muted);margin-top:2px}
+
+/* Misc */
 .sep{border:none;border-top:1px solid var(--border);margin:.75rem 0}
 .tab-bar{display:flex;gap:4px;margin-bottom:.875rem;flex-wrap:wrap}
 .tab-bar button{padding:5px 12px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:.75rem;color:var(--muted);border-radius:var(--radius-sm);font-family:inherit;transition:all .15s}
@@ -167,119 +178,134 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 @keyframes sp{to{transform:rotate(360deg)}}
 #toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#1E293B;color:#fff;padding:10px 18px;border-radius:99px;font-size:.8125rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.2)}
 #toast.show{opacity:1}
-.tl-form{background:var(--bg);border:1.5px dashed var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:.75rem}
 .setup-banner{background:#FEF9C3;border:1px solid var(--warn);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;font-size:.8125rem;line-height:1.9}
 .time-chip{display:inline-block;font-size:.625rem;padding:2px 7px;border-radius:99px;background:var(--accent-lt);color:var(--accent);margin-left:4px;font-weight:600}
-.daily-panel{display:grid;grid-template-columns:1.1fr .9fr;gap:1rem;margin-bottom:1.25rem}
-.quick-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:.875rem}
-.quick-metric{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.75rem;text-align:center;min-width:0}
-.quick-metric strong{display:block;font-size:1.15rem;line-height:1.2}
-.quick-metric span{display:block;font-size:.6875rem;color:var(--muted);margin-top:2px}
-.quick-actions{display:flex;gap:6px;flex-wrap:wrap}
-.import-box{width:100%;min-height:120px;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);font-family:inherit;font-size:.8125rem;line-height:1.6;resize:vertical}
-.template-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:.75rem}
-.template-btn{border:1px solid var(--border);background:var(--bg);border-radius:var(--radius-sm);padding:8px;text-align:left;cursor:pointer;font-family:inherit;font-size:.75rem;line-height:1.35;transition:all .15s}
-.template-btn:hover{border-color:var(--accent-md);background:#fff}
-.template-btn b{display:block;color:var(--text);font-size:.75rem}
-.template-btn span{display:block;color:var(--muted);font-size:.6875rem;margin-top:2px}
-.sticky-tool{scroll-margin-top:70px}
-.draft-list{display:grid;gap:7px;margin-top:.75rem}
-.draft-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 10px;font-size:.75rem;line-height:1.5}
-.scan-file{width:100%;padding:9px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);background:var(--bg);font-size:.75rem}
+.prot-protocol{background:#EFF6FF;border-left:3px solid var(--info);border-radius:var(--radius-sm);padding:9px 12px;font-size:.75rem;line-height:1.7;margin-bottom:.75rem;display:none}
+.summary-box{background:var(--bg);border-radius:var(--radius-sm);padding:1rem;border:1px solid var(--border);font-size:.8125rem;line-height:1.8}
+.deficit-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.8125rem}
+.deficit-row:last-child{border-bottom:none}
+.tl-form{background:var(--bg);border:1.5px dashed var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:.75rem}
 
-/* ══ RESPONSIVE ══════════════════════════════════════════════
-
-   LG  1024px+  sidebar 220px
-   MD  768-1023 sidebar 64px icon-only
-   SM  480-767  no sidebar, topbar
-   XS  <480px   topbar + bottom nav
-══════════════════════════════════════════════════════════════*/
-
-/* MD */
+/* ══ RESPONSIVE ══ */
 @media(max-width:1023px) and (min-width:768px){
   :root{--sidebar-w:64px}
   .sidebar{padding:.875rem .5rem;align-items:center}
   .logo{padding:0 0 .75rem;align-items:center;flex-direction:row}
   .logo .logo-text,.logo-sub{display:none}
-  .logo::before{content:'⚡';font-size:1.25rem;color:var(--accent-md)}
+  .logo::before{content:'🥗';font-size:1.25rem}
   .nav-section{display:none}
-  .nav-btn,.nav-anchor{justify-content:center;padding:10px 0;width:44px;border-radius:var(--radius-sm);position:relative}
-  .nav-btn .nav-label,.nav-anchor .nav-label{display:none}
-  .nav-btn i,.nav-anchor i{width:auto;font-size:1.1rem;margin:0}
-  .nav-btn:hover::after,.nav-anchor:hover::after{content:attr(data-label);position:absolute;left:52px;top:50%;transform:translateY(-50%);background:#1E293B;color:#fff;padding:4px 10px;border-radius:6px;font-size:.75rem;white-space:nowrap;pointer-events:none;z-index:999;box-shadow:2px 2px 8px rgba(0,0,0,.2)}
+  .nav-btn{justify-content:center;padding:10px 0;width:44px;position:relative}
+  .nav-btn .nav-label{display:none}
+  .nav-btn i{width:auto;font-size:1.1rem;margin:0}
+  .nav-btn:hover::after{content:attr(data-label);position:absolute;left:52px;top:50%;transform:translateY(-50%);background:#1E293B;color:#fff;padding:4px 10px;border-radius:6px;font-size:.75rem;white-space:nowrap;pointer-events:none;z-index:999;box-shadow:2px 2px 8px rgba(0,0,0,.2)}
+  .nav-sub{display:none}
   .main{margin-left:var(--sidebar-w);padding:1.25rem}
   .grid2,.grid3{grid-template-columns:1fr}
-  .daily-panel{grid-template-columns:1fr}
-  .quick-metrics{grid-template-columns:repeat(2,1fr)}
-  .grid-body{grid-template-columns:1fr}
-  .signal-grid{grid-template-columns:repeat(2,1fr)}
-  .discomfort-grid{grid-template-columns:repeat(3,1fr)}
+  .signal-grid,.discomfort-grid{grid-template-columns:repeat(2,1fr)}
   .fg3,.fg4{grid-template-columns:1fr 1fr}
 }
-
-/* SM */
 @media(max-width:767px) and (min-width:480px){
   :root{--sidebar-w:0px}
   .sidebar{display:none}
-  .topbar{display:flex;position:fixed;top:0;left:0;right:0;height:52px;background:#1E293B;z-index:200;align-items:center;padding:0 .875rem;gap:4px;box-shadow:0 2px 12px rgba(0,0,0,.2);overflow-x:auto}
+  .topbar{display:flex;position:fixed;top:0;left:0;right:0;height:var(--topbar-h);background:#1E293B;z-index:200;align-items:center;padding:0 .875rem;gap:4px;box-shadow:0 2px 12px rgba(0,0,0,.2);overflow-x:auto}
   .topbar-logo{font-size:.875rem;font-weight:700;color:#fff;white-space:nowrap;margin-right:.5rem;flex-shrink:0}
-  .tb-btn{padding:5px 10px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:.75rem;color:rgba(255,255,255,.6);font-family:inherit;white-space:nowrap;display:flex;align-items:center;gap:4px;flex-shrink:0}
+  .tb-btn{padding:5px 10px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:.75rem;color:rgba(255,255,255,.6);font-family:inherit;white-space:nowrap;flex-shrink:0}
   .tb-btn:hover{background:rgba(255,255,255,.1);color:#fff}
   .tb-btn.active{background:rgba(20,184,166,.25);color:var(--accent-md);font-weight:600}
   .main{margin-left:0;padding:1rem;padding-top:60px}
   .grid2,.grid3{grid-template-columns:1fr}
-  .daily-panel{grid-template-columns:1fr}
-  .quick-metrics{grid-template-columns:repeat(2,1fr)}
-  .grid-body{grid-template-columns:1fr}
   .signal-grid{grid-template-columns:repeat(2,1fr)}
   .discomfort-grid{grid-template-columns:repeat(2,1fr)}
   .fg3,.fg4{grid-template-columns:1fr 1fr}
 }
-
-/* XS */
 @media(max-width:479px){
   :root{--sidebar-w:0px}
   .sidebar{display:none}
-  .topbar{display:flex;position:fixed;top:0;left:0;right:0;height:52px;background:#1E293B;z-index:200;align-items:center;padding:0 .875rem;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+  .topbar{display:flex;position:fixed;top:0;left:0;right:0;height:var(--topbar-h);background:#1E293B;z-index:200;align-items:center;padding:0 .875rem;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.25)}
   .topbar-logo{font-size:.9375rem;font-weight:700;color:#fff}
   .tb-btn{display:none}
-  .mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;height:60px;background:#1E293B;z-index:200;border-top:1px solid rgba(255,255,255,.1);box-shadow:0 -2px 12px rgba(0,0,0,.2);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;height:var(--bottomnav-h);background:#1E293B;z-index:200;border-top:1px solid rgba(255,255,255,.1);padding-bottom:env(safe-area-inset-bottom,0px)}
   .mnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;cursor:pointer;color:rgba(255,255,255,.45);font-size:.5625rem;font-family:inherit;padding:4px 2px;transition:all .15s}
   .mnav-btn i{font-size:1.25rem;line-height:1}
   .mnav-btn.active{color:var(--accent-md)}
   .main{margin-left:0;padding:.875rem;padding-top:60px;padding-bottom:68px}
   .grid2,.grid3{grid-template-columns:1fr}
-  .daily-panel{grid-template-columns:1fr}
-  .quick-metrics{grid-template-columns:repeat(2,1fr)}
-  .template-grid{grid-template-columns:1fr}
-  .grid-body{grid-template-columns:1fr}
-  .card{padding:.875rem;border-radius:10px}
+  .card{padding:.875rem}
   .signal-grid{grid-template-columns:1fr 1fr}
   .discomfort-grid{grid-template-columns:1fr 1fr}
-  .fg2{grid-template-columns:1fr 1fr}.fg3,.fg4{grid-template-columns:1fr 1fr}
-  .omnibox{min-height:72px;font-size:.8125rem;padding:10px 44px 10px 12px}
+  .fg3,.fg4{grid-template-columns:1fr 1fr}
   .btn{min-height:40px}.btn.sm{min-height:34px}
-  .del-btn{min-width:34px;min-height:34px}
-  .sig-btn,.dc-btn{min-height:40px}
+  .dc-btn,.sig-btn{min-height:40px}
 }
 @media(max-width:359px){
-  .main{padding:.75rem;padding-top:58px;padding-bottom:66px}
-  .card{padding:.75rem}
+  .main{padding:.75rem;padding-top:56px;padding-bottom:66px}
   .fg2,.fg3,.fg4{grid-template-columns:1fr}
   .signal-grid,.discomfort-grid{grid-template-columns:1fr 1fr}
-  .metric-value{font-size:.875rem}
 }
 </style>
 </head>
 <body>
 <div id="toast"></div>
-<!-- ══ 使用者 Modal ══ -->
+
+<!-- ══ Capture Modal (OCR / Camera / Screen) ══ -->
+<div id="capture-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.8);z-index:9997;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:#fff;border-radius:16px;padding:1.5rem;width:95%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,.35)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div style="font-weight:700;font-size:1rem">📷 掃描營養標示</div>
+      <button onclick="closeCapture()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#64748B">✕</button>
+    </div>
+    <div id="cap-mobile" style="display:none">
+      <p style="font-size:.8125rem;color:#64748B;margin-bottom:.75rem">請拍攝營養標示（建議拍清楚、字體清晰）</p>
+      <label style="display:block;border:2px dashed #14B8A6;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;color:#14B8A6;font-size:.875rem">
+        <i class="ti ti-camera" style="font-size:2rem;display:block;margin-bottom:.5rem"></i>
+        點此拍照 / 選擇圖片
+        <input type="file" id="cap-file-input" accept="image/*" capture="environment" style="display:none" onchange="handleCaptureFile(this)">
+      </label>
+    </div>
+    <div id="cap-desktop" style="display:none">
+      <p style="font-size:.8125rem;color:#64748B;margin-bottom:.75rem">選擇截圖方式</p>
+      <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:.75rem">
+        <button class="btn p" onclick="startScreenCapture()" style="justify-content:center"><i class="ti ti-screenshot"></i> 螢幕截取區域（推薦）</button>
+        <button class="btn" onclick="document.getElementById('cap-file-input-d').click()" style="justify-content:center"><i class="ti ti-photo"></i> 從檔案選擇圖片</button>
+        <input type="file" id="cap-file-input-d" accept="image/*" style="display:none" onchange="handleCaptureFile(this)">
+      </div>
+    </div>
+    <div id="cap-preview-wrap" style="display:none;margin-top:.75rem">
+      <div style="font-size:.75rem;color:#64748B;margin-bottom:.5rem">預覽（確認清晰後送出解析）</div>
+      <img id="cap-preview-img" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid #E2E8F0;object-fit:contain">
+      <div id="cap-size-hint" style="font-size:.6875rem;color:#64748B;margin-top:4px"></div>
+      <div class="btn-row" style="margin-top:.75rem">
+        <button class="btn sm" onclick="resetCapture()">重新選擇</button>
+        <button class="btn sm p" id="cap-ocr-btn" onclick="submitOCR()"><i class="ti ti-scan"></i>送出解析</button>
+      </div>
+    </div>
+    <div style="margin-top:1rem;border-top:1px solid #E2E8F0;padding-top:.75rem">
+      <div style="font-size:.75rem;color:#64748B;margin-bottom:.375rem">或直接貼上/輸入標示文字：</div>
+      <textarea id="ocr-raw-text" placeholder="例：每份100g 熱量200大卡 蛋白質15g 脂肪8g 碳水化合物20g" style="width:100%;min-height:60px;padding:8px;font-size:.8125rem;border:1.5px solid #E2E8F0;border-radius:8px;font-family:inherit;resize:vertical"></textarea>
+      <div class="btn-row" style="margin-top:.5rem">
+        <button class="btn sm p" onclick="submitOCRText()"><i class="ti ti-sparkles"></i>AI解析文字</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Screen Crop Overlay ══ -->
+<div id="crop-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;cursor:crosshair">
+  <div id="crop-hint" style="position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.9);padding:8px 16px;border-radius:99px;font-size:.8125rem;color:#1E293B;pointer-events:none;white-space:nowrap">
+    🖱 拖曳選取要掃描的區域
+  </div>
+  <canvas id="crop-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+  <div id="crop-selection" style="display:none;position:absolute;border:2px solid #14B8A6;background:rgba(20,184,166,.08);pointer-events:none"></div>
+  <button onclick="cancelCrop()" style="position:absolute;top:10px;right:20px;background:#EF4444;color:#fff;border:none;border-radius:99px;padding:6px 14px;cursor:pointer;font-size:.8125rem">取消</button>
+</div>
+
+<!-- ══ User Modal ══ -->
 <div id="user-modal" style="position:fixed;inset:0;background:rgba(15,23,42,.75);z-index:9998;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
   <div style="background:#fff;border-radius:16px;padding:2rem;width:90%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
     <div style="text-align:center;margin-bottom:1.5rem">
       <div style="font-size:2.5rem">🥗</div>
       <div style="font-size:1.25rem;font-weight:700;color:#1E293B;margin-top:.5rem">飲控小幫手</div>
-      <div style="font-size:.8125rem;color:#64748B;margin-top:4px">輸入名稱以載入你的記錄</div>
+      <div style="font-size:.8125rem;color:#64748B;margin-top:4px">選擇或輸入使用者名稱</div>
     </div>
     <div id="existing-user-btns" style="display:none;margin-bottom:1rem">
       <div style="font-size:.75rem;color:#64748B;margin-bottom:6px">選擇使用者</div>
@@ -287,7 +313,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
       <div style="text-align:center;font-size:.75rem;color:#94A3B8">或輸入新名稱</div>
     </div>
     <input id="user-input" type="text" placeholder="你的名稱" maxlength="20"
-      style="width:100%;padding:10px 14px;font-size:1rem;border-radius:8px;border:2px solid #E2E8F0;font-family:inherit;margin-bottom:.75rem;outline:none"
+      style="width:100%;padding:10px 14px;font-size:1rem;border-radius:8px;border:2px solid #E2E8F0;font-family:inherit;margin-bottom:.75rem;outline:none;transition:border-color .2s"
+      onfocus="this.style.borderColor='#14B8A6'" onblur="this.style.borderColor='#E2E8F0'"
       onkeydown="if(event.key==='Enter')confirmUser()">
     <button onclick="confirmUser()"
       style="width:100%;padding:11px;background:linear-gradient(135deg,#0F766E,#14B8A6);color:#fff;border:none;border-radius:8px;font-size:.9375rem;font-weight:600;cursor:pointer;font-family:inherit">
@@ -299,95 +326,413 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <!-- ══ Sidebar ══ -->
 <nav class="sidebar" id="sidebar">
   <div class="logo">
-    <span class="logo-text">⚡ ACA 3.0</span>
-    <span class="logo-sub">健康指揮中樞 · <span id="ver-display"></span></span>
+    <span class="logo-text">🥗 飲控小幫手</span>
+    <span class="logo-sub">ACA 3.0 · <span id="ver-display"></span></span>
   </div>
-  <div class="nav-section">頁面</div>
-  <button class="nav-btn active" data-label="今日總覽" onclick="swPage('home')"><i class="ti ti-home"></i><span class="nav-label">今日總覽</span></button>
-  <button class="nav-btn" onclick="switchUser()" id="switch-user-btn"><i class="ti ti-user-circle"></i><span class="nav-label" id="current-user-label">使用者</span></button>
+
+  <div class="nav-section">主頁面</div>
+  <button class="nav-btn active" data-label="主頁面" onclick="swPage('home')"><i class="ti ti-home"></i><span class="nav-label">主頁面</span></button>
+  <button class="nav-sub" data-sub="home" data-sec="macros" onclick="swSub('home','macros')"><i class="ti ti-chart-bar"></i>今日攝取進度</button>
+  <button class="nav-sub" data-sub="home" data-sec="signal" onclick="swSub('home','signal')"><i class="ti ti-traffic-lights"></i>生理燈號</button>
+  <button class="nav-sub" data-sub="home" data-sec="daily-summary" onclick="swSub('home','daily-summary')"><i class="ti ti-report-analytics"></i>每日總結</button>
+  <button class="nav-sub" data-sub="home" data-sec="history" onclick="swSub('home','history')"><i class="ti ti-chart-line"></i>歷史趨勢</button>
+
+  <div class="nav-section">飲食</div>
+  <button class="nav-btn" data-label="飲食記錄" onclick="swPage('diet')"><i class="ti ti-salad"></i><span class="nav-label">飲食記錄</span></button>
+  <button class="nav-sub" data-sub="diet" data-sec="omni" onclick="swSub('diet','omni')"><i class="ti ti-keyboard"></i>萬用輸入框</button>
+  <button class="nav-sub" data-sub="diet" data-sec="water" onclick="swSub('diet','water')"><i class="ti ti-droplet"></i>水分記錄</button>
+  <button class="nav-sub" data-sub="diet" data-sec="meal-rec" onclick="swSub('diet','meal-rec')"><i class="ti ti-chef-hat"></i>AI餐食推薦</button>
+  <button class="nav-sub" data-sub="diet" data-sec="food-list" onclick="swSub('diet','food-list')"><i class="ti ti-list"></i>今日飲食清單</button>
+
+  <div class="nav-section">運動</div>
+  <button class="nav-btn" data-label="運動記錄" onclick="swPage('activity')"><i class="ti ti-stairs"></i><span class="nav-label">運動記錄</span></button>
+
+  <div class="nav-section">帳號</div>
+  <button class="nav-btn" data-label="切換使用者" onclick="swPage('users')"><i class="ti ti-users"></i><span class="nav-label" id="current-user-label">使用者</span></button>
+
+  <div class="nav-section">資料</div>
+  <button class="nav-btn" data-label="身體數據" onclick="swPage('bodydata')"><i class="ti ti-body-scan"></i><span class="nav-label">身體數據與保健食品</span></button>
+  <button class="nav-sub" data-sub="bodydata" data-sec="body-input" onclick="swSub('bodydata','body-input')"><i class="ti ti-ruler-measure"></i>身體數據</button>
+  <button class="nav-sub" data-sub="bodydata" data-sec="supp" onclick="swSub('bodydata','supp')"><i class="ti ti-pill"></i>保健食品</button>
+
+  <hr style="border:none;border-top:1px solid rgba(255,255,255,.1);margin:.75rem 0;margin-top:auto">
   <button class="nav-btn" data-label="設定" onclick="swPage('setup')"><i class="ti ti-settings"></i><span class="nav-label">設定</span></button>
-  <div class="nav-section" style="margin-top:.5rem">快速跳轉</div>
-  <a class="nav-anchor" href="#sec-body" data-label="身體數據"><i class="ti ti-body-scan"></i><span class="nav-label">身體數據</span></a>
-  <a class="nav-anchor" href="#sec-label" data-label="營養標示"><i class="ti ti-scan"></i><span class="nav-label">營養標示</span></a>
-  <a class="nav-anchor" href="#sec-signal" data-label="生理燈號"><i class="ti ti-traffic-lights"></i><span class="nav-label">生理燈號</span></a>
-  <a class="nav-anchor" href="#sec-meal" data-label="餐食推薦"><i class="ti ti-chef-hat"></i><span class="nav-label">餐食推薦</span></a>
-  <a class="nav-anchor" href="#sec-food-db" data-label="外食資料庫"><i class="ti ti-database"></i><span class="nav-label">外食資料庫</span></a>
-  <a class="nav-anchor" href="#sec-supp" data-label="保健食品"><i class="ti ti-pill"></i><span class="nav-label">保健食品</span></a>
-  <a class="nav-anchor" href="#sec-timeline" data-label="時間軸"><i class="ti ti-clock"></i><span class="nav-label">時間軸</span></a>
-  <a class="nav-anchor" href="#sec-activity" data-label="運動記錄"><i class="ti ti-stairs"></i><span class="nav-label">運動記錄</span></a>
-  <a class="nav-anchor" href="#sec-today" data-label="今日總覽"><i class="ti ti-chart-bar"></i><span class="nav-label">今日進度</span></a>
-  <a class="nav-anchor" href="#sec-summary" data-label="每日總結"><i class="ti ti-report-analytics"></i><span class="nav-label">每日總結</span></a>
-  <a class="nav-anchor" href="#sec-history" data-label="歷史趨勢"><i class="ti ti-chart-line"></i><span class="nav-label">歷史趨勢</span></a>
 </nav>
 
-<!-- ══ Topbar (SM/XS) ══ -->
+<!-- ══ Topbar (SM) ══ -->
 <div class="topbar" id="topbar">
-  <span class="topbar-logo">⚡ ACA 3.0</span>
-  <button class="tb-btn active" id="tb-home" onclick="swPage('home')"><i class="ti ti-home"></i>總覽</button>
+  <span class="topbar-logo">🥗 飲控</span>
+  <button class="tb-btn active" id="tb-home" onclick="swPage('home')"><i class="ti ti-home"></i>主頁</button>
+  <button class="tb-btn" id="tb-diet" onclick="swPage('diet')"><i class="ti ti-salad"></i>飲食</button>
+  <button class="tb-btn" id="tb-activity" onclick="swPage('activity')"><i class="ti ti-stairs"></i>運動</button>
+  <button class="tb-btn" id="tb-users" onclick="swPage('users')"><i class="ti ti-users"></i>使用者</button>
+  <button class="tb-btn" id="tb-bodydata" onclick="swPage('bodydata')"><i class="ti ti-body-scan"></i>數據</button>
   <button class="tb-btn" id="tb-setup" onclick="swPage('setup')"><i class="ti ti-settings"></i>設定</button>
 </div>
 
-<!-- ══ Mobile Bottom Nav ══ -->
+<!-- ══ Mobile Nav ══ -->
 <nav class="mobile-nav" id="mobile-nav">
-  <button class="mnav-btn active" id="mn-home" onclick="swPage('home')"><i class="ti ti-home"></i>總覽</button>
-  <button class="mnav-btn" onclick="scrollTo('#sec-label')"><i class="ti ti-scan"></i>掃描</button>
-  <button class="mnav-btn" onclick="scrollTo('#sec-meal')"><i class="ti ti-chef-hat"></i>餐食</button>
-  <button class="mnav-btn" onclick="scrollTo('#sec-today')"><i class="ti ti-chart-bar"></i>進度</button>
-  <button class="mnav-btn" id="mn-setup" onclick="swPage('setup')"><i class="ti ti-settings"></i>設定</button>
+  <button class="mnav-btn active" id="mn-home" onclick="swPage('home')"><i class="ti ti-home"></i>主頁</button>
+  <button class="mnav-btn" id="mn-diet" onclick="swPage('diet')"><i class="ti ti-salad"></i>飲食</button>
+  <button class="mnav-btn" id="mn-activity" onclick="swPage('activity')"><i class="ti ti-stairs"></i>運動</button>
+  <button class="mnav-btn" id="mn-users" onclick="swPage('users')"><i class="ti ti-users"></i>使用者</button>
+  <button class="mnav-btn" id="mn-bodydata" onclick="swPage('bodydata')"><i class="ti ti-body-scan"></i>數據</button>
 </nav>
 
-<div class="shell">
-<main class="main">
+<div class="main" id="main-content">
 
-<!-- ════════════════════════════════════
-     HOME PAGE — 單頁垂直捲動
-════════════════════════════════════ -->
+<!-- ════ 主頁面 ════ -->
 <div id="page-home" class="page active">
-
-  <!-- 頁頭 -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.5rem">
-    <div>
-      <div style="font-size:1.375rem;font-weight:800;color:var(--text)">今日健康總覽</div>
+  <div class="page-title">
+    <div class="page-title-text"><i class="ti ti-home"></i>主頁面</div>
+    <div style="display:flex;align-items:center;gap:.75rem">
       <div style="font-size:.75rem;color:var(--muted)" id="dash-date"></div>
-    </div>
-    <div id="global-light" class="badge g" style="font-size:.875rem;padding:6px 16px">🟢 生理狀態：正常</div>
-  </div>
-
-  <!-- 每日快速面板 -->
-  <div class="daily-panel" id="sec-daily">
-    <div class="card" style="margin-bottom:0">
-      <div class="card-title"><i class="ti ti-dashboard"></i>今天只做這幾件事</div>
-      <div class="quick-metrics">
-        <div class="quick-metric"><strong id="quick-cal">0</strong><span id="quick-cal-sub">/ 0 kcal</span></div>
-        <div class="quick-metric"><strong id="quick-prot">0g</strong><span id="quick-prot-sub">/ 0g 蛋白</span></div>
-        <div class="quick-metric"><strong id="quick-water">0</strong><span id="quick-water-sub">/ 0ml 水分</span></div>
-        <div class="quick-metric"><strong id="quick-left">0</strong><span>剩餘 kcal</span></div>
-      </div>
-      <div class="quick-actions">
-        <button class="btn sm p" onclick="scrollTo('#sec-meal')"><i class="ti ti-keyboard"></i>語音/文字記餐</button>
-        <button class="btn sm" onclick="scrollTo('#sec-label')"><i class="ti ti-scan"></i>掃營養標示</button>
-        <button class="btn sm" onclick="addWater(250)"><i class="ti ti-droplet-plus"></i>+250 水</button>
-        <button class="btn sm" onclick="genSummary()"><i class="ti ti-sparkles"></i>今日建議</button>
-      </div>
-    </div>
-    <div class="card" style="margin-bottom:0">
-      <div class="card-title"><i class="ti ti-bolt"></i>常用組合</div>
-      <div class="template-grid" id="combo-list"></div>
-      <div style="display:flex;gap:6px;margin-top:.75rem">
-        <input id="combo-name" placeholder="把今天餐點存成組合" style="flex:1;padding:7px 10px;font-size:.8125rem;border-radius:var(--radius-sm);border:1.5px solid var(--border)">
-        <button class="btn sm p" onclick="saveTodayCombo()"><i class="ti ti-device-floppy"></i>儲存</button>
-      </div>
+      <div id="global-light" class="badge g" style="font-size:.8125rem;padding:5px 12px">🟢 正常</div>
     </div>
   </div>
 
-  <!-- ① 身體數據 -->
-  <div class="section" id="sec-body">
-    <div class="section-header">
-      <div><div class="section-title"><i class="ti ti-body-scan"></i>身體數據</div><div class="section-sub">每日量測後更新</div></div>
-      <button class="btn sm p" onclick="calcAndSave()"><i class="ti ti-device-floppy"></i>計算並儲存</button>
+  <!-- Sub tabs -->
+  <div class="section-tabs">
+    <button class="stab active" onclick="swSub('home','macros')">📊 今日攝取進度</button>
+    <button class="stab" onclick="swSub('home','signal')">🚦 生理燈號</button>
+    <button class="stab" onclick="swSub('home','daily-summary')">📋 每日總結</button>
+    <button class="stab" onclick="swSub('home','history')">📈 歷史趨勢</button>
+  </div>
+
+  <!-- ① 今日攝取進度 -->
+  <div id="home-macros" class="sub-section active">
+    <div class="grid2">
+      <div>
+        <div class="card">
+          <div class="card-title"><i class="ti ti-chart-bar"></i>Macros 進度</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:.875rem">
+            <div style="background:var(--bg);border-radius:var(--radius-sm);padding:.625rem;text-align:center;border:1px solid var(--border)"><div style="font-size:1.125rem;font-weight:700" id="mc-cal">0</div><div style="font-size:.625rem;color:var(--muted)">熱量 kcal</div><div style="font-size:.5625rem;color:var(--muted)" id="mc-cal-t">/0</div></div>
+            <div style="background:var(--bg);border-radius:var(--radius-sm);padding:.625rem;text-align:center;border:1px solid var(--border)"><div style="font-size:1.125rem;font-weight:700" id="mc-prot">0g</div><div style="font-size:.625rem;color:var(--muted)">蛋白質</div><div style="font-size:.5625rem;color:var(--muted)" id="mc-prot-t">/0g</div></div>
+            <div style="background:var(--bg);border-radius:var(--radius-sm);padding:.625rem;text-align:center;border:1px solid var(--border)"><div style="font-size:1.125rem;font-weight:700" id="mc-water">0</div><div style="font-size:.625rem;color:var(--muted)">水分 ml</div><div style="font-size:.5625rem;color:var(--muted)" id="mc-water-t">/0</div></div>
+            <div style="background:var(--bg);border-radius:var(--radius-sm);padding:.625rem;text-align:center;border:1px solid var(--border)"><div style="font-size:1.125rem;font-weight:700" id="mc-net">0</div><div style="font-size:.625rem;color:var(--muted)">淨熱量</div><div style="font-size:.5625rem;color:var(--muted)">扣運動</div></div>
+          </div>
+          <div class="prog-wrap"><div class="prog-label"><span>熱量</span><span id="pb-cal-l">0/0</span></div><div class="prog-bar"><div class="prog-fill c-cal" id="pb-cal" style="width:0%"></div></div></div>
+          <div class="prog-wrap"><div class="prog-label"><span>蛋白質</span><span id="pb-prot-l">0/0</span></div><div class="prog-bar"><div class="prog-fill c-prot" id="pb-prot" style="width:0%"></div></div></div>
+          <div class="prog-wrap"><div class="prog-label"><span>碳水</span><span id="pb-carb-l">0/0</span></div><div class="prog-bar"><div class="prog-fill c-carb" id="pb-carb" style="width:0%"></div></div></div>
+          <div class="prog-wrap"><div class="prog-label"><span>脂肪</span><span id="pb-fat-l">0/0</span></div><div class="prog-bar"><div class="prog-fill c-fat" id="pb-fat" style="width:0%"></div></div></div>
+          <div class="prog-wrap" style="margin-bottom:0"><div class="prog-label"><span>水分</span><span id="pb-water-l">0/0</span></div><div class="prog-bar"><div class="prog-fill c-water" id="pb-water" style="width:0%"></div></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-title"><i class="ti ti-egg"></i>雙源蛋白質比例</div>
+          <div style="margin-bottom:.75rem">
+            <div class="prog-label"><span>動物性蛋白質</span><span id="prot-animal-l">0g</span></div>
+            <div class="prog-bar" style="height:10px"><div class="prog-fill c-animal" id="prot-animal-bar" style="width:0%"></div></div>
+          </div>
+          <div style="margin-bottom:.75rem">
+            <div class="prog-label"><span>植物性蛋白質</span><span id="prot-plant-l">0g</span></div>
+            <div class="prog-bar" style="height:10px"><div class="prog-fill c-plant" id="prot-plant-bar" style="width:0%"></div></div>
+          </div>
+          <div id="prot-ratio-hint" style="font-size:.75rem;color:var(--muted);background:var(--bg);border-radius:var(--radius-sm);padding:8px 10px;border:1px solid var(--border)">
+            建議動：植 ≈ 7:3，動物性蛋白質更易吸收，植物性蛋白質富含纖維。
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="ti ti-activity"></i>體態快覽</div>
+          <div id="body-quick-view"><p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">請先儲存身體數據</p></div>
+        </div>
+      </div>
     </div>
-    <div class="grid-body">
-      <!-- 左：輸入 -->
+  </div>
+
+  <!-- ② 生理燈號 -->
+  <div id="home-signal" class="sub-section">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-circle"></i>整體狀態</div>
+      <div class="signal-grid">
+        <button class="sig-btn on-green" id="sig-normal" onclick="setSignal('normal')">🟢 正常</button>
+        <button class="sig-btn" id="sig-yellow" onclick="setSignal('yellow')">🟡 呼吸道症狀</button>
+        <button class="sig-btn" id="sig-red" onclick="setSignal('red')">🔴 腸道不穩</button>
+        <button class="sig-btn" id="sig-immune" onclick="setSignal('immune')">🟠 免疫應激</button>
+      </div>
+      <hr class="sep">
+      <div class="card-title" style="margin-bottom:.5rem"><i class="ti ti-stethoscope"></i>身體不適細部項目</div>
+      <div class="discomfort-grid" id="discomfort-grid">
+        <button class="dc-btn" id="dc-rumble" onclick="toggleDC(this,'rumble','red')">🫃 腹鳴</button>
+        <button class="dc-btn" id="dc-gas" onclick="toggleDC(this,'gas','red')">💨 雞蛋味臭屁</button>
+        <button class="dc-btn" id="dc-loose" onclick="toggleDC(this,'loose','red')">🚽 軟便</button>
+        <button class="dc-btn" id="dc-bloat" onclick="toggleDC(this,'bloat','red')">🎈 腹脹</button>
+        <button class="dc-btn" id="dc-phlegm_y" onclick="toggleDC(this,'phlegm_y','yellow')">🟡 黃痰</button>
+        <button class="dc-btn" id="dc-phlegm_g" onclick="toggleDC(this,'phlegm_g','yellow')">🟢 綠痰</button>
+        <button class="dc-btn" id="dc-cough" onclick="toggleDC(this,'cough','yellow')">💨 劇烈咳嗽</button>
+        <button class="dc-btn" id="dc-throat" onclick="toggleDC(this,'throat','yellow')">🔴 喉嚨痛</button>
+        <button class="dc-btn" id="dc-fever" onclick="toggleDC(this,'fever','red')">🌡️ 發燒</button>
+        <button class="dc-btn" id="dc-fatigue" onclick="toggleDC(this,'fatigue','yellow')">😴 嚴重疲勞</button>
+        <button class="dc-btn" id="dc-headache" onclick="toggleDC(this,'headache','yellow')">🤕 頭痛</button>
+        <button class="dc-btn" id="dc-nausea" onclick="toggleDC(this,'nausea','red')">🤢 噁心</button>
+      </div>
+    </div>
+    <div class="alert danger" id="gut-alert">
+      🚨 <strong>腸道防禦模式啟動</strong><br>
+      滲透壓風險值：<strong id="osmotic-val">0</strong><br>
+      <strong>已攔截：</strong>地瓜、燕麥、豆漿、花椰菜、乳清蛋白<br>
+      <strong>允許：</strong>白飯、白吐司、白粥、雞里肌、水煮蛋
+    </div>
+    <div class="alert warn" id="prot-alert">
+      ⚡ <strong>蛋白質無效負荷</strong>：上餐 <strong id="prot-prev">0</strong>g，距今 <strong id="prot-gap">0</strong>h，建議 <strong id="prot-next">--:--</strong> 後再補充。
+    </div>
+  </div>
+
+  <!-- ③ 每日總結 -->
+  <div id="home-daily-summary" class="sub-section">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-report-analytics"></i>今日概況
+        <button class="btn xs p" onclick="genSummary()"><i class="ti ti-sparkles"></i>AI 生成</button>
+      </div>
+      <div id="deficit-table" style="margin-bottom:1rem">
+        <div class="deficit-row"><span>熱量攝取</span><span id="def-cal">0 / 0 kcal</span></div>
+        <div class="deficit-row"><span>熱量缺口</span><span id="def-gap" style="font-weight:600">0 kcal</span></div>
+        <div class="deficit-row"><span>蛋白質達成率</span><span id="def-prot">0%</span></div>
+        <div class="deficit-row"><span>水分達成率</span><span id="def-water">0%</span></div>
+        <div class="deficit-row"><span>腸道防禦達成</span><span id="def-gut">—</span></div>
+        <div class="deficit-row" style="border-bottom:none"><span>生理燈號</span><span id="def-signal">🟢 正常</span></div>
+      </div>
+      <div id="summary-ai-content"><p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">點「AI 生成」取得今日分析與明日建議</p></div>
+    </div>
+  </div>
+
+  <!-- ④ 歷史趨勢 -->
+  <div id="home-history" class="sub-section">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chart-line"></i>BIA 趨勢圖表
+        <button class="btn xs p" onclick="analyzeChart()"><i class="ti ti-sparkles"></i>AI分析</button>
+      </div>
+      <div class="tab-bar">
+        <button class="active" onclick="showChart('weight',this)">體重</button>
+        <button onclick="showChart('bf',this)">體脂率</button>
+        <button onclick="showChart('vf',this)">內臟脂肪</button>
+        <button onclick="showChart('muscle',this)">肌肉量</button>
+      </div>
+      <canvas id="trend-chart" height="200"></canvas>
+      <div id="chart-ai-out" style="margin-top:.75rem"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 飲食記錄 ════ -->
+<div id="page-diet" class="page">
+  <div class="page-title"><div class="page-title-text"><i class="ti ti-salad"></i>飲食記錄</div></div>
+  <div class="section-tabs">
+    <button class="stab active" onclick="swSub('diet','omni')">⌨️ 萬用輸入框</button>
+    <button class="stab" onclick="swSub('diet','water')">💧 水分記錄</button>
+    <button class="stab" onclick="swSub('diet','meal-rec')">🍽️ AI餐食推薦</button>
+    <button class="stab" onclick="swSub('diet','food-list')">📋 今日飲食清單</button>
+  </div>
+
+  <!-- 萬用輸入框 -->
+  <div id="diet-omni" class="sub-section active">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-keyboard"></i>萬用輸入框
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="btn xs" id="capture-btn" onclick="openCapture()" title="拍照/截圖掃描營養標示"><i class="ti ti-camera"></i><span style="display:none" class="desktop-only"> 截圖</span></button>
+        </div>
+      </div>
+      <div id="prot-protocol" class="prot-protocol">
+        ⚡ <b>蛋白質吸收協定</b>：上餐 <span id="pp-prev">0</span>g，距今 <span id="pp-gap">0</span>h，建議 <span id="pp-next">--:--</span> 後再補固態蛋白。
+      </div>
+      <div class="omnibox-wrap">
+        <textarea class="omnibox" id="omnibox"
+          placeholder="描述你吃了什麼，例如：&#10;「炸雞排、半碗白飯、一根香蕉」&#10;「雞里肌150g、花椰菜100g」"
+          oninput="onOmniInput(this.value)" onkeydown="onOmniKey(event)"></textarea>
+        <button class="omni-mic" id="mic-btn" onclick="toggleVoice()" title="語音輸入"><i class="ti ti-microphone"></i></button>
+      </div>
+
+      <!-- 操作按鈕列 -->
+      <div class="btn-row" style="margin-top:0;margin-bottom:.5rem;justify-content:flex-start">
+        <button class="btn sm" onclick="clearOmni()"><i class="ti ti-x"></i>清除</button>
+        <button class="btn sm" id="parse-btn" onclick="parseOmniAI()" title="讓AI解析你輸入的文字，不使用本機DB"><i class="ti ti-sparkles"></i>AI 解析</button>
+        <button class="btn sm" id="fs-btn" onclick="doFatSecretSearch()" title="從FatSecret食品資料庫搜尋"><i class="ti ti-search"></i>FatSecret</button>
+      </div>
+
+      <div id="omni-status" style="font-size:.6875rem;color:var(--muted);min-height:16px;margin-bottom:4px"></div>
+
+      <!-- DB 建議 chips（本機，僅供參考） -->
+      <div id="db-suggest-section" style="display:none;margin-bottom:.5rem">
+        <div style="font-size:.6875rem;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:6px">
+          <span>📦 本機資料庫建議（點選加入 / 或選「AI解析」讓AI判斷原始文字）</span>
+          <button class="btn xs" id="quick-add-btn" onclick="quickAddFromDB()" style="display:none"><i class="ti ti-database"></i>全部使用DB</button>
+        </div>
+        <div class="db-suggest-row" id="db-chips"></div>
+      </div>
+
+      <!-- FatSecret 結果 -->
+      <div id="fs-result-section" style="display:none;margin-bottom:.5rem">
+        <div style="font-size:.6875rem;color:var(--muted);margin-bottom:4px">🌐 FatSecret 搜尋結果（點選加入）：</div>
+        <div class="db-suggest-row" id="fs-chips"></div>
+      </div>
+
+      <!-- AI 解析結果 chips -->
+      <div id="ai-result-section" style="display:none;margin-top:.5rem">
+        <div style="font-size:.6875rem;color:var(--muted);margin-bottom:6px">✨ AI 解析結果（AI根據「<span id="ai-parsed-query"></span>」計算，點選加入）：</div>
+        <div class="ai-food-row" id="ai-chips"></div>
+        <div class="btn-row" style="margin-top:.5rem">
+          <button class="btn sm p" onclick="addAllAIChips()"><i class="ti ti-check"></i>全部加入</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 掃描 OCR 結果 -->
+    <div id="ocr-result-card" class="card" style="display:none;margin-top:.5rem">
+      <div class="card-title"><i class="ti ti-scan"></i>掃描結果
+        <button class="btn xs" onclick="document.getElementById('ocr-result-card').style.display='none'"><i class="ti ti-x"></i></button>
+      </div>
+      <div id="ocr-status" style="font-size:.8125rem;color:var(--muted)">解析中…</div>
+      <div id="ocr-item-preview" style="display:none">
+        <div class="food-item" style="border:none;padding:.25rem 0">
+          <div>
+            <div class="food-name" id="ocr-name">—</div>
+            <div class="food-meta" id="ocr-meta">—</div>
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:.5rem">
+          <button class="btn sm p" onclick="addOcrItem()"><i class="ti ti-plus"></i>加入飲食</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 水分記錄 -->
+  <div id="diet-water" class="sub-section">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-droplet"></i>水分記錄
+        <span style="font-size:.75rem;font-weight:500;color:var(--text)" id="water-display">0 / 0 ml</span></div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.5rem">
+        <button class="btn sm" onclick="addWater(150)">+150ml</button>
+        <button class="btn sm" onclick="addWater(250)">+250ml</button>
+        <button class="btn sm" onclick="addWater(350)">+350ml</button>
+        <button class="btn sm" onclick="addWater(500)">+500ml</button>
+        <div style="display:flex;gap:4px;align-items:center">
+          <input type="number" id="custom-water" value="200" style="width:60px;padding:5px 7px;font-size:.75rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text)">
+          <button class="btn sm p" onclick="addWater(+document.getElementById('custom-water').value)">+自訂</button>
+        </div>
+      </div>
+      <div class="prog-bar" style="height:9px"><div class="prog-fill c-water" id="water-pb" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- AI 餐食推薦 -->
+  <div id="diet-meal-rec" class="sub-section">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chef-hat"></i>AI 餐食推薦</div>
+      <div class="fg2" style="margin-bottom:.75rem">
+        <div class="f"><label>手邊食材（逗號/換行分隔）</label>
+          <textarea id="ingredients" placeholder="例：雞里肌、白飯、花椰菜、雞蛋" style="min-height:56px"></textarea></div>
+        <div>
+          <div class="f"><label>餐點類型</label><select id="meal-type">
+            <option value="breakfast">早餐</option><option value="lunch">午餐</option>
+            <option value="dinner">晚餐</option><option value="snack">點心</option>
+          </select></div>
+          <div class="f"><label>特殊需求</label><select id="meal-pref">
+            <option value="">無</option><option value="low_carb">低碳水</option>
+            <option value="high_protein">高蛋白</option><option value="gut_safe">腸道安全</option>
+          </select></div>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:0"><button class="btn p" onclick="getMealRec()"><i class="ti ti-sparkles"></i>生成建議</button></div>
+      <div id="meal-recs" style="margin-top:.75rem"><p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">點「生成建議」</p></div>
+    </div>
+  </div>
+
+  <!-- 今日飲食清單 -->
+  <div id="diet-food-list" class="sub-section">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-list"></i>今日飲食清單
+        <span id="food-count" style="font-size:.6875rem;font-weight:500;color:var(--muted)">0項</span></div>
+      <div id="food-list"><p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚未記錄</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 運動記錄 ════ -->
+<div id="page-activity" class="page">
+  <div class="page-title"><div class="page-title-text"><i class="ti ti-stairs"></i>運動記錄</div></div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-plus"></i>新增運動</div>
+      <div class="fg fg2">
+        <div class="f"><label>運動類型</label><select id="act-type" onchange="toggleStairs()">
+          <option value="stairs">階梯訓練</option><option value="cardio">有氧</option>
+          <option value="strength">重訓</option><option value="walk">散步</option><option value="yoga">瑜伽</option>
+        </select></div>
+        <div class="f"><label>時間（分）</label><input type="number" id="act-min" value="30"></div>
+      </div>
+      <div id="stairs-fields" class="fg fg2">
+        <div class="f"><label>層數（單趟）</label><input type="number" id="stairs-up" value="8"></div>
+        <div class="f"><label>組數</label><input type="number" id="stairs-sets" value="2"></div>
+      </div>
+      <div class="fg fg2">
+        <div class="f"><label>強度</label><select id="act-int"><option value="low">輕鬆</option><option value="med" selected>中等</option><option value="high">高強度</option></select></div>
+        <div class="f"><label>備注</label><input type="text" id="act-note"></div>
+      </div>
+      <div id="act-cal-preview" style="display:none;font-size:.75rem;color:var(--accent-md);margin-bottom:6px">預估消耗：<b id="act-cal-est">0</b> kcal</div>
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn sm" onclick="previewCal()"><i class="ti ti-calculator"></i>預估</button>
+        <button class="btn sm p" onclick="addAct()">記錄</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-list"></i>今日運動清單</div>
+      <div id="act-list"><p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚未記錄</p></div>
+    </div>
+  </div>
+
+  <!-- 今日時間軸 -->
+  <div class="card" style="margin-top:.25rem">
+    <div class="card-title"><i class="ti ti-clock"></i>今日時間軸（乾濕分離監控）
+      <button class="btn xs p" onclick="toggleTLForm()">+ 新增</button></div>
+    <div id="tl-add-form" style="display:none" class="tl-form">
+      <div class="fg fg3">
+        <div class="f"><label>時間</label><input type="time" id="tl-time" value="08:00"></div>
+        <div class="f"><label>類型</label><select id="tl-type">
+          <option value="meal">正餐</option><option value="drug">中藥</option>
+          <option value="supp">保健食品</option><option value="water">補水</option><option value="exercise">運動</option>
+        </select></div>
+        <div class="f"><label>描述</label><input type="text" id="tl-desc" placeholder="例：魚油2顆"></div>
+      </div>
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn sm" onclick="toggleTLForm()">取消</button>
+        <button class="btn sm p" onclick="addTLItem()">新增</button>
+      </div>
+    </div>
+    <div class="timeline" id="timeline-list"><p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚無記錄</p></div>
+  </div>
+</div>
+
+<!-- ════ 切換使用者 ════ -->
+<div id="page-users" class="page">
+  <div class="page-title"><div class="page-title-text"><i class="ti ti-users"></i>使用者管理</div>
+    <button class="btn sm p" onclick="addNewUser()"><i class="ti ti-plus"></i>新增使用者</button>
+  </div>
+  <div id="users-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem"></div>
+  <div id="add-user-form" style="display:none" class="card" style="max-width:400px">
+    <div class="card-title"><i class="ti ti-user-plus"></i>新增使用者</div>
+    <div class="f" style="margin-bottom:.75rem"><label>使用者名稱</label>
+      <input type="text" id="new-user-input" placeholder="輸入名稱" maxlength="20"
+        onkeydown="if(event.key==='Enter')confirmNewUser()"></div>
+    <div class="btn-row" style="margin-top:0">
+      <button class="btn sm" onclick="document.getElementById('add-user-form').style.display='none'">取消</button>
+      <button class="btn sm p" onclick="confirmNewUser()">建立</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ 身體數據與保健食品 ════ -->
+<div id="page-bodydata" class="page">
+  <div class="page-title"><div class="page-title-text"><i class="ti ti-body-scan"></i>身體數據與保健食品資訊更新</div></div>
+  <div class="section-tabs">
+    <button class="stab active" onclick="swSub('bodydata','body-input')">📏 身體數據</button>
+    <button class="stab" onclick="swSub('bodydata','supp')">💊 保健食品</button>
+  </div>
+
+  <!-- 身體數據 -->
+  <div id="bodydata-body-input" class="sub-section active">
+    <div class="grid2">
       <div>
         <div class="card">
           <div class="card-title"><i class="ti ti-ruler-measure"></i>基本體位</div>
@@ -419,336 +764,61 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
             <div class="f"><label>目標內臟脂肪</label><input type="number" id="tvf" value="5"></div>
           </div>
         </div>
+        <div class="btn-row"><button class="btn p" onclick="calcAndSave()"><i class="ti ti-device-floppy"></i>計算並儲存</button></div>
       </div>
-      <!-- 右：指標卡 -->
       <div>
-        <div class="card" id="body-metrics-card">
-          <div class="card-title"><i class="ti ti-activity"></i>體態指標與目標差距</div>
-          <div id="body-metrics-content">
-            <p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">儲存身體數據後顯示</p>
-          </div>
-        </div>
-        <div class="card" id="body-targets-card" style="display:none">
-          <div class="card-title"><i class="ti ti-chart-pie"></i>每日營養目標</div>
-          <div id="body-targets-content"></div>
+        <div class="card" id="body-result-card" style="display:none">
+          <div class="card-title"><i class="ti ti-chart-pie"></i>計算結果</div>
+          <div id="body-result-content"></div>
         </div>
         <div id="body-anomaly"></div>
       </div>
     </div>
   </div>
 
-  <!-- ② 生理燈號 -->
-  <div class="section" id="sec-signal">
-    <div class="section-header">
-      <div><div class="section-title"><i class="ti ti-traffic-lights"></i>生理燈號與身體不適</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title"><i class="ti ti-circle"></i>今日整體狀態</div>
-      <div class="signal-grid">
-        <button class="sig-btn on-green" id="sig-normal" onclick="setSignal('normal')">🟢 正常</button>
-        <button class="sig-btn" id="sig-yellow" onclick="setSignal('yellow')">🟡 呼吸道症狀</button>
-        <button class="sig-btn" id="sig-red" onclick="setSignal('red')">🔴 腸道不穩</button>
-        <button class="sig-btn" id="sig-immune" onclick="setSignal('immune')">🟠 免疫應激</button>
-      </div>
-      <hr class="sep">
-      <div class="card-title" style="margin-bottom:.625rem"><i class="ti ti-stethoscope"></i>身體不適細部項目</div>
-      <div class="discomfort-grid" id="discomfort-grid">
-        <!-- 腸道 -->
-        <button class="dc-btn" onclick="toggleDC(this,'rumble','red')">🫃 腹鳴</button>
-        <button class="dc-btn" onclick="toggleDC(this,'gas','red')">💨 雞蛋味臭屁</button>
-        <button class="dc-btn" onclick="toggleDC(this,'loose','red')">🚽 軟便/未成型</button>
-        <button class="dc-btn" onclick="toggleDC(this,'bloat','red')">🎈 腹脹</button>
-        <!-- 呼吸道 -->
-        <button class="dc-btn" onclick="toggleDC(this,'phlegm_y','yellow')">🟡 黃痰</button>
-        <button class="dc-btn" onclick="toggleDC(this,'phlegm_g','yellow')">🟢 綠痰</button>
-        <button class="dc-btn" onclick="toggleDC(this,'cough','yellow')">💨 劇烈咳嗽</button>
-        <button class="dc-btn" onclick="toggleDC(this,'throat','yellow')">🔴 喉嚨痛</button>
-        <!-- 全身 -->
-        <button class="dc-btn" onclick="toggleDC(this,'fever','red')">🌡️ 發燒</button>
-        <button class="dc-btn" onclick="toggleDC(this,'fatigue','yellow')">😴 嚴重疲勞</button>
-        <button class="dc-btn" onclick="toggleDC(this,'headache','yellow')">🤕 頭痛</button>
-        <button class="dc-btn" onclick="toggleDC(this,'nausea','red')">🤢 噁心/嘔吐</button>
-      </div>
-    </div>
-    <!-- 腸道警告 -->
-    <div class="alert danger" id="gut-alert">
-      🚨 <strong>腸道防禦模式啟動</strong>：偵測到腸道不穩症狀。<br>
-      <strong>滲透壓風險值：</strong><span id="osmotic-val">0</span><br>
-      <strong>已攔截高風險食物：</strong>地瓜、燕麥、豆漿、花椰菜、乳清蛋白<br>
-      <strong>建議本餐選擇：</strong>白飯、白吐司、白粥、雞里肌、水煮蛋、鯛魚片
-    </div>
-    <div class="alert warn" id="prot-alert">
-      ⚡ <strong>蛋白質無效負荷警告</strong>：上餐攝取 <strong id="prot-prev">0</strong>g，距今 <strong id="prot-gap">0</strong>h，建議 <strong id="prot-next">--:--</strong> 後再補充固態蛋白。
-    </div>
-  </div>
-
-  <!-- ③ 動態餐食推薦 + 飲食輸入 -->
-  <div class="section" id="sec-meal">
-    <div class="section-header">
-      <div><div class="section-title"><i class="ti ti-chef-hat"></i>動態餐食推薦與飲食記錄</div></div>
-    </div>
-    <div class="card sticky-tool" id="sec-label">
-      <div class="card-title"><i class="ti ti-scan"></i>掃營養標示
-        <span class="badge b" style="font-size:.625rem">包裝食品 / 超商品項</span></div>
-      <input class="scan-file" id="label-file" type="file" accept="image/*" capture="environment">
-      <textarea class="import-box" id="label-manual" placeholder="也可以直接貼上營養標示文字，例如：每份熱量 180 大卡、蛋白質 12g、脂肪 4g、碳水 25g、糖 6g。" style="margin-top:.5rem;min-height:70px"></textarea>
-      <div id="label-status" style="font-size:.6875rem;color:var(--muted);min-height:16px;margin:.375rem 0"></div>
-      <div id="label-draft" class="draft-list"></div>
-      <div class="btn-row" style="margin-top:0">
-        <button class="btn sm" onclick="clearNutritionLabel()"><i class="ti ti-eraser"></i>清空</button>
-        <button class="btn sm p" id="label-btn" onclick="scanNutritionLabel()"><i class="ti ti-sparkles"></i>解析標示</button>
-      </div>
-    </div>
+  <!-- 保健食品 -->
+  <div id="bodydata-supp" class="sub-section">
     <div class="grid2">
-      <!-- 左：輸入 -->
       <div>
         <div class="card">
-          <div class="card-title"><i class="ti ti-keyboard"></i>萬用輸入框
-            <span class="badge b" style="font-size:.625rem" id="db-badge">本機DB優先</span></div>
-          <div id="prot-protocol" class="prot-protocol">
-            ⚡ <b>蛋白質吸收協定</b>：上餐 <span id="pp-prev">0</span>g，距今 <span id="pp-gap">0</span>h，建議 <span id="pp-next">--:--</span> 後再補固態蛋白。
+          <div class="card-title"><i class="ti ti-plus"></i>新增補充品</div>
+          <div class="fg fg2">
+            <div class="f"><label>名稱</label><input type="text" id="supp-name" placeholder="例：魚油、愛康鈣"></div>
+            <div class="f"><label>主要成分</label><input type="text" id="supp-comp" placeholder="例：EPA/DHA"></div>
           </div>
-          <div class="omnibox-wrap">
-            <textarea class="omnibox" id="omnibox"
-              placeholder="描述你吃了什麼，例如：&#10;「1塊無骨炸雞排、1/4份肉鬆火腿吐司跟一根香蕉」&#10;「雞里肌150g、白飯一碗、小黃瓜半條」"
-              oninput="onOmniInput(this.value)" onkeydown="onOmniKey(event)"></textarea>
-            <button class="omni-mic" id="mic-btn" onclick="toggleVoice()" title="語音輸入"><i class="ti ti-microphone"></i></button>
+          <div class="fg fg2">
+            <div class="f"><label>劑量</label><input type="text" id="supp-dose" placeholder="例：2顆 1000mg"></div>
+            <div class="f"><label>服用時間</label><select id="supp-time">
+              <option value="morning">早餐後</option><option value="lunch">午餐後</option>
+              <option value="dinner">晚餐後</option><option value="sleep">睡前</option><option value="empty">空腹</option>
+            </select></div>
           </div>
-          <div class="suggest-box" id="suggest-box"></div>
-          <div id="omni-status" style="font-size:.6875rem;color:var(--muted);min-height:16px;margin-bottom:6px"></div>
+          <div class="f" style="margin-bottom:6px"><label>目前服用藥物（選填）</label>
+            <input type="text" id="supp-meds" placeholder="例：克流感、中藥水藥"></div>
           <div class="btn-row" style="margin-top:0">
-            <button class="btn sm" onclick="clearOmni()">清除</button>
-            <button class="btn sm p" id="parse-btn" onclick="parseOmni()"><i class="ti ti-sparkles"></i>解析加入</button>
+            <button class="btn sm p" onclick="addSupp()"><i class="ti ti-plus"></i>新增</button>
+            <button class="btn sm" onclick="analyzeSupp()"><i class="ti ti-sparkles"></i>AI分析時序</button>
           </div>
         </div>
-        <!-- 水分 -->
-        <div class="card">
-          <div class="card-title"><i class="ti ti-droplet"></i>水分記錄
-            <span style="font-size:.75rem;font-weight:500;color:var(--text)" id="water-display">0 / 0 ml</span></div>
-          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.5rem">
-            <button class="btn sm" onclick="addWater(150)">+150</button>
-            <button class="btn sm" onclick="addWater(250)">+250</button>
-            <button class="btn sm" onclick="addWater(350)">+350</button>
-            <button class="btn sm" onclick="addWater(500)">+500</button>
-            <button class="btn sm" onclick="undoWater()"><i class="ti ti-arrow-back-up"></i>撤銷水分</button>
-            <button class="btn sm" onclick="resetWater()"><i class="ti ti-rotate-clockwise"></i>重設</button>
-            <div style="display:flex;gap:4px">
-              <input type="number" id="custom-water" value="200" style="width:60px;padding:5px 7px;font-size:.75rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text)">
-              <button class="btn sm p" onclick="addWater(+document.getElementById('custom-water').value)">+自訂</button>
-            </div>
-          </div>
-          <div class="prog-bar" style="height:8px"><div class="prog-fill c-water" id="water-pb" style="width:0%"></div></div>
-        </div>
-        <!-- 今日清單 -->
-        <div class="card">
-          <div class="card-title"><i class="ti ti-list"></i>今日飲食清單 <span id="food-count" style="font-size:.6875rem;font-weight:500;color:var(--muted)">0項</span></div>
-          <div id="food-list"><p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚未記錄</p></div>
-        </div>
-      </div>
-      <!-- 右：餐食推薦 -->
-      <div>
-        <div class="card">
-          <div class="card-title"><i class="ti ti-sparkles"></i>AI 餐食推薦
-            <button class="btn xs p" onclick="getMealRec()"><i class="ti ti-refresh"></i>更新</button></div>
-          <div class="f" style="margin-bottom:.75rem">
-            <label>手邊食材（逗號/換行分隔）</label>
-            <textarea id="ingredients" placeholder="例：雞里肌、白飯、花椰菜、雞蛋" style="min-height:56px"></textarea>
-          </div>
-          <div class="fg fg2" style="margin-bottom:.75rem">
-            <div class="f"><label>餐點類型</label><select id="meal-type">
-              <option value="breakfast">早餐</option><option value="lunch">午餐</option>
-              <option value="dinner">晚餐</option><option value="snack">點心</option>
-            </select></div>
-            <div class="f"><label>特殊需求</label><select id="meal-pref">
-              <option value="">無</option><option value="low_carb">低碳水</option>
-              <option value="high_protein">高蛋白</option><option value="gut_safe">腸道安全模式</option>
-            </select></div>
-          </div>
-          <div id="meal-recs"><p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">點「更新」生成建議</p></div>
-        </div>
-      </div>
-    </div>
-    <div class="card" id="sec-food-db">
-      <div class="card-title"><i class="ti ti-database"></i>我的外食資料庫
-        <span class="badge b" style="font-size:.625rem">常吃店家 / 便當 / 超商品項</span></div>
-      <div class="fg fg4">
-        <div class="f"><label>品項名稱</label><input id="db-food-name" placeholder="例：XX便當雞腿飯"></div>
-        <div class="f"><label>熱量 kcal/100g</label><input id="db-food-cal" type="number" value="0"></div>
-        <div class="f"><label>蛋白 g/100g</label><input id="db-food-prot" type="number" value="0" step="0.1"></div>
-        <div class="f"><label>碳水 g/100g</label><input id="db-food-carb" type="number" value="0" step="0.1"></div>
-      </div>
-      <div class="fg fg3">
-        <div class="f"><label>脂肪 g/100g</label><input id="db-food-fat" type="number" value="0" step="0.1"></div>
-        <div class="f"><label>糖 g/100g</label><input id="db-food-sug" type="number" value="0" step="0.1"></div>
-        <div class="f"><label>纖維 g/100g</label><input id="db-food-fib" type="number" value="0" step="0.1"></div>
-      </div>
-      <div class="btn-row" style="margin-top:0"><button class="btn sm p" onclick="addCustomFoodFromForm()"><i class="ti ti-plus"></i>加入資料庫</button></div>
-      <div id="custom-food-list" class="draft-list"></div>
-    </div>
-  </div>
-
-  <!-- ④ 保健食品管理 -->
-  <div class="section" id="sec-supp">
-    <div class="section-header">
-      <div><div class="section-title"><i class="ti ti-pill"></i>保健食品管理</div></div>
-      <button class="btn sm p" onclick="analyzeSupp()"><i class="ti ti-sparkles"></i>AI 分析時序</button>
-    </div>
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title"><i class="ti ti-plus"></i>新增補充品</div>
-        <div class="fg fg2">
-          <div class="f"><label>名稱</label><input type="text" id="supp-name" placeholder="例：魚油、愛康鈣"></div>
-          <div class="f"><label>主要成分</label><input type="text" id="supp-comp" placeholder="例：EPA/DHA、活性D3"></div>
-        </div>
-        <div class="fg fg2">
-          <div class="f"><label>劑量</label><input type="text" id="supp-dose" placeholder="例：2顆 1000mg"></div>
-          <div class="f"><label>服用時間</label><select id="supp-time">
-            <option value="morning">早餐後</option><option value="lunch">午餐後</option>
-            <option value="dinner">晚餐後</option><option value="sleep">睡前</option><option value="empty">空腹</option>
-          </select></div>
-        </div>
-        <div class="f" style="margin-bottom:6px"><label>目前服用藥物（選填）</label><input type="text" id="supp-meds" placeholder="例：克流感、中藥水藥"></div>
-        <div class="btn-row" style="margin-top:0"><button class="btn sm p" onclick="addSupp()"><i class="ti ti-plus"></i>新增</button></div>
-      </div>
-      <div>
         <div class="card">
           <div class="card-title"><i class="ti ti-list"></i>補充清單</div>
           <div id="supp-list"><p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚未新增</p></div>
         </div>
-        <div id="supp-result" style="display:none">
-          <div class="card"><div class="card-title"><i class="ti ti-clock"></i>服用時序與衝突分析</div><div id="supp-content"></div></div>
-        </div>
+      </div>
+      <div id="supp-result" style="display:none">
+        <div class="card"><div class="card-title"><i class="ti ti-clock"></i>服用時序與衝突</div><div id="supp-content"></div></div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- ⑤ 今日時間軸 -->
-  <div class="section" id="sec-timeline">
-    <div class="section-header">
-      <div><div class="section-title"><i class="ti ti-clock"></i>今日時間軸</div><div class="section-sub">正餐・中藥・補充品・水分・運動</div></div>
-      <button class="btn sm p" onclick="toggleTLForm()"><i class="ti ti-plus"></i>新增事件</button>
-    </div>
-    <div class="card">
-      <div id="tl-add-form" style="display:none" class="tl-form">
-        <div class="fg fg3">
-          <div class="f"><label>時間</label><input type="time" id="tl-time" value="08:00"></div>
-          <div class="f"><label>類型</label><select id="tl-type">
-            <option value="meal">正餐</option><option value="drug">中藥</option>
-            <option value="supp">保健食品</option><option value="water">補水</option><option value="exercise">運動</option>
-          </select></div>
-          <div class="f"><label>描述</label><input type="text" id="tl-desc" placeholder="例：魚油2顆"></div>
-        </div>
-        <div class="btn-row" style="margin-top:0">
-          <button class="btn sm" onclick="toggleTLForm()">取消</button>
-          <button class="btn sm p" onclick="addTLItem()">新增</button>
-        </div>
-      </div>
-      <div class="timeline" id="timeline-list"><p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚無記錄</p></div>
-    </div>
-  </div>
-
-  <!-- ⑥ 運動記錄 -->
-  <div class="section" id="sec-activity">
-    <div class="section-header">
-      <div><div class="section-title"><i class="ti ti-stairs"></i>運動記錄</div></div>
-    </div>
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title"><i class="ti ti-plus"></i>新增運動</div>
-        <div class="fg fg2">
-          <div class="f"><label>運動類型</label><select id="act-type" onchange="toggleStairs()">
-            <option value="stairs">階梯訓練</option><option value="cardio">有氧</option>
-            <option value="strength">重訓</option><option value="walk">散步</option><option value="yoga">瑜伽</option>
-          </select></div>
-          <div class="f"><label>時間（分）</label><input type="number" id="act-min" value="30"></div>
-        </div>
-        <div id="stairs-fields" class="fg fg2">
-          <div class="f"><label>層數（單趟）</label><input type="number" id="stairs-up" value="8"></div>
-          <div class="f"><label>組數</label><input type="number" id="stairs-sets" value="2"></div>
-        </div>
-        <div class="fg fg2">
-          <div class="f"><label>強度</label><select id="act-int"><option value="low">輕鬆</option><option value="med" selected>中等</option><option value="high">高強度</option></select></div>
-          <div class="f"><label>備注</label><input type="text" id="act-note"></div>
-        </div>
-        <div id="act-cal-preview" style="display:none;font-size:.75rem;color:var(--accent-md);margin-bottom:6px">預估消耗：<b id="act-cal-est">0</b> kcal（體重 <span id="act-weight">70</span>kg）</div>
-        <div class="btn-row" style="margin-top:0">
-          <button class="btn sm" onclick="previewCal()"><i class="ti ti-calculator"></i>預估</button>
-          <button class="btn sm p" onclick="addAct()"><i class="ti ti-device-floppy"></i>記錄</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title"><i class="ti ti-list"></i>今日運動清單</div>
-        <div id="act-list"><p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚未記錄</p></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ⑦ 今日進度總覽 -->
-  <div class="section" id="sec-today">
-    <div class="section-header">
-      <div><div class="section-title"><i class="ti ti-chart-bar"></i>今日攝取進度</div></div>
-    </div>
-    <div class="card">
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem">
-        <div style="background:var(--bg);border-radius:var(--radius-sm);padding:.75rem;text-align:center;border:1px solid var(--border)">
-          <div style="font-size:1.25rem;font-weight:700" id="sum-cal">0</div><div style="font-size:.6875rem;color:var(--muted)">熱量 kcal</div><div style="font-size:.625rem;color:var(--muted)" id="sum-cal-t">/0</div></div>
-        <div style="background:var(--bg);border-radius:var(--radius-sm);padding:.75rem;text-align:center;border:1px solid var(--border)">
-          <div style="font-size:1.25rem;font-weight:700" id="sum-prot">0g</div><div style="font-size:.6875rem;color:var(--muted)">蛋白質</div><div style="font-size:.625rem;color:var(--muted)" id="sum-prot-t">/0g</div></div>
-        <div style="background:var(--bg);border-radius:var(--radius-sm);padding:.75rem;text-align:center;border:1px solid var(--border)">
-          <div style="font-size:1.25rem;font-weight:700" id="sum-water">0</div><div style="font-size:.6875rem;color:var(--muted)">水分 ml</div><div style="font-size:.625rem;color:var(--muted)" id="sum-water-t">/0ml</div></div>
-        <div style="background:var(--bg);border-radius:var(--radius-sm);padding:.75rem;text-align:center;border:1px solid var(--border)">
-          <div style="font-size:1.25rem;font-weight:700" id="sum-net">0</div><div style="font-size:.6875rem;color:var(--muted)">淨熱量 kcal</div><div style="font-size:.625rem;color:var(--muted)">扣運動</div></div>
-      </div>
-      <div class="prog-wrap"><div class="prog-label"><span>熱量</span><span id="p-cal-l">0/0</span></div><div class="prog-bar"><div class="prog-fill c-cal" id="p-cal" style="width:0%"></div></div></div>
-      <div class="prog-wrap"><div class="prog-label"><span>蛋白質</span><span id="p-prot-l">0/0</span></div><div class="prog-bar"><div class="prog-fill c-prot" id="p-prot" style="width:0%"></div></div></div>
-      <div class="prog-wrap"><div class="prog-label"><span>碳水</span><span id="p-carb-l">0/0</span></div><div class="prog-bar"><div class="prog-fill c-carb" id="p-carb" style="width:0%"></div></div></div>
-      <div class="prog-wrap"><div class="prog-label"><span>脂肪</span><span id="p-fat-l">0/0</span></div><div class="prog-bar"><div class="prog-fill c-fat" id="p-fat" style="width:0%"></div></div></div>
-      <div class="prog-wrap"><div class="prog-label"><span>水分</span><span id="p-water-l">0/0</span></div><div class="prog-bar"><div class="prog-fill c-water" id="p-water" style="width:0%"></div></div></div>
-    </div>
-  </div>
-
-  <!-- ⑧ 每日總結 -->
-  <div class="section" id="sec-summary">
-    <div class="section-header">
-      <div><div class="section-title"><i class="ti ti-report-analytics"></i>每日總結</div></div>
-      <button class="btn sm p" onclick="genSummary()"><i class="ti ti-sparkles"></i>生成總結</button>
-    </div>
-    <div id="summary-content">
-      <p style="font-size:.75rem;color:var(--muted);text-align:center;padding:1rem">點「生成總結」取得今日飲食分析與明日建議</p>
-    </div>
-  </div>
-
-  <!-- ⑨ 歷史趨勢 -->
-  <div class="section" id="sec-history">
-    <div class="section-header">
-      <div><div class="section-title"><i class="ti ti-chart-line"></i>歷史趨勢</div></div>
-      <button class="btn sm p" onclick="analyzeChart()"><i class="ti ti-sparkles"></i>AI 分析</button>
-    </div>
-    <div class="card">
-      <div class="tab-bar">
-        <button class="active" onclick="showChart('weight',this)">體重</button>
-        <button onclick="showChart('bf',this)">體脂率</button>
-        <button onclick="showChart('muscle',this)">肌肉量</button>
-        <button onclick="showChart('water',this)">水分</button>
-      </div>
-      <canvas id="trend-chart" height="200"></canvas>
-      <div id="chart-ai-out" style="margin-top:.75rem"></div>
-    </div>
-  </div>
-
-</div><!-- end page-home -->
-
-<!-- ════════════════════════════════════
-     SETUP PAGE
-════════════════════════════════════ -->
+<!-- ════ 設定 ════ -->
 <div id="page-setup" class="page">
-  <div style="font-size:1.25rem;font-weight:700;margin-bottom:1.25rem">設定</div>
+  <div class="page-title"><div class="page-title-text"><i class="ti ti-settings"></i>設定</div></div>
   <div class="setup-banner">
     <strong>⚡ 首次使用設定</strong><br>
-    1. 從「健康追蹤」Google Sheets → 擴充功能 → Apps Script → 貼入 Code.gs<br>
-    2. 執行 <code>authorizeAll</code> 函式完成授權<br>
-    3. Script Properties 需設定 <code>GROQ_KEY</code>、<code>SPREADSHEET_ID</code>；要掃營養標示再加免費 <code>OCR_SPACE_KEY</code><br>
-    4. 部署為 Web App（執行身分：我 / 存取：所有人）→ 複製網址
+    1. 從「健康追蹤」Google Sheets → 擴充功能 → Apps Script → 貼入 Code.gs → 執行 authorizeAll 授權<br>
+    2. 部署為 Web App（執行身分：我 / 存取：所有人）→ 複製網址貼到下方
   </div>
   <div class="card" style="max-width:600px">
     <div class="card-title"><i class="ti ti-link"></i>API 連線設定</div>
@@ -764,95 +834,60 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   </div>
 </div>
 
-</main>
-</div><!-- end shell -->
-
+</div><!-- end main -->
 <script>
 // ══ 本機食物資料庫 ════════════════════════════════════════════
+// [名稱, kcal/100g, 蛋白質, 碳水, 脂肪, 糖, 纖維, 蛋白質類型(a=動物/p=植物)]
 const FOODS_DB=[
-  ["白飯",180,3,40,0.3,0,0.3],["糙米飯",160,3.5,35,1,0,1.8],["白吐司",265,8,50,3,5,2],
-  ["全麥吐司",247,9,45,3,3,5],["白粥",65,1.1,14,0.1,0,0.1],["白麵條",138,4.5,27,0.6,0,0.8],
-  ["烏龍麵",105,3,22,0.4,0,0.6],["燕麥",389,17,66,7,1,11],["地瓜",86,1.6,20,0.1,4,3],
-  ["馬鈴薯",76,2,17,0.1,1,2],["玉米",86,3.4,19,1.2,6,2.4],["饅頭",235,7,48,1.2,2,1.5],
-  ["雞胸肉",110,23,0,2,0,0],["雞里肌",105,24,0,1.5,0,0],["雞腿肉",172,18,0,11,0,0],
-  ["雞蛋",143,12,1.6,10,1,0],["水煮蛋",155,13,1.1,11,1,0],
-  ["豬里肌",143,22,0,6,0,0],["豬五花",395,14,0,38,0,0],["牛肉",158,26,0,5,0,0],
-  ["鮭魚",208,20,0,13,0,0],["鯛魚片",96,20,0,1.5,0,0],["蝦子",99,21,0,1.1,0,0],
-  ["豆腐",55,5,2,2.7,0.5,0.3],["毛豆",125,11,9,5,2,4],
-  ["無骨炸雞排",250,22,12,12,0.5,0.5],["滷雞腿",185,19,2,11,1,0],
-  ["花椰菜",32,3,6,0.4,2,2.6],["高麗菜",23,1.5,5,0.2,2.8,1.8],["菠菜",23,2.9,3.6,0.4,0.4,2.2],
-  ["番茄",18,0.9,3.9,0.2,2.6,1.2],["小黃瓜",15,0.7,3.6,0.1,1.7,0.5],
-  ["紅蘿蔔",41,0.9,10,0.2,4.7,2.8],["洋蔥",40,1.1,9.3,0.1,4.2,1.7],
-  ["香蕉",89,1.1,23,0.3,12,2.6],["蘋果",52,0.3,14,0.2,10,2.4],
-  ["藍莓",57,0.7,14,0.3,10,2.4],["草莓",32,0.7,7.7,0.3,4.9,2],
-  ["牛奶",61,3.2,4.8,3.3,4.8,0],["低脂牛奶",42,3.6,5,1,4.8,0],
-  ["優格",59,3.5,4,3.3,3,0],["起司片",300,18,4,23,1,0],
-  ["濃縮乳清",380,80,7,4,3,0],["豆漿",33,3,1.8,1.8,0.5,0.2],
-  ["杏仁",579,21,22,50,4,12],["無調味堅果",607,20,18,54,3,7],
-  ["橄欖油",884,0,0,100,0,0],["奶粉",500,26,55,27,55,0],
-  ["肉鬆火腿吐司",280,12,38,8,4,1.5],["蛋餅",220,8,28,9,2,1],
-  ["飯糰",185,4.5,38,2,0.5,0.8],["鹹酥雞",320,18,15,20,0.5,0.5],
-  ["珍珠奶茶",50,0.3,10,0.7,9.3,0],["美式咖啡",5,0.3,0.8,0,0,0],
-  ["拿鐵",120,6,10,5,9,0],["花椰菜米",25,2,4,0.3,1.5,2],
-  ["低脂蔓越莓優格",80,4,13,0.5,10,0],["冷凍藍莓",57,0.7,14,0.3,10,2.4],
+  ["白飯",180,3,40,0.3,0,0.3,"p"],["糙米飯",160,3.5,35,1,0,1.8,"p"],
+  ["白吐司",265,8,50,3,5,2,"p"],["全麥吐司",247,9,45,3,3,5,"p"],
+  ["白粥",65,1.1,14,0.1,0,0.1,"p"],["白麵條",138,4.5,27,0.6,0,0.8,"p"],
+  ["烏龍麵",105,3,22,0.4,0,0.6,"p"],["燕麥",389,17,66,7,1,11,"p"],
+  ["地瓜",86,1.6,20,0.1,4,3,"p"],["馬鈴薯",76,2,17,0.1,1,2,"p"],
+  ["饅頭",235,7,48,1.2,2,1.5,"p"],["玉米",86,3.4,19,1.2,6,2.4,"p"],
+  ["雞胸肉",110,23,0,2,0,0,"a"],["雞里肌",105,24,0,1.5,0,0,"a"],
+  ["雞腿肉",172,18,0,11,0,0,"a"],["雞蛋",143,12,1.6,10,1,0,"a"],
+  ["水煮蛋",155,13,1.1,11,1,0,"a"],["豬里肌",143,22,0,6,0,0,"a"],
+  ["豬五花",395,14,0,38,0,0,"a"],["牛肉",158,26,0,5,0,0,"a"],
+  ["鮭魚",208,20,0,13,0,0,"a"],["鯛魚片",96,20,0,1.5,0,0,"a"],
+  ["鯖魚",205,21,0,13,0,0,"a"],["蝦子",99,21,0,1.1,0,0,"a"],
+  ["豆腐",55,5,2,2.7,0.5,0.3,"p"],["毛豆",125,11,9,5,2,4,"p"],
+  ["無骨炸雞排",250,22,12,12,0.5,0.5,"a"],["滷雞腿",185,19,2,11,1,0,"a"],
+  ["花椰菜",32,3,6,0.4,2,2.6,"p"],["高麗菜",23,1.5,5,0.2,2.8,1.8,"p"],
+  ["菠菜",23,2.9,3.6,0.4,0.4,2.2,"p"],["番茄",18,0.9,3.9,0.2,2.6,1.2,"p"],
+  ["小黃瓜",15,0.7,3.6,0.1,1.7,0.5,"p"],["紅蘿蔔",41,0.9,10,0.2,4.7,2.8,"p"],
+  ["洋蔥",40,1.1,9.3,0.1,4.2,1.7,"p"],["香蕉",89,1.1,23,0.3,12,2.6,"p"],
+  ["蘋果",52,0.3,14,0.2,10,2.4,"p"],["藍莓",57,0.7,14,0.3,10,2.4,"p"],
+  ["草莓",32,0.7,7.7,0.3,4.9,2,"p"],["牛奶",61,3.2,4.8,3.3,4.8,0,"a"],
+  ["低脂牛奶",42,3.6,5,1,4.8,0,"a"],["優格",59,3.5,4,3.3,3,0,"a"],
+  ["起司片",300,18,4,23,1,0,"a"],["濃縮乳清",380,80,7,4,3,0,"a"],
+  ["豆漿",33,3,1.8,1.8,0.5,0.2,"p"],["杏仁",579,21,22,50,4,12,"p"],
+  ["無調味堅果",607,20,18,54,3,7,"p"],["橄欖油",884,0,0,100,0,0,"p"],
+  ["奶粉",500,26,55,27,55,0,"a"],["肉鬆火腿吐司",280,12,38,8,4,1.5,"a"],
+  ["蛋餅",220,8,28,9,2,1,"a"],["飯糰",185,4.5,38,2,0.5,0.8,"a"],
+  ["鹹酥雞",320,18,15,20,0.5,0.5,"a"],["炸雞排",260,20,14,13,0.5,0.5,"a"],
+  ["珍珠奶茶",50,0.3,10,0.7,9.3,0,"p"],["美式咖啡",5,0.3,0.8,0,0,0,"p"],
+  ["拿鐵",120,6,10,5,9,0,"a"],["花椰菜米",25,2,4,0.3,1.5,2,"p"],
+  ["低脂蔓越莓優格",80,4,13,0.5,10,0,"a"],
 ];
 const HIGH_RISK=['地瓜','燕麥','豆漿','豆腐','毛豆','花椰菜','洋蔥','玉米','乳清'];
 const GUT_SAFE=['白飯','白吐司','白粥','白麵條','烏龍麵','雞里肌','雞胸肉','水煮蛋','鯛魚','馬鈴薯'];
 
 function dbSearch(q){
   if(!q||q.length<1)return[];
-  q=q.toLowerCase();
+  q=q.toLowerCase().trim();
   const res=[];
-  for(const f of [...FOODS_DB,...getCustomFoodRows()]){
+  for(const f of FOODS_DB){
     const n=f[0].toLowerCase();let s=0;
-    if(n===q)s=10;else if(n.includes(q))s=7;else if(q.includes(n)&&n.length>1)s=5;
-    else{let m=0;for(const c of q)if(n.includes(c))m++;if(m/q.length>0.65)s=2;}
-    if(s>0)res.push({name:f[0],cal:f[1],prot:f[2],carb:f[3],fat:f[4],sug:f[5],fib:f[6],score:s});
+    if(n===q)s=10;
+    else if(n.includes(q))s=7;
+    else if(q.includes(n)&&n.length>1)s=5;
+    else{let m=0;for(const c of q)if(n.includes(c))m++;if(q.length>0&&m/q.length>0.65)s=2;}
+    if(s>0)res.push({name:f[0],cal:f[1],prot:f[2],carb:f[3],fat:f[4],sug:f[5],fib:f[6],protType:f[7]||'p',score:s});
   }
-  return res.sort((a,b)=>b.score-a.score).slice(0,5);
+  return res.sort((a,b)=>b.score-a.score).slice(0,6);
 }
-function getCustomFoodRows(){
-  try{return JSON.parse(localStorage.getItem('ht_custom_foods')||'[]');}
-  catch(e){return[];}
-}
-function saveCustomFood(item){
-  const rows=getCustomFoodRows();
-  if(!item.name||rows.some(r=>r[0]===item.name))return;
-  rows.push([item.name,+item.cal||0,+item.prot||0,+item.carb||0,+item.fat||0,+item.sug||0,+item.fib||0]);
-  localStorage.setItem('ht_custom_foods',JSON.stringify(rows.slice(-120)));
-  renderCustomFoodList();
-}
-function addCustomFoodFromForm(){
-  const item={
-    name:document.getElementById('db-food-name').value.trim(),
-    cal:+document.getElementById('db-food-cal').value||0,
-    prot:+document.getElementById('db-food-prot').value||0,
-    carb:+document.getElementById('db-food-carb').value||0,
-    fat:+document.getElementById('db-food-fat').value||0,
-    sug:+document.getElementById('db-food-sug').value||0,
-    fib:+document.getElementById('db-food-fib').value||0
-  };
-  if(!item.name){toast('請輸入品項名稱');return;}
-  saveCustomFood(item);
-  ['db-food-name','db-food-cal','db-food-prot','db-food-carb','db-food-fat','db-food-sug','db-food-fib'].forEach((id,i)=>document.getElementById(id).value=i?'0':'');
-  toast('✓ 已加入外食資料庫');
-}
-function removeCustomFood(name){
-  const rows=getCustomFoodRows().filter(r=>r[0]!==name);
-  localStorage.setItem('ht_custom_foods',JSON.stringify(rows));
-  renderCustomFoodList();
-}
-function renderCustomFoodList(){
-  const el=document.getElementById('custom-food-list');if(!el)return;
-  const rows=getCustomFoodRows();
-  if(!rows.length){el.innerHTML='<p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚未建立外食資料</p>';return;}
-  el.innerHTML=rows.slice(-12).reverse().map(r=>`
-    <div class="draft-item"><b>${r[0]}</b><br>${r[1]} kcal/100g · 蛋白 ${r[2]}g · 碳水 ${r[3]}g · 脂肪 ${r[4]}g
-      <div class="btn-row" style="margin-top:.35rem">
-        <button class="btn xs" onclick="removeCustomFood('${String(r[0]).replace(/'/g,'\\\'')}')"><i class="ti ti-x"></i>刪除</button>
-      </div>
-    </div>`).join('');
-}
+
 function osmoticRisk(foods){
   let r=0;
   for(const f of foods){
@@ -873,147 +908,11 @@ const VER=(()=>{
 document.getElementById('ver-display').textContent='v'+VER;
 document.getElementById('dash-date').textContent=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
 
-
-// ══ 使用者系統 ═══════════════════════════════════════════════
-const USER = { current: '' };
-
-function initUser(){
-  const users = JSON.parse(localStorage.getItem('ht_users')||'[]');
-  const last  = localStorage.getItem('ht_current_user')||'';
-  const existing = document.getElementById('existing-users');
-  const wrap     = document.getElementById('existing-user-btns');
-  if(users.length){
-    wrap.style.display='block';
-    existing.innerHTML = users.map(u=>
-      `<button onclick="selectUser('${u}')"
-        style="padding:5px 14px;border-radius:99px;border:1.5px solid #E2E8F0;
-               background:#F0F4F8;cursor:pointer;font-size:.8125rem;font-family:inherit">${u}</button>`
-    ).join('');
-  }
-  if(last){ selectUser(last); }
-  else { showUserModal(); }
-}
-
-function showUserModal(){
-  document.getElementById('user-modal').style.display='flex';
-  setTimeout(()=>document.getElementById('user-input').focus(),100);
-}
-
-function selectUser(name){
-  document.getElementById('user-input').value=name;
-  confirmUser();
-}
-
-function confirmUser(){
-  const name = document.getElementById('user-input').value.trim();
-  if(!name){ document.getElementById('user-input').style.outline='2px solid #EF4444'; return; }
-  const users = JSON.parse(localStorage.getItem('ht_users')||'[]');
-  if(!users.includes(name)) users.push(name);
-  localStorage.setItem('ht_users', JSON.stringify(users));
-  localStorage.setItem('ht_current_user', name);
-  USER.current = name;
-  const label = document.getElementById('current-user-label');
-  if(label) label.textContent = name;
-  document.getElementById('user-modal').style.display='none';
-  // 先從快取還原，再從 Sheets 同步最新
-  restoreFromCache();
-  if(CFG.gasUrl) loadAll(); else swPage('setup');
-}
-
-function switchUser(){
-  localStorage.removeItem('ht_current_user');
-  USER.current = '';
-  document.getElementById('user-input').value='';
-  clearStateAndUI();
-  const users = JSON.parse(localStorage.getItem('ht_users')||'[]');
-  const wrap=document.getElementById('existing-user-btns');
-  const existing=document.getElementById('existing-users');
-  if(users.length){
-    wrap.style.display='block';
-    existing.innerHTML=users.map(u=>
-      `<button onclick="selectUser('${u}')"
-        style="padding:5px 14px;border-radius:99px;border:1.5px solid #E2E8F0;
-               background:#F0F4F8;cursor:pointer;font-size:.8125rem;font-family:inherit">${u}</button>`
-    ).join('');
-  } else { wrap.style.display='none'; }
-  showUserModal();
-}
-
-function clearStateAndUI(){
-  S.foods=[];S.activities=[];S.timeline=[];S.water=0;S.history=[];S.supps=[];
-  S.lastMealTime=null;S.lastMealProt=0;S.signal='normal';S.discomforts=new Set();
-  ['normal','yellow','red','immune'].forEach(k=>{const b=document.getElementById('sig-'+k);if(b)b.className='sig-btn';});
-  const nb=document.getElementById('sig-normal');if(nb)nb.classList.add('on-green');
-  const gl=document.getElementById('global-light');
-  if(gl){gl.textContent='🟢 生理狀態：正常';gl.className='badge g';}
-  renderFoodList(); renderActList(); renderSuppList(); renderTimeline();
-  updateProgress(); updateWaterUI();
-}
-
-// ══ localStorage 快取（解決重整後資料消失）═══════════════════
-const CACHE_VER = 3;
-
-function cacheKey(suffix){ return 'ht_' + (USER.current||'_') + '_' + suffix; }
-
-function saveToCache(){
-  if(!USER.current) return;
-  const today = new Date().toLocaleDateString('zh-TW');
-  try{
-    localStorage.setItem(cacheKey('state'), JSON.stringify({
-      v: CACHE_VER, date: today,
-      foods: S.foods, water: S.water, waterGoal: S.waterGoal,
-      activities: S.activities, targets: S.targets, profile: S.profile,
-      supps: S.supps, history: S.history.slice(-30),
-      signal: S.signal, discomforts: Array.from(S.discomforts),
-      lastMealTime: S.lastMealTime, lastMealProt: S.lastMealProt,
-    }));
-  }catch(e){ console.warn('saveToCache failed',e); }
-}
-
-function restoreFromCache(){
-  if(!USER.current) return;
-  try{
-    const raw = localStorage.getItem(cacheKey('state'));
-    if(!raw) return;
-    const d = JSON.parse(raw);
-    if(d.v !== CACHE_VER) return;
-    const today = new Date().toLocaleDateString('zh-TW');
-    // 永遠還原設定類資料
-    if(d.targets)  S.targets  = d.targets;
-    if(d.profile)  S.profile  = d.profile;
-    if(d.supps)    S.supps    = d.supps;
-    if(d.history)  S.history  = d.history;
-    if(d.waterGoal)S.waterGoal= d.waterGoal;
-    if(d.date === today){
-      // 同一天：還原今日記錄
-      S.foods        = d.foods    || [];
-      S.water        = d.water    || 0;
-      S.activities   = d.activities || [];
-      S.lastMealTime = d.lastMealTime || null;
-      S.lastMealProt = d.lastMealProt || 0;
-      if(d.signal) setSignal(d.signal);
-      (d.discomforts||[]).forEach(key=>{
-        S.discomforts.add(key);
-        const btn = document.getElementById('dc-'+key);
-        if(btn) btn.className='dc-btn '+(key.match(/^(rumble|gas|loose|bloat|fever|nausea)$/)?'on':'on-y');
-      });
-    } else {
-      // 跨日：清空今日，保留設定
-      S.foods=[]; S.activities=[]; S.water=0;
-    }
-    // 刷新 UI
-    renderBodyMetrics && renderBodyMetrics();
-    renderFoodList(); updateProgress(); updateWaterUI();
-    renderActList(); renderSuppList(); renderTimeline();
-    checkProtProtocol && checkProtProtocol();
-    checkGutAlert && checkGutAlert();
-  }catch(e){ console.warn('restoreFromCache failed',e); }
-}
-
-// ══ CONFIG & STATE ════════════════════════════════════════════
+// ══ CONFIG ═══════════════════════════════════════════════════
 const CFG={gasUrl:localStorage.getItem('ht_gas')||''};
 if(CFG.gasUrl)document.getElementById('cfg-gas').value=CFG.gasUrl;
 
+// ══ STATE ════════════════════════════════════════════════════
 const S={
   targets:{cal:2000,prot:105,carb:180,fat:55,sug:30,fib:25,water:2450},
   foods:[],supps:[],activities:[],timeline:[],
@@ -1021,66 +920,196 @@ const S={
   profile:{weight:70,bf:20,muscle:52,vf:7},
   signal:'normal',discomforts:new Set(),
   lastMealTime:null,lastMealProt:0,
-  lastWaterAdd:0,
-  labelDraft:null,
-  combos:[],
   chartInst:null,chartType:'weight',
+  pendingDBItems:[],pendingAIItems:[],pendingFSItems:[],
+  pendingOcrItem:null,
 };
 
-// ══ PAGE NAV ═════════════════════════════════════════════════
-function swPage(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  const nb=document.querySelector(`.nav-btn[onclick="swPage('${id}')"]`);
-  if(nb)nb.classList.add('active');
-  // topbar
-  document.querySelectorAll('.tb-btn').forEach(b=>b.classList.remove('active'));
-  const tb=document.getElementById('tb-'+id);if(tb)tb.classList.add('active');
-  // mobile nav
-  document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('active'));
-  const mn=document.getElementById('mn-'+id);if(mn)mn.classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
-  if(id==='home')setTimeout(()=>renderChart(S.chartType),200);
+// ══ 使用者系統 ═══════════════════════════════════════════════
+const USER={current:''};
+
+function initUser(){
+  const users=JSON.parse(localStorage.getItem('ht_users')||'[]');
+  const last=localStorage.getItem('ht_current_user')||'';
+  const wrap=document.getElementById('existing-user-btns');
+  const existing=document.getElementById('existing-users');
+  if(users.length){
+    wrap.style.display='block';
+    existing.innerHTML=users.map(u=>
+      `<button onclick="selectUser('${u}')"
+        style="padding:5px 14px;border-radius:99px;border:1.5px solid #E2E8F0;background:#F0F4F8;
+               cursor:pointer;font-size:.8125rem;font-family:inherit;transition:all .15s"
+        onmouseover="this.style.borderColor='#14B8A6'"
+        onmouseout="this.style.borderColor='#E2E8F0'">${u}</button>`
+    ).join('');
+  }
+  if(last)selectUser(last);
+  else{document.getElementById('user-modal').style.display='flex';setTimeout(()=>document.getElementById('user-input').focus(),100);}
+  renderUsersPage();
 }
 
-function scrollTo(sel){
-  const el=document.querySelector(sel);
-  if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+function selectUser(name){document.getElementById('user-input').value=name;confirmUser();}
+
+function confirmUser(){
+  const name=document.getElementById('user-input').value.trim();
+  if(!name){document.getElementById('user-input').style.borderColor='#EF4444';return;}
+  const users=JSON.parse(localStorage.getItem('ht_users')||'[]');
+  if(!users.includes(name))users.push(name);
+  localStorage.setItem('ht_users',JSON.stringify(users));
+  localStorage.setItem('ht_current_user',name);
+  USER.current=name;
+  const label=document.getElementById('current-user-label');
+  if(label)label.textContent=name;
+  document.getElementById('user-modal').style.display='none';
+  renderUsersPage();
+  restoreFromCache();
+  if(CFG.gasUrl)loadAll();else swPage('setup');
+}
+
+function addNewUser(){document.getElementById('add-user-form').style.display='block';document.getElementById('new-user-input').focus();}
+function confirmNewUser(){
+  const name=document.getElementById('new-user-input').value.trim();
+  if(!name)return;
+  const users=JSON.parse(localStorage.getItem('ht_users')||'[]');
+  if(!users.includes(name)){users.push(name);localStorage.setItem('ht_users',JSON.stringify(users));}
+  document.getElementById('add-user-form').style.display='none';
+  document.getElementById('new-user-input').value='';
+  renderUsersPage();toast('✓ 已新增使用者：'+name);
+}
+
+function switchToUser(name){
+  localStorage.setItem('ht_current_user',name);
+  USER.current=name;
+  clearStateAndUI();
+  const label=document.getElementById('current-user-label');
+  if(label)label.textContent=name;
+  restoreFromCache();
+  if(CFG.gasUrl)loadAll();else toast('⚠️ 請先設定 Apps Script 網址');
+  renderUsersPage();
+  toast('✓ 已切換到：'+name);
+  swPage('home');
+}
+
+function deleteUser(name){
+  if(!confirm(`確定要刪除使用者「${name}」的所有資料嗎？`))return;
+  const users=JSON.parse(localStorage.getItem('ht_users')||'[]').filter(u=>u!==name);
+  localStorage.setItem('ht_users',JSON.stringify(users));
+  localStorage.removeItem('ht_'+name+'_state');
+  if(USER.current===name){
+    localStorage.removeItem('ht_current_user');
+    if(users.length){switchToUser(users[0]);}
+    else{USER.current='';clearStateAndUI();document.getElementById('user-modal').style.display='flex';}
+  }
+  renderUsersPage();toast('已刪除：'+name);
+}
+
+function renderUsersPage(){
+  const el=document.getElementById('users-grid');if(!el)return;
+  const users=JSON.parse(localStorage.getItem('ht_users')||'[]');
+  if(!users.length){el.innerHTML='<p style="font-size:.8125rem;color:var(--muted)">尚無使用者，點右上角「新增使用者」</p>';return;}
+  el.innerHTML=users.map(u=>{
+    const isCurrent=u===USER.current;
+    const cache=JSON.parse(localStorage.getItem('ht_'+u+'_state')||'null');
+    const meta=cache?`上次記錄：${cache.date||'—'}`:' 尚無記錄';
+    return `<div class="user-card ${isCurrent?'current':''}" onclick="switchToUser('${u}')">
+      <div class="user-avatar">${u.charAt(0).toUpperCase()}</div>
+      <div class="user-name">${u}${isCurrent?' <span class="badge g" style="font-size:.625rem">目前</span>':''}</div>
+      <div class="user-meta">${meta}</div>
+      ${!isCurrent?`<button class="btn xs" style="margin-top:.5rem;color:var(--danger);border-color:var(--danger)" onclick="event.stopPropagation();deleteUser('${u}')"><i class="ti ti-trash"></i>刪除</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function clearStateAndUI(){
+  S.foods=[];S.activities=[];S.timeline=[];S.water=0;S.history=[];S.supps=[];
+  S.lastMealTime=null;S.lastMealProt=0;S.signal='normal';S.discomforts=new Set();
+  ['normal','yellow','red','immune'].forEach(k=>{const b=document.getElementById('sig-'+k);if(b)b.className='sig-btn';});
+  const nb=document.getElementById('sig-normal');if(nb)nb.classList.add('on-green');
+  const gl=document.getElementById('global-light');if(gl){gl.textContent='🟢 正常';gl.className='badge g';}
+  renderFoodList();renderActList();renderSuppList();renderTimeline();updateProgress();updateWaterUI();
+}
+
+// ══ CACHE ════════════════════════════════════════════════════
+const CACHE_VER=4;
+function cacheKey(s){return'ht_'+(USER.current||'_')+'_'+s;}
+
+function saveToCache(){
+  if(!USER.current)return;
+  const today=new Date().toLocaleDateString('zh-TW');
+  try{
+    localStorage.setItem(cacheKey('state'),JSON.stringify({
+      v:CACHE_VER,date:today,
+      foods:S.foods,water:S.water,waterGoal:S.waterGoal,
+      activities:S.activities,targets:S.targets,profile:S.profile,
+      supps:S.supps,history:S.history.slice(-30),
+      signal:S.signal,discomforts:Array.from(S.discomforts),
+      lastMealTime:S.lastMealTime,lastMealProt:S.lastMealProt,
+    }));
+  }catch(e){console.warn('saveToCache fail',e);}
+}
+
+function restoreFromCache(){
+  if(!USER.current)return;
+  try{
+    const raw=localStorage.getItem(cacheKey('state'));
+    if(!raw)return;
+    const d=JSON.parse(raw);
+    if(d.v!==CACHE_VER)return;
+    const today=new Date().toLocaleDateString('zh-TW');
+    if(d.targets)S.targets=d.targets;
+    if(d.profile){S.profile=d.profile;applyProfileToForm();}
+    if(d.supps)S.supps=d.supps;
+    if(d.history)S.history=d.history;
+    if(d.waterGoal)S.waterGoal=d.waterGoal;
+    if(d.date===today){
+      S.foods=d.foods||[];S.water=d.water||0;S.activities=d.activities||[];
+      S.lastMealTime=d.lastMealTime||null;S.lastMealProt=d.lastMealProt||0;
+      if(d.signal)setSignal(d.signal);
+      (d.discomforts||[]).forEach(key=>{
+        S.discomforts.add(key);
+        const btn=document.getElementById('dc-'+key);
+        if(btn)btn.className='dc-btn '+(key.match(/^(rumble|gas|loose|bloat|fever|nausea)$/)?'on':'on-y');
+      });
+    }else{S.foods=[];S.activities=[];S.water=0;}
+    renderBodyMetrics();renderFoodList();updateProgress();updateWaterUI();
+    renderActList();renderSuppList();renderTimeline();
+    checkProtProtocol();checkGutAlert();updateDeficitTable();updateProteinRatio();
+  }catch(e){console.warn('restoreFromCache fail',e);}
+}
+
+function applyProfileToForm(){
+  const p=S.profile;
+  ['age','gender','height','weight','bf','muscle','vf','tbf','tmuscle','tvf'].forEach(k=>{
+    const el=document.getElementById(k);if(el&&p[k]!==undefined)el.value=p[k];
+  });
+  if(p.goal){const el=document.getElementById('goal');if(el)el.value=p.goal;}
+  if(p.actLevel){const el=document.getElementById('act-level');if(el)el.value=p.actLevel;}
 }
 
 // ══ GAS ══════════════════════════════════════════════════════
 async function gasCall(body){
   if(!CFG.gasUrl){toast('⚠️ 請先在設定填入 Apps Script 網址');return null;}
   try{
-    const action=body.action;
-    const data=Object.assign({},body);delete data.action;
     const user=USER.current||'default';
-    // 統一走 POST，讓大 payload（圖片 base64）也能傳送
-    // Apps Script doPost 已支援
+    const payload=Object.assign({user},body);
     const resp=await fetch(CFG.gasUrl,{
-      method:'POST',
-      redirect:'follow',
+      method:'POST',redirect:'follow',
       headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify({action, user, data})
+      body:JSON.stringify(payload)
     });
-    if(!resp.ok) throw new Error('HTTP '+resp.status);
-    const txt=await resp.text();
-    return JSON.parse(txt);
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    return JSON.parse(await resp.text());
   }catch(e){
-    // POST 失敗時 fallback 到 GET（適用小 payload）
+    // fallback GET
     try{
-      const action=body.action;
-      const data=Object.assign({},body);delete data.action;
+      const action=body.action;const data=Object.assign({},body);delete data.action;
       const user=USER.current||'default';
       const p=new URLSearchParams({action,user});
-      const dataStr=JSON.stringify(data);
-      if(dataStr.length<3000) p.append('data',encodeURIComponent(dataStr));
+      const ds=JSON.stringify(data);
+      if(ds.length<3000)p.append('data',encodeURIComponent(ds));
       const r=await fetch(CFG.gasUrl+'?'+p.toString(),{redirect:'follow'});
       return JSON.parse(await r.text());
-    }catch(e2){
-      toast('連線失敗：'+e2.message);return null;
-    }
+    }catch(e2){toast('連線失敗：'+e2.message);return null;}
   }
 }
 async function aiText(prompt,max=2000){
@@ -1098,142 +1127,94 @@ async function testConn(){
   el.innerHTML=d&&d.ok?'<span style="color:var(--accent-md)">✓ 連線成功</span>':'<span style="color:var(--danger)">✗ 連線失敗</span>';
 }
 
+// ══ LOAD ALL ═════════════════════════════════════════════════
 async function loadAll(){
-  if(!CFG.gasUrl)return;
+  if(!CFG.gasUrl||!USER.current)return;
   const d=await gasCall({action:'getAll'});if(!d||!d.ok)return;
   if(d.profile&&d.profile.length>1){
     const p=d.profile[1];
-    ['age','gender','height','weight','bf','muscle','vf','tbf','tmuscle','tvf'].forEach(k=>{const el=document.getElementById(k);if(el&&p[k]!==undefined)el.value=p[k];});
-    if(p.goal)document.getElementById('goal').value=p.goal;
-    if(p.actLevel)document.getElementById('act-level').value=p.actLevel;
-    S.targets={cal:+p.calTarget||2000,prot:+p.protTarget||105,carb:+p.carbTarget||180,fat:+p.fatTarget||55,sug:+p.sugTarget||30,fib:+p.fibTarget||25,water:+p.waterGoal||2450};
-    S.profile={weight:+p.weight||70,bf:+p.bf||20,muscle:+p.muscle||52,vf:+p.vf||7,goal:p.goal,tbf:+p.targetBf||15,tmuscle:+p.targetMuscle||55,tvf:+p.targetVf||5,height:+p.height||170};
+    S.targets={cal:+p.calTarget||2000,prot:+p.protTarget||105,carb:+p.carbTarget||180,
+      fat:+p.fatTarget||55,sug:+p.sugTarget||30,fib:+p.fibTarget||25,water:+p.waterGoal||2450};
+    S.profile={weight:+p.weight||70,bf:+p.bf||20,muscle:+p.muscle||52,vf:+p.vf||7,
+      goal:p.goal,actLevel:p.actLevel||p.activity,height:+p.height||170,
+      tbf:+p.targetBf||15,tmuscle:+p.targetMuscle||55,tvf:+p.targetVf||5};
     S.waterGoal=S.targets.water;
-    renderBodyMetrics();
+    applyProfileToForm();renderBodyMetrics();
   }
-  S.foods=(d.foods||[]).map((f,i)=>({...f,prot:+f.prot,carb:+f.carb,fat:+f.fat,cal:+f.cal,sug:+f.sug||0,fib:+f.fib||0,amount:+f.amount,id:i}));
+  S.foods=(d.foods||[]).map((f,i)=>({...f,prot:+f.prot,carb:+f.carb,fat:+f.fat,cal:+f.cal,sug:+f.sug||0,fib:+f.fib||0,amount:+f.amount,protType:f.protType||'a',id:i}));
   S.water=+(d.water)||0;
-  S.activities=(d.activities||[]).map((a,i)=>({...a,min:+a.minutes,cal:+a.cal,id:i,stairsInfo:a.stairsUp?{up:+a.stairsUp,sets:+a.stairsSets,total:+a.stairsTotal}:null}));
+  S.activities=(d.activities||[]).map((a,i)=>({...a,min:+a.minutes||+a.min,cal:+a.cal,id:i,
+    stairsInfo:a.stairsUp?{up:+a.stairsUp,sets:+a.stairsSets,total:+a.stairsTotal}:null}));
   S.supps=(d.supplements||[]).map((s,i)=>({...s,id:i}));
   S.history=(d.history||[]).map(h=>({...h,weight:+h.weight,bf:+h.bf,muscle:+h.muscle,vf:+h.vf,water:+h.water}));
   renderFoodList();updateProgress();updateWaterUI();renderActList();renderSuppList();renderTimeline();
-  checkProtProtocol();checkGutAlert();
+  checkProtProtocol();checkGutAlert();updateDeficitTable();updateProteinRatio();
+  setTimeout(()=>renderChart(S.chartType),200);
   saveToCache();
-  setTimeout(()=>renderChart(S.chartType),300);
 }
 
-// ══ 身體數據 ════════════════════════════════════════════════
-async function calcAndSave(){
-  const age=+document.getElementById('age').value;
-  const gender=document.getElementById('gender').value;
-  const h=+document.getElementById('height').value;
-  const w=+document.getElementById('weight').value;
-  const bf=+document.getElementById('bf').value;
-  const muscle=+document.getElementById('muscle').value;
-  const vf=+document.getElementById('vf').value;
-  const tbf=+document.getElementById('tbf').value;
-  const tmuscle=+document.getElementById('tmuscle').value;
-  const tvf=+document.getElementById('tvf').value;
-  const actV=+document.getElementById('act-level').value;
-  const goal=document.getElementById('goal').value;
-  const gutActive=S.signal==='red'||S.discomforts.has('rumble')||S.discomforts.has('loose');
-  let protTarget=gutActive?25:105;
-  const bmr=Math.round(gender==='male'?10*w+6.25*h-5*age+5:10*w+6.25*h-5*age-161);
-  const tdee=Math.round(bmr*actV);
-  const cal=goal==='cut'?tdee-500:goal==='bulk'?tdee+300:tdee;
-  const fat=Math.round(cal*.25/9);
-  const carb=Math.round((cal-protTarget*4-fat*9)/4);
-  const sugTarget=goal==='cut'?25:40;
-  const fibTarget=gutActive?15:25;
-  const waterGoal=Math.round(w*35);
-  S.targets={cal,prot:protTarget,carb,fat,sug:sugTarget,fib:fibTarget,water:waterGoal};
-  S.waterGoal=waterGoal;
-  S.profile={weight:w,bf,muscle,vf,goal,actLevel:actV,height:h,tbf,tmuscle,tvf};
-  document.getElementById('bmr-display').value=bmr;
-  document.getElementById('act-weight').textContent=w;
+// ══ NAV ══════════════════════════════════════════════════════
+const PAGE_DEFAULT_SUB={home:'macros',diet:'omni',bodydata:'body-input'};
 
-  // 體態對抗性證偽
-  let anomaly='';
-  const prev=S.history[S.history.length-1];
-  if(prev&&prev.weight){
-    const dW=w-prev.weight,dM=muscle-(prev.muscle||0),dBf=bf-prev.bf;
-    if(dW<-0.5&&dM<-0.3)
-      anomaly=`<div class="alert danger show" style="margin-top:.75rem">⚠️ <b>非正常肌肉流失</b>：體重 ${dW.toFixed(1)}kg，肌肉流失 ${Math.abs(dM).toFixed(1)}kg。建議：調降訓練 30%，每 3 小時補充 25-30g 固態蛋白。</div>`;
-    else if(dBf<-0.8&&dM>0.1)
-      anomaly=`<div class="alert success show" style="margin-top:.75rem">✅ <b>進展良好</b>：體脂 -${Math.abs(dBf).toFixed(1)}%，肌肉 +${dM.toFixed(1)}kg。繼續保持！</div>`;
-    else if(dW<-0.8&&dBf>0)
-      anomaly=`<div class="alert warn show" style="margin-top:.75rem">⚠️ 體重快速下降但體脂微升，建議連觀 3 天確認是否為水分變化。</div>`;
-  }
-  document.getElementById('body-anomaly').innerHTML=anomaly;
-  renderBodyMetrics();updateProgress();updateWaterUI();
-
-  const r=await gasCall({action:'saveProfile',data:{age,gender,height:h,weight:w,targetWeight:0,bf,targetBf:tbf,muscle,targetMuscle:tmuscle,vf,targetVf:tvf,activity:actV,goal,bmr,tdee,calTarget:cal,protTarget,carbTarget:carb,fatTarget:fat,sugTarget,fibTarget,waterGoal}});
-  if(r&&r.ok){
-    await gasCall({action:'addHistory',data:{weight:w,bf,muscle,vf,water:S.water}});
-    S.history.push({date:new Date().toLocaleDateString('zh-TW'),weight:w,bf,muscle,vf,water:S.water});
-    toast('✓ 身體數據已儲存');
-    saveToCache();
-    setTimeout(()=>renderChart(S.chartType),300);
-  }
+function swPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.nav-btn[onclick="swPage('${id}')"]`)?.classList.add('active');
+  document.querySelectorAll('.tb-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tb-'+id)?.classList.add('active');
+  document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('mn-'+id)?.classList.add('active');
+  if(PAGE_DEFAULT_SUB[id])swSub(id,PAGE_DEFAULT_SUB[id]);
+  if(id==='history'||id==='home')setTimeout(()=>renderChart(S.chartType),80);
+  if(id==='users')renderUsersPage();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function renderBodyMetrics(){
-  const p=S.profile,t=S.targets;
-  if(!p.weight)return;
-  const bmi=p.height?(p.weight/((p.height||170)/100)**2).toFixed(1):'—';
-  const bfDiff=(p.bf-(p.tbf||15)).toFixed(1);
-  const muscleDiff=((p.tmuscle||55)-p.muscle).toFixed(1);
-  const bfWeeks=bfDiff>0?Math.ceil(bfDiff/0.5):0;
-  const muscleMonths=muscleDiff>0?Math.ceil(muscleDiff/0.5):0;
-  document.getElementById('body-metrics-content').innerHTML=`
-    <div class="metric-row"><span class="metric-label"><i class="ti ti-scale"></i>體重</span><span class="metric-value">${p.weight} kg</span></div>
-    <div class="metric-row"><span class="metric-label"><i class="ti ti-percentage"></i>體脂率</span><div style="text-align:right"><div class="metric-value">${p.bf}%</div><div class="metric-target">目標${p.tbf||15}% · 差${bfDiff}% · 約${bfWeeks}週</div></div></div>
-    <div class="metric-row"><span class="metric-label"><i class="ti ti-arm"></i>肌肉量</span><div style="text-align:right"><div class="metric-value">${p.muscle} kg</div><div class="metric-target">目標${p.tmuscle||55}kg · 差${muscleDiff}kg · 約${muscleMonths}月</div></div></div>
-    <div class="metric-row"><span class="metric-label"><i class="ti ti-heart"></i>內臟脂肪</span><div style="text-align:right"><div class="metric-value">${p.vf}</div><div class="metric-target">目標${p.tvf||5}</div></div></div>
-    <div class="metric-row" style="border-bottom:none"><span class="metric-label"><i class="ti ti-activity"></i>BMI</span><span class="metric-value">${bmi}</span></div>`;
-  document.getElementById('body-targets-card').style.display='block';
-  document.getElementById('body-targets-content').innerHTML=`
-    <div style="display:flex;flex-wrap:wrap;gap:5px">
-      <span style="background:#CCFBF1;color:#0F766E;font-size:.6875rem;padding:3px 9px;border-radius:99px;font-weight:500">熱量 ${t.cal}kcal</span>
-      <span style="background:#D1FAE5;color:#065F46;font-size:.6875rem;padding:3px 9px;border-radius:99px;font-weight:500">蛋白質 ${t.prot}g${S.signal==='red'?' ⚠️':''}</span>
-      <span style="background:#FEF9C3;color:#92400E;font-size:.6875rem;padding:3px 9px;border-radius:99px;font-weight:500">碳水 ${t.carb}g</span>
-      <span style="background:#FEE2E2;color:#991B1B;font-size:.6875rem;padding:3px 9px;border-radius:99px;font-weight:500">脂肪 ${t.fat}g</span>
-      <span style="background:#DBEAFE;color:#1E40AF;font-size:.6875rem;padding:3px 9px;border-radius:99px;font-weight:500">水分 ${t.water}ml</span>
-    </div>`;
+function swSub(page,sec){
+  // update stabs
+  document.querySelectorAll(`#page-${page} .stab`).forEach(b=>b.classList.remove('active'));
+  const activeStab=document.querySelector(`#page-${page} .stab[onclick="swSub('${page}','${sec}')"]`);
+  if(activeStab)activeStab.classList.add('active');
+  // show/hide sub-sections
+  document.querySelectorAll(`#page-${page} .sub-section`).forEach(s=>s.classList.remove('active'));
+  document.getElementById(`${page}-${sec}`)?.classList.add('active');
+  // update sidebar sub buttons
+  document.querySelectorAll('.nav-sub').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.nav-sub[onclick="swSub('${page}','${sec}')"]`)?.classList.add('active');
+  if(page==='home'&&sec==='history')setTimeout(()=>renderChart(S.chartType),80);
 }
 
-// ══ 燈號 & 不適 ═══════════════════════════════════════════════
+// ══ SIGNAL ═══════════════════════════════════════════════════
 function setSignal(type){
   S.signal=type;
   ['normal','yellow','red','immune'].forEach(k=>{const b=document.getElementById('sig-'+k);if(b)b.className='sig-btn';});
   const cls={normal:'on-green',yellow:'on-yellow',red:'on-red',immune:'on-orange'}[type]||'on-green';
-  const b=document.getElementById('sig-'+type);if(b)b.classList.add(cls);
-  const label={normal:'🟢 生理狀態：正常',yellow:'🟡 呼吸道症狀',red:'🔴 腸道不穩',immune:'🟠 免疫應激'}[type];
-  document.getElementById('global-light').textContent=label;
-  document.getElementById('global-light').className='badge '+(type==='normal'?'g':type==='red'?'d':'w');
-  checkGutAlert();
+  document.getElementById('sig-'+type)?.classList.add(cls);
+  const label={normal:'🟢 正常',yellow:'🟡 呼吸道',red:'🔴 腸道不穩',immune:'🟠 免疫應激'}[type];
+  const gl=document.getElementById('global-light');
+  if(gl){gl.textContent=label;gl.className='badge '+(type==='normal'?'g':type==='red'?'d':'w');}
+  checkGutAlert();saveToCache();
 }
 
 function toggleDC(btn,key,color){
-  if(S.discomforts.has(key)){
-    S.discomforts.delete(key);btn.className='dc-btn';
-  }else{
+  if(S.discomforts.has(key)){S.discomforts.delete(key);btn.className='dc-btn';}
+  else{
     S.discomforts.add(key);
     btn.className='dc-btn '+(color==='red'?'on':'on-y');
-    // 自動帶動燈號
     const redKeys=['rumble','gas','loose','bloat','fever','nausea'];
-    const yellowKeys=['phlegm_y','phlegm_g','cough','throat','fatigue','headache'];
     if(redKeys.includes(key)&&S.signal==='normal')setSignal('red');
-    else if(yellowKeys.includes(key)&&S.signal==='normal')setSignal('yellow');
+    else if(!redKeys.includes(key)&&S.signal==='normal')setSignal('yellow');
   }
-  checkGutAlert();
+  checkGutAlert();saveToCache();
 }
 
 function checkGutAlert(){
-  const isGut=S.signal==='red'||S.discomforts.has('rumble')||S.discomforts.has('loose')||S.discomforts.has('nausea');
+  const isGut=S.signal==='red'||S.discomforts.has('rumble')||S.discomforts.has('loose');
   const risk=osmoticRisk(S.foods);
   document.getElementById('osmotic-val').textContent=risk;
-  document.getElementById('gut-alert').classList.toggle('show',isGut&&risk>=2);
+  document.getElementById('gut-alert')?.classList.toggle('show',isGut&&risk>=2);
+  updateDeficitTable();
 }
 
 function isBlockedFood(name){
@@ -1243,263 +1224,182 @@ function isBlockedFood(name){
 
 function checkProtProtocol(){
   const box=document.getElementById('prot-protocol');
-  const alert=document.getElementById('prot-alert');
-  if(!S.lastMealTime||!S.lastMealProt){if(box)box.style.display='none';if(alert)alert.classList.remove('show');return;}
+  const al=document.getElementById('prot-alert');
+  if(!S.lastMealTime||!S.lastMealProt){box&&(box.style.display='none');al?.classList.remove('show');return;}
   const gapH=(Date.now()-S.lastMealTime)/3600000;
   if(S.lastMealProt>=40&&gapH<4){
     const nxt=new Date(S.lastMealTime+4*3600000).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
     ['pp-prev','prot-prev'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=Math.round(S.lastMealProt);});
     ['pp-gap','prot-gap'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=gapH.toFixed(1);});
     ['pp-next','prot-next'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=nxt;});
-    if(box)box.style.display='block';if(alert)alert.classList.add('show');
-  }else{if(box)box.style.display='none';if(alert)alert.classList.remove('show');}
+    box&&(box.style.display='block');al?.classList.add('show');
+  }else{box&&(box.style.display='none');al?.classList.remove('show');}
 }
 
-// ══ OMNIBOX ══════════════════════════════════════════════════
+// ══ OMNIBOX — 改良版（DB chips + AI 解析分離）═══════════════
+let _lastQuery='';
+
 function onOmniInput(val){
+  _lastQuery=val;
   const words=val.split(/[\s,，、\n]+/).filter(Boolean);
   const last=words[words.length-1]||'';
-  if(last.length>=1)showSuggest(dbSearch(last));else hideSuggest();
-}
-function showSuggest(items){
-  const el=document.getElementById('suggest-box');
-  if(!items.length){el.style.display='none';return;}
-  el.style.display='block';
-  el.innerHTML=items.map(f=>`
-    <div class="suggest-item" onclick="applySuggest('${f.name}')">
-      <span>${f.name}${isBlockedFood(f.name)?'<span style="color:var(--danger);font-size:.625rem;margin-left:4px">⛔已攔截</span>':''}</span>
-      <span class="suggest-nut">${f.cal}kcal/100g · 蛋白${f.prot}g</span>
-    </div>`).join('');
-}
-function hideSuggest(){document.getElementById('suggest-box').style.display='none';}
-function applySuggest(name){
-  const ta=document.getElementById('omnibox');
-  const words=ta.value.split(/[\s,，、\n]+/);words[words.length-1]=name;
-  ta.value=words.join(' ');hideSuggest();ta.focus();
-}
-function onOmniKey(e){if(e.key==='Enter'&&e.ctrlKey){e.preventDefault();parseOmni();}}
-function clearOmni(){document.getElementById('omnibox').value='';document.getElementById('omni-status').textContent='';hideSuggest();}
-
-const DEFAULT_COMBOS={
-    'chicken-rice':[
-      {name:'雞胸肉',amount:150,cal:165,prot:31,carb:0,fat:3.6,sug:0,fib:0},
-      {name:'白飯',amount:200,cal:130,prot:2.4,carb:28,fat:0.3,sug:0.1,fib:0.4}
-    ],
-    'egg-toast':[
-      {name:'水煮蛋',amount:120,cal:155,prot:13,carb:1.1,fat:11,sug:1.1,fib:0},
-      {name:'吐司',amount:60,cal:265,prot:9,carb:49,fat:3.2,sug:5,fib:2.7}
-    ],
-    'convenience':[
-      {name:'雞胸肉',amount:115,cal:165,prot:31,carb:0,fat:3.6,sug:0,fib:0},
-      {name:'茶葉蛋',amount:60,cal:155,prot:13,carb:1.1,fat:11,sug:1.1,fib:0}
-    ],
-    'gut-safe':[
-      {name:'白飯',amount:180,cal:130,prot:2.4,carb:28,fat:0.3,sug:0.1,fib:0.4},
-      {name:'水煮蛋',amount:60,cal:155,prot:13,carb:1.1,fat:11,sug:1.1,fib:0},
-      {name:'鯛魚片',amount:120,cal:105,prot:20,carb:0,fat:2,sug:0,fib:0}
-    ]
-};
-const DEFAULT_COMBO_META={
-  'chicken-rice':{name:'雞胸白飯',desc:'訓練日主餐'},
-  'egg-toast':{name:'蛋吐司早餐',desc:'早上快速記'},
-  'convenience':{name:'超商高蛋白',desc:'茶葉蛋 + 雞胸'},
-  'gut-safe':{name:'腸胃穩定餐',desc:'白飯 + 蛋 + 魚'}
-};
-
-function loadCombos(){
-  try{S.combos=JSON.parse(localStorage.getItem('ht_combos')||'[]');}
-  catch(e){S.combos=[];}
-  renderCombos();
-}
-function renderCombos(){
-  const el=document.getElementById('combo-list');if(!el)return;
-  const built=Object.keys(DEFAULT_COMBOS).map(id=>({id,name:DEFAULT_COMBO_META[id].name,desc:DEFAULT_COMBO_META[id].desc,items:DEFAULT_COMBOS[id],builtin:true}));
-  const all=[...built,...S.combos];
-  el.innerHTML=all.map(c=>`
-    <button class="template-btn" onclick="addCombo('${c.id}')">
-      <b>${c.name}</b><span>${c.desc||comboMacroText(c.items)}${c.builtin?'':' · 自訂'}</span>
-    </button>`).join('');
-}
-function comboMacroText(items){
-  const t=(items||[]).reduce((a,x)=>({cal:a.cal+(+x.cal||0)*(+x.amount||100)/100,prot:a.prot+(+x.prot||0)*(+x.amount||100)/100}),{cal:0,prot:0});
-  return `${Math.round(t.cal)} kcal · 蛋白 ${Math.round(t.prot)}g`;
-}
-async function addCombo(id){
-  const combo=S.combos.find(c=>c.id===id);
-  const items=combo?combo.items:DEFAULT_COMBOS[id];
-  await addFoods(items||[]);
-  toast('✓ 已加入常用組合');
-}
-async function addMealTemplate(kind){await addCombo(kind);}
-function saveTodayCombo(){
-  const name=document.getElementById('combo-name').value.trim();
-  if(!name){toast('先輸入組合名稱');return;}
-  if(!S.foods.length){toast('今天還沒有餐點可以儲存');return;}
-  const items=S.foods.map(f=>({name:f.name,amount:f.amount,cal:f.cal/(f.amount/100||1),prot:f.prot/(f.amount/100||1),carb:f.carb/(f.amount/100||1),fat:f.fat/(f.amount/100||1),sug:(f.sug||0)/(f.amount/100||1),fib:(f.fib||0)/(f.amount/100||1)}));
-  S.combos.push({id:'custom-'+Date.now(),name,desc:comboMacroText(items),items});
-  localStorage.setItem('ht_combos',JSON.stringify(S.combos.slice(-20)));
-  document.getElementById('combo-name').value='';
-  renderCombos();toast('✓ 已儲存常用組合');
+  if(last.length>=1){
+    const hits=dbSearch(last);
+    showDBChips(hits,last);
+  }else{hideDBChips();}
+  // hide AI result if user is typing
+  document.getElementById('ai-result-section').style.display='none';
+  const qab=document.getElementById('quick-add-btn');if(qab)qab.style.display='none';
 }
 
-function clearNutritionLabel(){
-  document.getElementById('label-file').value='';
-  document.getElementById('label-manual').value='';
-  document.getElementById('label-status').textContent='';
-  document.getElementById('label-draft').innerHTML='';
-  S.labelDraft=null;
-}
-function fileToDataUrl(file){
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onload=()=>resolve(reader.result);
-    reader.onerror=reject;
-    reader.readAsDataURL(file);
-  });
-}
-async function scanNutritionLabel(){
-  const file=document.getElementById('label-file').files[0];
-  const manual=document.getElementById('label-manual').value.trim();
-  if(!file&&!manual){toast('請拍攝營養標示，或貼上標示文字');return;}
-  const btn=document.getElementById('label-btn'),status=document.getElementById('label-status');
-  btn.innerHTML='<span class="spin"></span>解析中…';btn.disabled=true;
-  status.innerHTML='<span class="spin"></span>'+(file?'OCR 讀取營養標示中':'解析文字中');
-  try{
-    const imageBase64=file?await fileToDataUrl(file):'';
-    const r=await gasCall({action:'ocrNutritionLabel',imageBase64,rawText:manual});
-    if(!r||!r.ok)throw new Error(r?.error||'解析失敗');
-    S.labelDraft=r.item;
-    renderNutritionDraft(r.item,r.rawText);
-    status.innerHTML='<span style="color:var(--accent-md)">✓ 已產生確認卡，請確認後加入今天</span>';
-  }catch(e){
-    status.innerHTML=`<span style="color:var(--danger)">解析失敗：${e.message}</span>`;
-  }
-  btn.innerHTML='<i class="ti ti-sparkles"></i>解析標示';btn.disabled=false;
-}
-function renderNutritionDraft(item,rawText){
-  const el=document.getElementById('label-draft');
-  if(!item){el.innerHTML='';return;}
-  el.innerHTML=`
-    <div class="draft-item">
-      <b>${item.name||'營養標示食品'}</b><br>
-      份量 ${item.amount||100}g · ${Math.round(item.cal||0)} kcal · 蛋白 ${item.prot||0}g · 碳水 ${item.carb||0}g · 脂肪 ${item.fat||0}g
-      <div class="btn-row" style="margin-top:.5rem">
-        <button class="btn xs" onclick="saveCustomFood(S.labelDraft)"><i class="ti ti-database-plus"></i>存入外食資料庫</button>
-        <button class="btn xs p" onclick="confirmNutritionDraft()"><i class="ti ti-plus"></i>加入今天</button>
-      </div>
-    </div>
-    ${rawText?`<div class="draft-item" style="color:var(--muted)">OCR：${String(rawText).slice(0,260)}</div>`:''}`;
-}
-async function confirmNutritionDraft(){
-  if(!S.labelDraft)return;
-  await addFoods([S.labelDraft]);
-  saveCustomFood(S.labelDraft);
-  clearNutritionLabel();
-  toast('✓ 營養標示已加入今天');
+function showDBChips(items,query){
+  const sec=document.getElementById('db-suggest-section');
+  const box=document.getElementById('db-chips');
+  if(!items.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  S.pendingDBItems=items;
+  box.innerHTML=items.map((f,i)=>{
+    const blocked=isBlockedFood(f.name);
+    return `<button class="db-chip ${blocked?'blocked':''}"
+      onclick="${blocked?'toast(\"⛔ 腸道防禦：已攔截\")':''};${blocked?'':('addDBChip('+i+')')}"
+      title="${f.cal}kcal/100g · 蛋白${f.prot}g · 碳水${f.carb}g · 脂${f.fat}g">
+      ${f.name}
+      <span class="chip-nut">${f.cal}kcal</span>
+      ${blocked?'<span style="color:var(--danger);font-size:.625rem">⛔</span>':''}
+    </button>`;
+  }).join('');
+  // show quick-add button
+  const qab=document.getElementById('quick-add-btn');if(qab)qab.style.display='inline-flex';
 }
 
-async function parseOmni(){
+function hideDBChips(){
+  document.getElementById('db-suggest-section').style.display='none';
+  const qab=document.getElementById('quick-add-btn');if(qab)qab.style.display='none';
+}
+
+function addDBChip(idx){
+  const item=S.pendingDBItems[idx];if(!item)return;
+  const amount=parseAmountFromText(_lastQuery)||100;
+  addFoods([{...item,amount}]);
+  clearOmni();toast(`✓ 已加入：${item.name} ${amount}g`);
+}
+
+function quickAddFromDB(){
+  // add all non-blocked DB items from current query
+  const text=document.getElementById('omnibox').value.trim();
+  const items=tryLocalMatch(text).filter(f=>!isBlockedFood(f.name));
+  if(!items.length){toast('找不到可加入的食物');return;}
+  addFoods(items);clearOmni();
+}
+
+function onOmniKey(e){if(e.key==='Enter'&&e.ctrlKey){e.preventDefault();parseOmniAI();}}
+function clearOmni(){
+  document.getElementById('omnibox').value='';
+  document.getElementById('omni-status').textContent='';
+  hideDBChips();
+  document.getElementById('ai-result-section').style.display='none';
+  document.getElementById('fs-result-section').style.display='none';
+  const qab=document.getElementById('quick-add-btn');if(qab)qab.style.display='none';
+  S.pendingAIItems=[];S.pendingFSItems=[];_lastQuery='';
+}
+
+// AI 解析（獨立按鈕，永遠解析原始輸入文字，不使用DB資料）
+async function parseOmniAI(){
   const text=document.getElementById('omnibox').value.trim();if(!text)return;
   const btn=document.getElementById('parse-btn');
-  btn.innerHTML='<span class="spin"></span>解析中…';btn.disabled=true;
-
-  const local=tryLocalMatch(text);
-  if(local.length&&local.every(r=>r.matched)){
-    document.getElementById('omni-status').innerHTML='<span style="color:var(--accent-md)">✓ 本機資料庫直接匹配</span>';
-    document.getElementById('db-badge').textContent='本機DB ✓';
-    await addFoods(local);clearOmni();
-    btn.innerHTML='<i class="ti ti-sparkles"></i>解析加入';btn.disabled=false;return;
-  }
-
-  document.getElementById('omni-status').innerHTML='<span class="spin"></span>呼叫 AI 解析…';
-  document.getElementById('db-badge').textContent='AI 補差';
-  const gutNote=S.signal==='red'?'【腸道紅燈：嚴格低渣，僅允許白飯/白吐司/白粥/雞里肌/水煮蛋/鯛魚片】':'';
-  const sys=`你是食物營養JSON解析器。只輸出JSON不含說明或markdown。份量：1塊≈150g,1碗≈200g,1片≈30g,1顆蛋≈60g,1根香蕉≈120g,半份=50%,1/4份=25%。${gutNote}格式：{"items":[{"name":"食物","amount":100,"cal":150,"prot":10,"carb":20,"fat":5,"sug":3,"fib":2}]}`;
+  btn.innerHTML='<span class="spin"></span>AI解析…';btn.disabled=true;
+  document.getElementById('omni-status').innerHTML='<span class="spin"></span>AI 分析中（解析原始文字：「'+text+'」）…';
+  document.getElementById('ai-result-section').style.display='none';
+  document.getElementById('fs-result-section').style.display='none';
+  const gutNote=S.signal==='red'?'【腸道紅燈：僅允許白飯/白吐司/白粥/雞里肌/水煮蛋/鯛魚片】':'';
+  const sys=`你是食物營養JSON解析器。只輸出JSON不含說明或markdown。
+份量換算：1塊≈150g,1碗飯≈200g,半碗=100g,1/4碗=50g,1片≈30g,1顆蛋≈60g,1根香蕉≈120g,半份=50%。
+${gutNote}
+格式：{"items":[{"name":"食物名稱","amount":100,"cal":150,"prot":10,"carb":20,"fat":5,"sug":3,"fib":2,"protType":"a或p"}]}
+protType: a=動物性蛋白質, p=植物性
+重要：根據用戶描述的「原始食物名稱」計算，例如用戶說「炸雞排」就用炸雞排的營養，不要替換成其他食物。`;
   try{
     const r=await aiText(`${sys}\n用戶輸入：${text}`,600);
     const parsed=JSON.parse(r.replace(/```json|```/g,'').trim());
-    await addFoods(parsed.items);clearOmni();
-    document.getElementById('omni-status').innerHTML='<span style="color:var(--accent-md)">✓ AI 解析完成</span>';
-  }catch(e){document.getElementById('omni-status').innerHTML=`<span style="color:var(--danger)">解析失敗：${e.message}</span>`;}
-  btn.innerHTML='<i class="ti ti-sparkles"></i>解析加入';btn.disabled=false;
+    S.pendingAIItems=parsed.items||[];
+    // 顯示解析了哪段文字
+    const qel=document.getElementById('ai-parsed-query');
+    if(qel)qel.textContent=text.length>20?text.substring(0,20)+'…':text;
+    showAIChips(S.pendingAIItems);
+    document.getElementById('omni-status').innerHTML='<span style="color:var(--accent-md)">✓ AI 已解析「'+text.substring(0,15)+(text.length>15?'…':'')+'」，點選要加入的食物</span>';
+  }catch(e){
+    document.getElementById('omni-status').innerHTML=`<span style="color:var(--danger)">AI解析失敗：${e.message}</span>`;
+  }
+  btn.innerHTML='<i class="ti ti-sparkles"></i>AI 解析';btn.disabled=false;
+}
+
+function showAIChips(items){
+  const sec=document.getElementById('ai-result-section');
+  const box=document.getElementById('ai-chips');
+  if(!items.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  box.innerHTML=items.map((f,i)=>{
+    const blocked=isBlockedFood(f.name);
+    return `<button class="ai-chip${blocked?' blocked':''}"
+      onclick="${blocked?'toast(\"⛔ 已攔截\")':('addAIChip('+i+')')}"
+      style="${blocked?'opacity:.5;cursor:not-allowed':''}">
+      ${f.name} <span style="color:var(--muted);font-size:.6875rem">${f.amount}g</span>
+      <span class="chip-cal">${f.cal}kcal · 蛋白${f.prot}g</span>
+    </button>`;
+  }).join('');
+}
+
+function addAIChip(idx){
+  const item=S.pendingAIItems[idx];if(!item)return;
+  addFoods([item]);
+  // remove from pending
+  S.pendingAIItems.splice(idx,1);
+  showAIChips(S.pendingAIItems);
+  toast(`✓ 已加入：${item.name}`);
+}
+
+function addAllAIChips(){
+  const valid=S.pendingAIItems.filter(f=>!isBlockedFood(f.name));
+  if(!valid.length){toast('無可加入項目');return;}
+  addFoods(valid);clearOmni();
+}
+
+// ══ 份量解析 ═════════════════════════════════════════════════
+function parseAmountFromText(text){
+  const unitMap={'克':1,'g':1,'公克':1,'毫升':1,'ml':1,
+    '碗':200,'小碗':150,'大碗':250,'塊':150,'片':30,
+    '顆':60,'條':120,'杯':240,'份':100,'匙':15};
+  const mA=text.match(/(\d+(?:\.\d+)?)\s*(克|公克|g|ml|毫升|碗|塊|片|顆|條|杯|份|匙)/i);
+  if(mA)return Math.round(parseFloat(mA[1])*(unitMap[mA[2]]||1));
+  const fracMap={'半':0.5,'一':1,'兩':2,'二':2,'三':3,'四':4,'1/2':0.5,'1/4':0.25};
+  const mB=text.match(/(半|一|兩|二|三|四|1\/2|1\/4)\s*(碗|塊|片|顆|條|杯|份)/);
+  if(mB)return Math.round((fracMap[mB[1]]||1)*(unitMap[mB[2]]||100));
+  const mC=text.match(/\b(\d+)\b/);
+  if(mC&&+mC[1]>=5&&+mC[1]<=2000)return +mC[1];
+  return null;
 }
 
 function tryLocalMatch(text){
   const results=[];
-  const unitMap={'克':1,'g':1,'公克':1,'毫升':1,'ml':1,
-    '碗':200,'小碗':150,'大碗':250,'塊':150,'片':30,
-    '顆':60,'粒':5,'條':120,'杯':240,'小杯':150,'大杯':350,
-    '份':100,'匙':15,'茶匙':5,'湯匙':15,'瓶':500,'罐':330};
-  const fracMap={'半':0.5,'1/2':0.5,'1/4':0.25,'1/3':0.33,'2/3':0.67,'3/4':0.75,'一':1,'二':2,'兩':2,'三':3,'四':4};
-
-  // 以逗號/頓號/換行切段
-  const segments=text.split(/[,，、\n]+/).map(s=>s.trim()).filter(Boolean);
-
-  for(const seg of segments){
-    let amount=null;
-
-    // 模式A: 阿拉伯數字+單位  例: 50克、50g、2碗
-    const mA=seg.match(/(\d+(?:\.\d+)?)\s*(克|公克|g|毫升|ml|碗|塊|片|顆|粒|條|杯|份|匙)/i);
-    if(mA){
-      const num=parseFloat(mA[1]);
-      const unit=mA[2].toLowerCase();
-      amount=Math.round(num*(unitMap[mA[2]]||unitMap[unit]||1));
-    }
-
-    // 模式B: 中文量詞+單位  例: 半碗、一塊、兩片
-    if(amount===null){
-      const mB=seg.match(/(半|一|兩|二|三|四|1\/2|1\/4|1\/3|2\/3|3\/4)\s*(碗|塊|片|顆|條|杯|份)/);
-      if(mB){amount=Math.round((fracMap[mB[1]]||1)*(unitMap[mB[2]]||100));}
-    }
-
-    // 模式C: 純數字視為克  例: 「燕麥 50」
-    if(amount===null){
-      const mC=seg.match(/\b(\d+)\b/);
-      if(mC&&+mC[1]>=5&&+mC[1]<=2000)amount=+mC[1];
-    }
-
-    // 去除數字/單位/形容詞後搜尋食物名
-    const stripped=seg
-      .replace(/(\d+(?:\.\d+)?)\s*(克|公克|g|毫升|ml|碗|塊|片|顆|粒|條|杯|份|匙)/gi,'')
-      .replace(/\b\d+\b/g,'')
-      .replace(/(半|一|兩|二|三|四)\s*(碗|塊|片|顆|條|杯|份)/g,'')
-      .replace(/無糖|低糖|低脂|高纖|冷凍|即食|水煮|清蒸|烤/g,'')
-      .trim();
-
+  const segs=text.split(/[,，、\n]+/).map(s=>s.trim()).filter(Boolean);
+  for(const seg of segs){
+    const amount=parseAmountFromText(seg)||100;
+    const stripped=seg.replace(/(\d+(?:\.\d+)?)\s*(克|公克|g|ml|毫升|碗|塊|片|顆|條|杯|份|匙)/gi,'')
+      .replace(/\b\d+\b/g,'').replace(/(半|一|兩|二|三|四)\s*(碗|塊|片|顆|條|杯|份)/g,'')
+      .replace(/無糖|低糖|低脂|高纖|冷凍|即食|水煮|清蒸/g,'').trim();
     let hits=dbSearch(stripped);
     if(!hits.length)hits=dbSearch(seg.replace(/\d+/g,'').trim());
-    if(hits.length&&hits[0].score>=5){
-      results.push({...hits[0],amount:amount||100,matched:true});
-    }
+    if(hits.length&&hits[0].score>=5)results.push({...hits[0],amount,matched:true});
   }
   return results;
 }
 
-async function addFoods(items){
-  let mealProt=0;
-  for(const item of items){
-    if(isBlockedFood(item.name)){toast(`⛔ 腸道防禦：已攔截「${item.name}」`);continue;}
-    const sc=item.amount/100;
-    const f={name:item.name,amount:item.amount,
-      cal:Math.round((item.cal||0)*sc),prot:+(((item.prot||0)*sc).toFixed(1)),
-      carb:+(((item.carb||0)*sc).toFixed(1)),fat:+(((item.fat||0)*sc).toFixed(1)),
-      sug:+(((item.sug||0)*sc).toFixed(1)),fib:+(((item.fib||0)*sc).toFixed(1)),
-      id:Date.now()+Math.random()};
-    mealProt+=f.prot;S.foods.push(f);
-    gasCall({action:'addFood',data:f});
-  }
-  S.lastMealTime=Date.now();S.lastMealProt=mealProt;
-  addTLAuto('meal',items.map(i=>i.name).join('、'));
-  renderFoodList();updateProgress();checkGutAlert();checkProtProtocol();
-  saveToCache();
-}
-
-// ══ 語音輸入 ════════════════════════════════════════════════
+// ══ 語音 ═════════════════════════════════════════════════════
 let isListening=false,recognition=null;
 function toggleVoice(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){toast('⚠️ 請使用 Chrome 瀏覽器');return;}
-  if(isListening){recognition&&recognition.stop();return;}
+  if(!SR){toast('⚠️ 請使用 Chrome');return;}
+  if(isListening){recognition?.stop();return;}
   recognition=new SR();recognition.lang='zh-TW';recognition.continuous=false;recognition.interimResults=true;
   const mic=document.getElementById('mic-btn');mic.classList.add('listening');mic.innerHTML='<i class="ti ti-microphone-off"></i>';isListening=true;
   recognition.onresult=e=>{const t=Array.from(e.results).map(r=>r[0].transcript).join('');document.getElementById('omnibox').value=t;onOmniInput(t);};
@@ -1508,42 +1408,91 @@ function toggleVoice(){
   recognition.start();
 }
 
-// ══ 進度 ════════════════════════════════════════════════════
-function getTotals(){return S.foods.reduce((a,f)=>({cal:a.cal+f.cal,prot:a.prot+f.prot,carb:a.carb+f.carb,fat:a.fat+f.fat,sug:a.sug+(f.sug||0),fib:a.fib+(f.fib||0)}),{cal:0,prot:0,carb:0,fat:0,sug:0,fib:0});}
+// ══ FOOD OPS ═════════════════════════════════════════════════
+function getTotals(){
+  return S.foods.reduce((a,f)=>({
+    cal:a.cal+f.cal,prot:a.prot+f.prot,carb:a.carb+f.carb,fat:a.fat+f.fat,
+    sug:a.sug+(f.sug||0),fib:a.fib+(f.fib||0),
+    protAnimal:a.protAnimal+((f.protType||'a')==='a'?f.prot:0),
+    protPlant:a.protPlant+((f.protType||'a')==='p'?f.prot:0),
+  },{cal:0,prot:0,carb:0,fat:0,sug:0,fib:0,protAnimal:0,protPlant:0});
+}
+
+async function addFoods(items){
+  let mealProt=0;
+  for(const item of items){
+    if(isBlockedFood(item.name)){toast(`⛔ 腸道防禦：已攔截「${item.name}」`);continue;}
+    const sc=item.amount/100;
+    const f={
+      name:item.name,amount:item.amount,protType:item.protType||'a',
+      cal:Math.round((item.cal||0)*sc),
+      prot:+(((item.prot||0)*sc).toFixed(1)),
+      carb:+(((item.carb||0)*sc).toFixed(1)),
+      fat:+(((item.fat||0)*sc).toFixed(1)),
+      sug:+(((item.sug||0)*sc).toFixed(1)),
+      fib:+(((item.fib||0)*sc).toFixed(1)),
+      id:Date.now()+Math.random()
+    };
+    mealProt+=f.prot;S.foods.push(f);
+    gasCall({action:'addFood',data:f});
+  }
+  if(mealProt>0){S.lastMealTime=Date.now();S.lastMealProt=mealProt;}
+  addTLAuto('meal',items.map(i=>i.name).join('、'));
+  renderFoodList();updateProgress();checkGutAlert();checkProtProtocol();updateProteinRatio();saveToCache();
+}
 
 function updateProgress(){
   const t=getTotals(),g=S.targets;
   const actCal=S.activities.reduce((a,x)=>a+x.cal,0);
   [['cal','kcal'],['prot','g'],['carb','g'],['fat','g']].forEach(([k,u])=>{
     const v=Math.round(t[k]),max=g[k]||1,pct=Math.min(Math.round(v/max*100),100);
-    const bar=document.getElementById('p-'+k);if(bar){bar.style.width=pct+'%';bar.classList.toggle('over',v>max);}
-    const lbl=document.getElementById('p-'+k+'-l');if(lbl)lbl.textContent=v+u+'/'+max+u;
+    ['pb-'+k,'p-'+k].forEach(id=>{const b=document.getElementById(id);if(b){b.style.width=pct+'%';b.classList.toggle('over',v>max);}});
+    ['pb-'+k+'-l','p-'+k+'-l'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=v+u+'/'+g[k]+u;});
+    ['mc-'+k].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=k==='cal'?v:v+'g';});
+    ['mc-'+k+'-t'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='/'+max+(k==='cal'?'':'g');});
   });
   const wp=Math.min(Math.round(S.water/S.waterGoal*100),100);
-  const wb=document.getElementById('p-water');if(wb)wb.style.width=wp+'%';
-  const wl=document.getElementById('p-water-l');if(wl)wl.textContent=S.water+'ml/'+S.waterGoal+'ml';
-  // 數字卡
-  const sc=document.getElementById('sum-cal');if(sc)sc.textContent=Math.round(t.cal);
-  const sct=document.getElementById('sum-cal-t');if(sct)sct.textContent='/'+g.cal+'kcal';
-  const sp2=document.getElementById('sum-prot');if(sp2)sp2.textContent=Math.round(t.prot)+'g';
-  const spt=document.getElementById('sum-prot-t');if(spt)spt.textContent='/'+g.prot+'g';
-  const sw2=document.getElementById('sum-water');if(sw2)sw2.textContent=S.water;
-  const swt=document.getElementById('sum-water-t');if(swt)swt.textContent='/'+S.waterGoal+'ml';
-  const sn=document.getElementById('sum-net');if(sn)sn.textContent=Math.round(t.cal-actCal);
-  updateQuickPanel();
+  ['pb-water','p-water'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.width=wp+'%';});
+  ['pb-water-l','p-water-l'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=S.water+'ml/'+S.waterGoal+'ml';});
+  ['mc-water'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=S.water;});
+  ['mc-water-t'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='/'+S.waterGoal+'ml';});
+  const net=Math.round(t.cal-actCal);
+  ['mc-net'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=net;});
+  updateDeficitTable();
 }
 
-function updateQuickPanel(){
-  const t=getTotals(),g=S.targets,actCal=S.activities.reduce((a,x)=>a+x.cal,0);
-  const left=Math.max(0,Math.round((g.cal||0)-t.cal+actCal));
-  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
-  set('quick-cal',Math.round(t.cal));
-  set('quick-cal-sub','/ '+(g.cal||0)+' kcal');
-  set('quick-prot',Math.round(t.prot)+'g');
-  set('quick-prot-sub','/ '+(g.prot||0)+'g 蛋白');
-  set('quick-water',S.water);
-  set('quick-water-sub','/ '+S.waterGoal+'ml 水分');
-  set('quick-left',left);
+function updateProteinRatio(){
+  const t=getTotals();
+  const total=t.prot||1;
+  const aPct=Math.min(Math.round(t.protAnimal/total*100),100);
+  const pPct=Math.min(Math.round(t.protPlant/total*100),100);
+  const ab=document.getElementById('prot-animal-bar');if(ab)ab.style.width=aPct+'%';
+  const pb2=document.getElementById('prot-plant-bar');if(pb2)pb2.style.width=pPct+'%';
+  const al=document.getElementById('prot-animal-l');if(al)al.textContent=t.protAnimal.toFixed(1)+'g ('+aPct+'%)';
+  const pl=document.getElementById('prot-plant-l');if(pl)pl.textContent=t.protPlant.toFixed(1)+'g ('+pPct+'%)';
+  const hint=document.getElementById('prot-ratio-hint');
+  if(hint){
+    if(t.prot===0)hint.textContent='建議動：植 ≈ 7:3，動物性蛋白質更易吸收，植物性富含纖維。';
+    else if(aPct>80)hint.innerHTML='<span style="color:var(--warn)">⚠️ 動物性蛋白質比例偏高，可適量補充植物性來源（豆腐、毛豆）</span>';
+    else if(pPct>60)hint.innerHTML='<span style="color:var(--info)">ℹ️ 植物性比例較高，吸收率約動物性的70-80%，可適量補充雞蛋或肉類</span>';
+    else hint.innerHTML='<span style="color:var(--accent-md)">✓ 動植物蛋白質搭配良好</span>';
+  }
+}
+
+function updateDeficitTable(){
+  const t=getTotals(),g=S.targets;
+  const actCal=S.activities.reduce((a,x)=>a+x.cal,0);
+  const gap=g.cal-Math.round(t.cal)+actCal;
+  const protPct=g.prot?Math.round(t.prot/g.prot*100):0;
+  const waterPct=S.waterGoal?Math.round(S.water/S.waterGoal*100):0;
+  const isGut=S.signal==='red'||S.discomforts.has('rumble')||S.discomforts.has('loose');
+  const gutDef=isGut?(osmoticRisk(S.foods)<=2?'✅ 低風險':'⚠️ 風險偏高'):'—（無腸道紅燈）';
+  const dc=document.getElementById('def-cal');if(dc)dc.textContent=`${Math.round(t.cal)} / ${g.cal} kcal`;
+  const dg=document.getElementById('def-gap');if(dg){dg.textContent=(gap>0?'+':'')+gap+' kcal';dg.style.color=gap>0?'var(--accent-md)':gap<-200?'var(--danger)':'var(--warn)';}
+  const dp=document.getElementById('def-prot');if(dp){dp.textContent=protPct+'%';dp.style.color=protPct>=90?'var(--accent-md)':protPct>=70?'var(--warn)':'var(--danger)';}
+  const dw=document.getElementById('def-water');if(dw){dw.textContent=waterPct+'%';dw.style.color=waterPct>=80?'var(--accent-md)':'var(--warn)';}
+  const dgu=document.getElementById('def-gut');if(dgu)dgu.textContent=gutDef;
+  const ds=document.getElementById('def-signal');if(ds)ds.textContent={normal:'🟢 正常',yellow:'🟡 呼吸道',red:'🔴 腸道不穩',immune:'🟠 免疫應激'}[S.signal]||'—';
 }
 
 function renderFoodList(){
@@ -1552,59 +1501,106 @@ function renderFoodList(){
   if(!S.foods.length){el.innerHTML='<p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚未記錄</p>';return;}
   el.innerHTML=S.foods.map(f=>`
     <div class="food-item">
-      <div><div class="food-name">${f.name} <span style="font-weight:400;color:var(--muted);font-size:.75rem">${f.amount}g</span></div>
+      <div><div class="food-name">${f.name} <span style="font-weight:400;color:var(--muted);font-size:.75rem">${f.amount}g</span>
+        <span style="font-size:.625rem;padding:1px 5px;border-radius:99px;background:${f.protType==='a'?'#FFEDD5':'#D1FAE5'};color:${f.protType==='a'?'#7C2D12':'#065F46'}">${f.protType==='a'?'動':'植'}</span></div>
       <div class="food-meta">${f.cal}kcal · 蛋白${f.prot}g · 碳水${f.carb}g · 脂${f.fat}g</div></div>
       <button class="del-btn" onclick="removeFood(${f.id})"><i class="ti ti-x"></i></button>
     </div>`).join('');
 }
+
 async function removeFood(id){
   const idx=S.foods.findIndex(f=>f.id===id);if(idx<0)return;
-  const rowIndex=S.foods[idx].rowNumber ?? S.foods[idx]._rowIndex ?? idx;
-  S.foods.splice(idx,1);renderFoodList();updateProgress();checkGutAlert();saveToCache();
-  await gasCall({action:'deleteFood',rowIndex});
+  S.foods.splice(idx,1);renderFoodList();updateProgress();checkGutAlert();updateProteinRatio();saveToCache();
+  await gasCall({action:'deleteFood',rowIndex:idx});
 }
 
-// ══ 水分 ════════════════════════════════════════════════════
+// ══ WATER ════════════════════════════════════════════════════
 async function addWater(ml){
-  if(!ml||ml<0)return;
-  S.lastWaterAdd=ml;
   S.water=Math.min(S.water+ml,9999);updateWaterUI();updateProgress();
-  addTLAuto('water',ml+'ml 補水');
+  addTLAuto('water',ml+'ml 補水');saveToCache();
   await gasCall({action:'setWater',ml:S.water});
-  saveToCache();
-}
-async function undoWater(){
-  if(!S.lastWaterAdd){toast('沒有可撤銷的補水');return;}
-  S.water=Math.max(0,S.water-S.lastWaterAdd);updateWaterUI();updateProgress();
-  await gasCall({action:'setWater',ml:S.water});
-  saveToCache();
-  toast('✓ 已撤銷 '+S.lastWaterAdd+'ml');
-  S.lastWaterAdd=0;
-}
-async function resetWater(){
-  S.water=0;S.lastWaterAdd=0;updateWaterUI();updateProgress();
-  await gasCall({action:'setWater',ml:S.water});
-  saveToCache();
-  toast('✓ 今日水分已重設');
 }
 function updateWaterUI(){
   const el=document.getElementById('water-display');if(el)el.textContent=S.water+' / '+S.waterGoal+' ml';
   const pb=document.getElementById('water-pb');if(pb)pb.style.width=Math.min(Math.round(S.water/S.waterGoal*100),100)+'%';
-  const sw2=document.getElementById('sum-water');if(sw2)sw2.textContent=S.water;
-  updateQuickPanel();
 }
 
-// ══ 餐食推薦 ════════════════════════════════════════════════
+// ══ BODY DATA ════════════════════════════════════════════════
+async function calcAndSave(){
+  const age=+document.getElementById('age').value,gender=document.getElementById('gender').value;
+  const h=+document.getElementById('height').value,w=+document.getElementById('weight').value;
+  const bf=+document.getElementById('bf').value,muscle=+document.getElementById('muscle').value;
+  const vf=+document.getElementById('vf').value,tbf=+document.getElementById('tbf').value;
+  const tmuscle=+document.getElementById('tmuscle').value,tvf=+document.getElementById('tvf').value;
+  const actV=+document.getElementById('act-level').value,goal=document.getElementById('goal').value;
+  const gutActive=S.signal==='red'||S.discomforts.has('rumble')||S.discomforts.has('loose');
+  const protTarget=gutActive?25:105;
+  const bmr=Math.round(gender==='male'?10*w+6.25*h-5*age+5:10*w+6.25*h-5*age-161);
+  const tdee=Math.round(bmr*actV);
+  const cal=goal==='cut'?tdee-500:goal==='bulk'?tdee+300:tdee;
+  const fat=Math.round(cal*.25/9);
+  const carb=Math.round((cal-protTarget*4-fat*9)/4);
+  const waterGoal=Math.round(w*35);
+  S.targets={cal,prot:protTarget,carb,fat,sug:goal==='cut'?25:40,fib:gutActive?15:25,water:waterGoal};
+  S.waterGoal=waterGoal;
+  S.profile={weight:w,bf,muscle,vf,goal,actLevel:actV,height:h,tbf,tmuscle,tvf};
+  document.getElementById('bmr-display').value=bmr;
+  // 體態對抗性證偽
+  let anomaly='';
+  const prev=S.history[S.history.length-1];
+  if(prev?.weight){
+    const dW=w-prev.weight,dM=muscle-(prev.muscle||0),dBf=bf-prev.bf;
+    if(dW<-0.5&&dM<-0.3)anomaly=`<div class="alert danger show">⚠️ <b>非正常肌肉流失</b>：體重 ${dW.toFixed(1)}kg，肌肉流失 ${Math.abs(dM).toFixed(1)}kg。建議調降訓練 30%，每 3 小時補充 25-30g 固態蛋白。</div>`;
+    else if(dBf<-0.8&&dM>0.1)anomaly=`<div class="alert success show">✅ <b>進展良好</b>：體脂 -${Math.abs(dBf).toFixed(1)}%，肌肉 +${dM.toFixed(1)}kg</div>`;
+    else if(dW<-0.8&&dBf>0)anomaly=`<div class="alert warn show">⚠️ 體重快速下降但體脂微升，建議連觀 3 天確認。</div>`;
+  }
+  document.getElementById('body-anomaly').innerHTML=anomaly;
+  renderBodyMetrics();updateProgress();updateWaterUI();updateProteinRatio();
+  const r=await gasCall({action:'saveProfile',data:{age,gender,height:h,weight:w,targetWeight:0,bf,targetBf:tbf,muscle,targetMuscle:tmuscle,vf,targetVf:tvf,activity:actV,goal,bmr,tdee,calTarget:cal,protTarget,carbTarget:carb,fatTarget:fat,sugTarget:S.targets.sug,fibTarget:S.targets.fib,waterGoal}});
+  if(r?.ok){
+    await gasCall({action:'addHistory',data:{weight:w,bf,muscle,vf,water:S.water}});
+    S.history.push({date:new Date().toLocaleDateString('zh-TW'),weight:w,bf,muscle,vf,water:S.water});
+    toast('✓ 身體數據已儲存');saveToCache();
+    setTimeout(()=>renderChart(S.chartType),300);
+  }
+}
+
+function renderBodyMetrics(){
+  const p=S.profile,t=S.targets;if(!p.weight)return;
+  const bmi=p.height?(p.weight/((p.height||170)/100)**2).toFixed(1):'—';
+  const bfW=Math.ceil(Math.max(0,(p.bf||0)-(p.tbf||15))/0.5);
+  const muM=Math.ceil(Math.max(0,(p.tmuscle||55)-(p.muscle||0))/0.5);
+  const content=`
+    <div class="metric-row"><span class="metric-label">體重</span><span class="metric-value">${p.weight} kg</span></div>
+    <div class="metric-row"><span class="metric-label">體脂率</span><div style="text-align:right"><div class="metric-value">${p.bf}%</div><div class="metric-target">目標${p.tbf||15}% · 差${((p.bf||0)-(p.tbf||15)).toFixed(1)}% · 約${bfW}週</div></div></div>
+    <div class="metric-row"><span class="metric-label">肌肉量</span><div style="text-align:right"><div class="metric-value">${p.muscle} kg</div><div class="metric-target">目標${p.tmuscle||55}kg · 差${((p.tmuscle||55)-(p.muscle||0)).toFixed(1)}kg · 約${muM}月</div></div></div>
+    <div class="metric-row"><span class="metric-label">內臟脂肪</span><div style="text-align:right"><div class="metric-value">${p.vf}</div><div class="metric-target">目標${p.tvf||5}</div></div></div>
+    <div class="metric-row" style="border-bottom:none"><span class="metric-label">BMI</span><span class="metric-value">${bmi}</span></div>`;
+  const rc=document.getElementById('body-result-card');if(rc)rc.style.display='block';
+  const rcc=document.getElementById('body-result-content');
+  if(rcc)rcc.innerHTML=`${content}<hr class="sep"><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:.5rem">
+    <span class="nut-pill pill-cal">熱量 ${t.cal}kcal</span>
+    <span class="nut-pill pill-prot">蛋白質 ${t.prot}g${S.signal==='red'?' ⚠️':''}</span>
+    <span class="nut-pill pill-carb">碳水 ${t.carb}g</span>
+    <span class="nut-pill pill-fat">脂肪 ${t.fat}g</span>
+    <span style="background:#DBEAFE;color:#1E40AF;font-size:.625rem;padding:2px 8px;border-radius:99px;font-weight:500">水分 ${t.water}ml</span>
+  </div>`;
+  // update quick view on home page
+  const qv=document.getElementById('body-quick-view');
+  if(qv)qv.innerHTML=content;
+}
+
+// ══ MEAL REC ═════════════════════════════════════════════════
 async function getMealRec(){
   const rawIng=document.getElementById('ingredients').value.trim();
   if(!rawIng){alert('請輸入手邊食材');return;}
   const ing=rawIng.split(/[\s,，、\n]+/).filter(Boolean).join('、');
   const el=document.getElementById('meal-recs');
-  el.innerHTML='<p style="font-size:.75rem;color:var(--muted)"><span class="spin"></span>AI 規劃中…</p>';
+  el.innerHTML='<p style="font-size:.75rem;color:var(--muted)"><span class="spin"></span>AI規劃中…</p>';
   const gutMode=S.signal==='red'||S.discomforts.has('rumble')||S.discomforts.has('loose');
   const typeLabel={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'點心'}[document.getElementById('meal-type').value];
   const goalLabel={cut:'減脂',maintain:'維持',bulk:'增肌'}[S.profile.goal||'cut'];
-  const gutNote=gutMode?'【腸道紅燈：僅允許白飯/白吐司/白粥/雞里肌/水煮蛋/鯛魚片，禁止地瓜/燕麥/豆漿/花椰菜/乳清】':'';
+  const gutNote=gutMode?'【腸道紅燈：僅允許白飯/白吐司/白粥/雞里肌/水煮蛋/鯛魚片，禁止高纖高糖食物】':'';
   const prompt=`你是營養師。目標：${goalLabel}，蛋白質${S.targets.prot}g/天。食材：${ing}。${gutNote}為${typeLabel}設計2個方案，各含：①食材分量 ②進食順序及原因 ③熱量與蛋白質。只回傳JSON不含markdown：{"plans":[{"name":"方案名","items":"食材清單","order":"進食順序","cal":0,"prot":0}]}`;
   try{
     const r=await aiText(prompt,800);
@@ -1613,25 +1609,24 @@ async function getMealRec(){
       <div class="meal-card">
         <div class="meal-card-title">${p.name}</div>
         <div class="meal-card-sub">${p.items}<br><span style="color:var(--accent-md)">📋 ${p.order}</span></div>
-        <div class="nut-pills">
-          <span class="nut-pill pill-cal">${p.cal} kcal</span>
-          <span class="nut-pill pill-prot">蛋白 ${p.prot}g</span>
-        </div>
+        <div class="nut-pills"><span class="nut-pill pill-cal">${p.cal}kcal</span><span class="nut-pill pill-prot">蛋白${p.prot}g</span></div>
       </div>`).join('');
   }catch(e){el.innerHTML=`<p style="color:var(--danger);font-size:.75rem">生成失敗：${e.message}</p>`;}
 }
 
-// ══ 保健食品 ════════════════════════════════════════════════
+// ══ SUPPLEMENTS ══════════════════════════════════════════════
 async function addSupp(){
   const name=document.getElementById('supp-name').value.trim();if(!name)return;
   S.supps.push({name,comp:document.getElementById('supp-comp').value,dose:document.getElementById('supp-dose').value,time:document.getElementById('supp-time').value,id:Date.now()});
   renderSuppList();document.getElementById('supp-name').value='';
-  await gasCall({action:'saveSupplements',list:S.supps});toast('✓ 已新增：'+name);
-  saveToCache();
+  await gasCall({action:'saveSupplements',list:S.supps});saveToCache();toast('✓ 已新增：'+name);
 }
-async function removeSupp(id){S.supps=S.supps.filter(s=>s.id!==id);renderSuppList();await gasCall({action:'saveSupplements',list:S.supps});saveToCache();}
+async function removeSupp(id){
+  S.supps=S.supps.filter(s=>s.id!==id);renderSuppList();
+  await gasCall({action:'saveSupplements',list:S.supps});saveToCache();
+}
 function renderSuppList(){
-  const el=document.getElementById('supp-list');
+  const el=document.getElementById('supp-list');if(!el)return;
   const tl={morning:'早餐後',lunch:'午餐後',dinner:'晚餐後',sleep:'睡前',empty:'空腹'};
   if(!S.supps.length){el.innerHTML='<p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚未新增</p>';return;}
   el.innerHTML=S.supps.map(s=>`<div class="food-item"><div><div class="food-name">${s.name}<span class="time-chip">${tl[s.time]||s.time}</span></div><div class="food-meta">${s.comp||''} ${s.dose?'· '+s.dose:''}</div></div><button class="del-btn" onclick="removeSupp(${s.id})"><i class="ti ti-x"></i></button></div>`).join('');
@@ -1643,17 +1638,52 @@ async function analyzeSupp(){
   const list=S.supps.map(s=>`${s.name}（${s.comp}，${s.dose}）`).join('；');
   const meds=document.getElementById('supp-meds').value.trim();
   const dc=Array.from(S.discomforts).join('、')||'無';
-  const prompt=`藥師。保健食品：${list}。${meds?'藥物：'+meds+'。':''}目標：${S.profile.goal||'減脂'}。身體不適：${dc}。分析：①最佳服用時序（乾濕分離：正餐前後40分鐘不補水；中藥與油脂/纖維間隔1.5小時）②成分重複警告（特別注意愛康鈣活性D3 vs 一般D3）③藥物交互作用 ④額外補充建議。繁體中文。`;
+  const prompt=`藥師角色。保健食品：${list}。${meds?'藥物：'+meds+'。':''}目標：${S.profile.goal||'減脂'}。不適：${dc}。分析：①最佳服用時序（正餐前後40分鐘不補水；中藥與油脂/纖維間隔1.5小時）②成分重複警告（特別注意愛康鈣活性D3 vs 一般D3）③藥物交互作用 ④額外補充建議。繁體中文。`;
   try{const r=await aiText(prompt,1200);el.innerHTML=`<div style="font-size:.8125rem;line-height:1.8;background:var(--bg);padding:1rem;border-radius:var(--radius-sm);border-left:3px solid var(--accent)">${r.replace(/\n/g,'<br>')}</div>`;}
   catch(e){el.innerHTML=`<p style="color:var(--danger)">分析失敗：${e.message}</p>`;}
 }
 
-// ══ Timeline ═════════════════════════════════════════════════
+// ══ ACTIVITY ═════════════════════════════════════════════════
+function toggleStairs(){document.getElementById('stairs-fields').style.display=document.getElementById('act-type').value==='stairs'?'grid':'none';}
+function previewCal(){
+  const min=+document.getElementById('act-min').value;
+  const mul={low:4,med:6,high:9}[document.getElementById('act-int').value];
+  const w=S.profile.weight||70;const cal=Math.round(min*mul*w/60);
+  document.getElementById('act-cal-est').textContent=cal;
+  document.getElementById('act-cal-preview').style.display='block';
+}
+async function addAct(){
+  const type=document.getElementById('act-type').value;
+  const label={stairs:'階梯訓練',cardio:'有氧',strength:'重訓',walk:'散步',yoga:'瑜伽'}[type];
+  const min=+document.getElementById('act-min').value;
+  const intV=document.getElementById('act-int').value;
+  const w=S.profile.weight||70;const cal=Math.round(min*{low:4,med:6,high:9}[intV]*w/60);
+  let si=null;
+  if(type==='stairs'){const up=+document.getElementById('stairs-up').value;const sets=+document.getElementById('stairs-sets').value;si={up,sets,total:up*sets*2};}
+  const act={type,typeLabel:label,min,intensity:intV,cal,stairsInfo:si,note:document.getElementById('act-note').value,id:Date.now()};
+  S.activities.push(act);renderActList();updateProgress();
+  addTLAuto('exercise',`${label} ${min}分鐘（消耗${cal}kcal）`);saveToCache();
+  await gasCall({action:'addActivity',data:act});toast('✓ 運動記錄 消耗 '+cal+' kcal');
+}
+async function removeAct(id){
+  const idx=S.activities.findIndex(a=>a.id===id);if(idx<0)return;
+  S.activities.splice(idx,1);renderActList();updateProgress();saveToCache();
+  await gasCall({action:'deleteActivity',rowIndex:idx});
+}
+function renderActList(){
+  const el=document.getElementById('act-list');if(!el)return;
+  if(!S.activities.length){el.innerHTML='<p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚未記錄</p>';return;}
+  const tot=S.activities.reduce((a,x)=>a+x.cal,0);
+  const stairs=S.activities.filter(a=>a.stairsInfo).reduce((a,x)=>a+(x.stairsInfo?.total||0),0);
+  el.innerHTML=`<div style="font-size:.75rem;color:var(--muted);margin-bottom:6px">總消耗 <b style="color:var(--text)">${tot} kcal</b>${stairs?' · 階梯 <b>'+stairs+'</b> 層':''}</div>`+
+    S.activities.map(a=>`<div class="food-item"><div><div class="food-name">${a.typeLabel} ${a.min}分</div><div class="food-meta">消耗 ${a.cal}kcal${a.note?' · '+a.note:''}</div></div><button class="del-btn" onclick="removeAct(${a.id})"><i class="ti ti-x"></i></button></div>`).join('');
+}
+
+// ══ TIMELINE ═════════════════════════════════════════════════
 function toggleTLForm(){const f=document.getElementById('tl-add-form');f.style.display=f.style.display==='none'?'block':'none';}
 function addTLAuto(type,desc){
-  const now=new Date();
-  const time=now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-  S.timeline.push({time,type,desc,id:Date.now(),auto:true});
+  const t=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+  S.timeline.push({time:t,type,desc,id:Date.now(),auto:true});
   S.timeline.sort((a,b)=>a.time.localeCompare(b.time));
   renderTimeline();checkDryWet();
 }
@@ -1669,13 +1699,13 @@ function checkDryWet(){
   S.timeline.forEach(item=>{
     item.warn='';
     if(item.type==='water'){const near=meals.map(m=>Math.abs(timeToMin(m.time)-timeToMin(item.time))).sort((a,b)=>a-b)[0];if(near!==undefined&&near<40)item.warn=`⚠️ 距正餐僅 ${near} 分鐘，建議乾濕分離 40 分鐘以上`;}
-    if(item.type==='drug'){const near=S.timeline.filter(t=>t.id!==item.id&&(t.type==='supp'||t.type==='meal')).map(c=>Math.abs(timeToMin(c.time)-timeToMin(item.time))).sort((a,b)=>a-b)[0];if(near!==undefined&&near<90)item.warn=`⚠️ 距進食/保健食品僅 ${near} 分鐘，建議間隔 1.5 小時以上`;}
+    if(item.type==='drug'){const near=S.timeline.filter(t=>t.id!==item.id&&(t.type==='supp'||t.type==='meal')).map(c=>Math.abs(timeToMin(c.time)-timeToMin(item.time))).sort((a,b)=>a-b)[0];if(near!==undefined&&near<90)item.warn=`⚠️ 距進食/保健食品僅 ${near} 分鐘，建議間隔 1.5 小時`;}
   });
   renderTimeline();
 }
 const TL_CFG={meal:{dot:'green',icon:'🍽️',label:'正餐'},drug:{dot:'purple',icon:'🌿',label:'中藥'},supp:{dot:'blue',icon:'💊',label:'保健食品'},water:{dot:'gray',icon:'💧',label:'補水'},exercise:{dot:'green',icon:'🏃',label:'運動'}};
 function renderTimeline(){
-  const el=document.getElementById('timeline-list');
+  const el=document.getElementById('timeline-list');if(!el)return;
   if(!S.timeline.length){el.innerHTML='<p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚無記錄</p>';return;}
   el.innerHTML=S.timeline.map(item=>{
     const cfg=TL_CFG[item.type]||{dot:'gray',icon:'📌',label:item.type};
@@ -1690,72 +1720,33 @@ function renderTimeline(){
     </div>`;}).join('');
 }
 
-// ══ 運動 ════════════════════════════════════════════════════
-function toggleStairs(){document.getElementById('stairs-fields').style.display=document.getElementById('act-type').value==='stairs'?'grid':'none';}
-function previewCal(){
-  const min=+document.getElementById('act-min').value;
-  const mul={low:4,med:6,high:9}[document.getElementById('act-int').value];
-  const w=S.profile.weight||70;const cal=Math.round(min*mul*w/60);
-  document.getElementById('act-cal-est').textContent=cal;
-  document.getElementById('act-weight').textContent=w;
-  document.getElementById('act-cal-preview').style.display='block';
-}
-async function addAct(){
-  const type=document.getElementById('act-type').value;
-  const label={stairs:'階梯訓練',cardio:'有氧',strength:'重訓',walk:'散步',yoga:'瑜伽'}[type];
-  const min=+document.getElementById('act-min').value;
-  const intV=document.getElementById('act-int').value;
-  const w=S.profile.weight||70;const cal=Math.round(min*{low:4,med:6,high:9}[intV]*w/60);
-  let si=null;
-  if(type==='stairs'){const up=+document.getElementById('stairs-up').value;const sets=+document.getElementById('stairs-sets').value;si={up,sets,total:up*sets*2};}
-  const act={type,typeLabel:label,min,intensity:intV,cal,stairsInfo:si,note:document.getElementById('act-note').value,id:Date.now()};
-  S.activities.push(act);renderActList();updateProgress();
-  addTLAuto('exercise',`${label} ${min}分鐘（消耗${cal}kcal）`);
-  await gasCall({action:'addActivity',data:act});
-  saveToCache();toast('✓ 運動記錄 消耗 '+cal+' kcal');
-}
-async function removeAct(id){const idx=S.activities.findIndex(a=>a.id===id);if(idx<0)return;const rowIndex=S.activities[idx].rowNumber ?? S.activities[idx]._rowIndex ?? idx;S.activities.splice(idx,1);renderActList();updateProgress();saveToCache();await gasCall({action:'deleteActivity',rowIndex});}
-function renderActList(){
-  const el=document.getElementById('act-list');if(!el)return;
-  if(!S.activities.length){el.innerHTML='<p style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem">尚未記錄</p>';return;}
-  const tot=S.activities.reduce((a,x)=>a+x.cal,0);
-  const stairs=S.activities.filter(a=>a.stairsInfo).reduce((a,x)=>a+(x.stairsInfo?.total||0),0);
-  el.innerHTML=`<div style="font-size:.75rem;color:var(--muted);margin-bottom:6px">總消耗 <b style="color:var(--text)">${tot} kcal</b>${stairs?' · 階梯 <b>'+stairs+'</b> 層':''}</div>`+
-    S.activities.map(a=>`<div class="food-item"><div><div class="food-name">${a.typeLabel} ${a.min}分</div><div class="food-meta">消耗 ${a.cal}kcal${a.note?' · '+a.note:''}</div></div><button class="del-btn" onclick="removeAct(${a.id})"><i class="ti ti-x"></i></button></div>`).join('');
-}
-
-// ══ 每日總結 ════════════════════════════════════════════════
+// ══ SUMMARY ══════════════════════════════════════════════════
 async function genSummary(){
-  const el=document.getElementById('summary-content');
+  const el=document.getElementById('summary-ai-content');
   el.innerHTML='<p style="color:var(--muted)"><span class="spin"></span>生成中…</p>';
   const t=getTotals(),g=S.targets;
   const actCal=S.activities.reduce((a,x)=>a+x.cal,0);
   const dc=Array.from(S.discomforts).join('、')||'無';
   const risk=osmoticRisk(S.foods);
-  const prompt=`今日：熱量${Math.round(t.cal)}/${g.cal}kcal，蛋白質${Math.round(t.prot)}/${g.prot}g，碳水${Math.round(t.carb)}g，水分${S.water}/${S.waterGoal}ml，運動消耗${actCal}kcal，生理燈號：${S.signal}，不適症狀：${dc}，滲透壓風險：${risk}，目標：${S.profile.goal||'減脂'}。只回傳JSON：{"today":"120字總結","tomorrow":"3項明日具體建議"}`;
+  const prompt=`今日：熱量${Math.round(t.cal)}/${g.cal}kcal，蛋白質${Math.round(t.prot)}/${g.prot}g（動物${t.protAnimal.toFixed(1)}g/植物${t.protPlant.toFixed(1)}g），碳水${Math.round(t.carb)}g，水分${S.water}/${S.waterGoal}ml，運動消耗${actCal}kcal，生理燈號：${S.signal}，不適：${dc}，滲透壓風險：${risk}，目標：${S.profile.goal||'減脂'}。只回傳JSON：{"today":"120字總結","tomorrow":"3項明日具體建議"}`;
   try{
     const r=await aiText(prompt,600);
     const p=JSON.parse(r.replace(/```json|```/g,'').trim());
     el.innerHTML=`
-      <div class="card">
-        <div class="card-title"><i class="ti ti-message-circle"></i>今日總結</div>
-        <div style="font-size:.8125rem;line-height:1.8;background:var(--bg);padding:1rem;border-radius:var(--radius-sm);border-left:3px solid var(--accent)">${p.today.replace(/\n/g,'<br>')}</div>
-      </div>
-      <div class="card">
-        <div class="card-title"><i class="ti ti-bulb"></i>明日建議</div>
-        <div style="font-size:.8125rem;line-height:1.8;background:#DBEAFE;padding:1rem;border-radius:var(--radius-sm);border-left:3px solid var(--info)">${p.tomorrow.replace(/\n/g,'<br>')}</div>
-      </div>`;
+      <div class="summary-box" style="border-left:3px solid var(--accent);margin-bottom:.75rem">${p.today.replace(/\n/g,'<br>')}</div>
+      <div style="font-size:.6875rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem">明日建議</div>
+      <div class="summary-box" style="border-left:3px solid var(--info)">${p.tomorrow.replace(/\n/g,'<br>')}</div>`;
   }catch(e){el.innerHTML=`<p style="color:var(--danger)">生成失敗：${e.message}</p>`;}
 }
 
-// ══ 歷史趨勢 ════════════════════════════════════════════════
+// ══ CHART ════════════════════════════════════════════════════
 function showChart(type,btn){S.chartType=type;document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderChart(type);}
 function renderChart(type){
   const canvas=document.getElementById('trend-chart');if(!canvas)return;
   if(S.chartInst){S.chartInst.destroy();S.chartInst=null;}
   const hist=S.history.slice(-14);
   if(!hist.length){const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#64748B';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('尚無歷史資料',canvas.width/2,80);return;}
-  const cfgMap={weight:{label:'體重(kg)',color:'#0F766E'},bf:{label:'體脂率(%)',color:'#EF4444'},muscle:{label:'肌肉量(kg)',color:'#14B8A6'},water:{label:'水分(ml)',color:'#3B82F6'}};
+  const cfgMap={weight:{label:'體重(kg)',color:'#0F766E'},bf:{label:'體脂率(%)',color:'#EF4444'},vf:{label:'內臟脂肪等級',color:'#F97316'},muscle:{label:'肌肉量(kg)',color:'#14B8A6'}};
   const c=cfgMap[type]||cfgMap.weight;
   S.chartInst=new Chart(canvas,{type:'line',data:{labels:hist.map(h=>h.date),datasets:[{label:c.label,data:hist.map(h=>h[type]||0),borderColor:c.color,backgroundColor:c.color+'18',tension:0.4,pointRadius:4,pointBackgroundColor:c.color,fill:true}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748B',font:{size:11}},grid:{color:'rgba(0,0,0,0.04)'}},y:{ticks:{color:'#64748B',font:{size:11}},grid:{color:'rgba(0,0,0,0.04)'}}}}});
 }
@@ -1763,15 +1754,243 @@ async function analyzeChart(){
   const el=document.getElementById('chart-ai-out');
   if(S.history.length<2){el.innerHTML='<p style="color:var(--muted);font-size:.75rem">需至少2筆記錄</p>';return;}
   el.innerHTML='<p style="color:var(--muted)"><span class="spin"></span>分析中…</p>';
-  const prompt=`近期數據：${JSON.stringify(S.history.slice(-14))}。目標體脂${S.profile.tbf||15}%，肌肉${S.profile.tmuscle||55}kg，方向：${S.profile.goal||'減脂'}。分析趨勢，若有異常明確指出，給3-5項具體建議。繁體中文200字內。`;
-  try{const r=await aiText(prompt,600);el.innerHTML=`<div style="font-size:.8125rem;line-height:1.8;background:var(--bg);padding:1rem;border-radius:var(--radius-sm);border-left:3px solid var(--accent);margin-top:.75rem">${r.replace(/\n/g,'<br>')}</div>`;}
+  const prompt=`近期數據：${JSON.stringify(S.history.slice(-14))}。目標體脂${S.profile.tbf||15}%，內臟脂肪${S.profile.tvf||5}，肌肉${S.profile.tmuscle||55}kg，方向：${S.profile.goal||'減脂'}。分析 BIA 趨勢，異常需明確指出，給3-5項具體建議。繁體中文200字內。`;
+  try{const r=await aiText(prompt,600);el.innerHTML=`<div class="summary-box" style="border-left:3px solid var(--accent);margin-top:.75rem">${r.replace(/\n/g,'<br>')}</div>`;}
   catch(e){el.innerHTML=`<p style="color:var(--danger)">分析失敗：${e.message}</p>`;}
 }
 
-// ══ Toast ════════════════════════════════════════════════════
-function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
+// ══ FATSECRET SEARCH ═════════════════════════════════════════
+async function doFatSecretSearch(){
+  const text=document.getElementById('omnibox').value.trim();
+  if(!text){toast('請先輸入要搜尋的食物名稱');return;}
+  const btn=document.getElementById('fs-btn');
+  btn.innerHTML='<span class="spin"></span>搜尋中…';btn.disabled=true;
+  document.getElementById('omni-status').innerHTML='<span class="spin"></span>FatSecret 搜尋「'+text+'」…';
+  document.getElementById('fs-result-section').style.display='none';
+  try{
+    const r=await gasCall({action:'searchFatSecret',query:text});
+    if(!r||!r.ok){throw new Error(r?.error||'搜尋失敗');}
+    S.pendingFSItems=r.items||[];
+    showFSChips(S.pendingFSItems);
+    document.getElementById('omni-status').innerHTML=
+      S.pendingFSItems.length
+        ?`<span style="color:var(--info)">🌐 FatSecret 找到 ${S.pendingFSItems.length} 筆，點選加入</span>`
+        :'<span style="color:var(--muted)">FatSecret 找不到相關食品</span>';
+  }catch(e){
+    document.getElementById('omni-status').innerHTML=`<span style="color:var(--danger)">FatSecret 搜尋失敗：${e.message}</span>`;
+  }
+  btn.innerHTML='<i class="ti ti-search"></i>FatSecret';btn.disabled=false;
+}
 
-// ══ Resize ═══════════════════════════════════════════════════
+function showFSChips(items){
+  const sec=document.getElementById('fs-result-section');
+  const box=document.getElementById('fs-chips');
+  if(!items.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  box.innerHTML=items.map((f,i)=>{
+    const blocked=isBlockedFood(f.name);
+    return `<button class="db-chip ${blocked?'blocked':''}"
+      onclick="${blocked?'toast(\"⛔ 腸道防禦：已攔截\")':('addFSChip('+i+')')}"
+      title="${f.desc||f.brand||''}">
+      ${f.name}${f.brand?'<span class="chip-nut"> '+f.brand+'</span>':''}
+      <span class="chip-nut">${f.cal}kcal/100g</span>
+      ${blocked?'<span style="color:var(--danger);font-size:.625rem">⛔</span>':''}
+    </button>`;
+  }).join('');
+}
+
+function addFSChip(idx){
+  const item=S.pendingFSItems[idx];if(!item)return;
+  const amount=parseAmountFromText(_lastQuery)||100;
+  addFoods([{...item,amount}]);
+  toast(`✓ 已加入：${item.name} ${amount}g`);
+}
+
+// ══ OCR CAPTURE ══════════════════════════════════════════════
+const isMobile=()=>/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+let _captureDataURL=null;
+let _screenStream=null;
+
+function openCapture(){
+  const modal=document.getElementById('capture-modal');
+  modal.style.display='flex';
+  document.getElementById('cap-mobile').style.display=isMobile()?'block':'none';
+  document.getElementById('cap-desktop').style.display=isMobile()?'none':'block';
+  document.getElementById('cap-preview-wrap').style.display='none';
+  document.getElementById('ocr-raw-text').value='';
+  _captureDataURL=null;
+}
+
+function closeCapture(){document.getElementById('capture-modal').style.display='none';}
+function resetCapture(){
+  document.getElementById('cap-preview-wrap').style.display='none';
+  document.getElementById('cap-mobile').style.display=isMobile()?'block':'none';
+  document.getElementById('cap-desktop').style.display=isMobile()?'none':'block';
+  _captureDataURL=null;
+}
+
+function handleCaptureFile(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    compressImage(e.target.result,800,0.75,compressed=>{
+      _captureDataURL=compressed;
+      showPreview(compressed);
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+function showPreview(dataURL){
+  document.getElementById('cap-mobile').style.display='none';
+  document.getElementById('cap-desktop').style.display='none';
+  document.getElementById('cap-preview-wrap').style.display='block';
+  document.getElementById('cap-preview-img').src=dataURL;
+  const bytes=Math.round(dataURL.length*0.75/1024);
+  document.getElementById('cap-size-hint').textContent=`圖片大小：約${bytes}KB（已壓縮）`;
+}
+
+// 圖片壓縮（修正 OCR HTTP 413 問題）
+function compressImage(dataURL,maxPx,quality,cb){
+  const img=new Image();
+  img.onload=()=>{
+    let w=img.width,h=img.height;
+    if(w>maxPx||h>maxPx){const r=Math.min(maxPx/w,maxPx/h);w=Math.round(w*r);h=Math.round(h*r);}
+    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    cb(canvas.toDataURL('image/jpeg',quality));
+  };
+  img.src=dataURL;
+}
+
+// ── 螢幕截圖（桌機）────────────────────────────────────────
+let _cropStart=null,_cropImg=null;
+
+async function startScreenCapture(){
+  try{
+    _screenStream=await navigator.mediaDevices.getDisplayMedia({video:true,preferCurrentTab:false});
+    const track=_screenStream.getVideoTracks()[0];
+    const cap=new ImageCapture(track);
+    const bmp=await cap.grabFrame();
+    track.stop();_screenStream=null;
+    // 畫到 crop canvas
+    const cm=document.getElementById('crop-modal');
+    const canvas=document.getElementById('crop-canvas');
+    canvas.width=bmp.width;canvas.height=bmp.height;
+    canvas.getContext('2d').drawImage(bmp,0,0);
+    _cropImg=bmp;
+    document.getElementById('capture-modal').style.display='none';
+    cm.style.display='block';
+    setupCropEvents();
+  }catch(e){
+    toast('截圖取消或不支援：'+e.message);
+  }
+}
+
+function setupCropEvents(){
+  const canvas=document.getElementById('crop-canvas');
+  const sel=document.getElementById('crop-selection');
+  canvas.onmousedown=e=>{
+    const r=canvas.getBoundingClientRect();
+    _cropStart={x:e.clientX-r.left,y:e.clientY-r.top,rx:r};
+    sel.style.cssText=`display:block;left:${e.clientX}px;top:${e.clientY}px;width:0;height:0;`;
+  };
+  canvas.onmousemove=e=>{
+    if(!_cropStart)return;
+    const l=Math.min(e.clientX,_cropStart.x+_cropStart.rx.left);
+    const t=Math.min(e.clientY,_cropStart.y+_cropStart.rx.top);
+    const w=Math.abs(e.clientX-(_cropStart.x+_cropStart.rx.left));
+    const h=Math.abs(e.clientY-(_cropStart.y+_cropStart.rx.top));
+    sel.style.cssText=`display:block;position:fixed;left:${l}px;top:${t}px;width:${w}px;height:${h}px;border:2px solid #14B8A6;background:rgba(20,184,166,.1);pointer-events:none;z-index:9999`;
+  };
+  canvas.onmouseup=e=>{
+    if(!_cropStart||!_cropImg)return;
+    const r=canvas.getBoundingClientRect();
+    const scaleX=_cropImg.width/r.width;
+    const scaleY=_cropImg.height/r.height;
+    const x1=_cropStart.x*scaleX,y1=_cropStart.y*scaleY;
+    const x2=(e.clientX-_cropStart.rx.left)*scaleX;
+    const y2=(e.clientY-_cropStart.rx.top)*scaleY;
+    const cx=Math.min(x1,x2),cy=Math.min(y1,y2);
+    const cw=Math.abs(x2-x1),ch=Math.abs(y2-y1);
+    if(cw<20||ch<20){toast('選取區域太小，請重試');_cropStart=null;return;}
+    const tmpCanvas=document.createElement('canvas');tmpCanvas.width=cw;tmpCanvas.height=ch;
+    tmpCanvas.getContext('2d').drawImage(canvas,cx,cy,cw,ch,0,0,cw,ch);
+    const cropped=tmpCanvas.toDataURL('image/jpeg',0.85);
+    _cropStart=null;
+    closeCrop();
+    compressImage(cropped,1200,0.8,compressed=>{
+      _captureDataURL=compressed;
+      document.getElementById('capture-modal').style.display='flex';
+      showPreview(compressed);
+    });
+  };
+}
+
+function cancelCrop(){closeCrop();}
+function closeCrop(){
+  document.getElementById('crop-modal').style.display='none';
+  document.getElementById('crop-selection').style.display='none';
+  _cropStart=null;
+  const canvas=document.getElementById('crop-canvas');
+  canvas.onmousedown=canvas.onmousemove=canvas.onmouseup=null;
+}
+
+// ── 送出 OCR ──────────────────────────────────────────────────
+async function submitOCR(){
+  if(!_captureDataURL){toast('請先選擇或拍攝圖片');return;}
+  closeCapture();
+  const card=document.getElementById('ocr-result-card');
+  card.style.display='block';
+  document.getElementById('ocr-status').innerHTML='<span class="spin"></span>OCR 辨識中（已壓縮圖片）…';
+  document.getElementById('ocr-item-preview').style.display='none';
+  // 提取 mediaType
+  const mt=(_captureDataURL.match(/^data:([^;]+);base64,/)||[])[1]||'image/jpeg';
+  try{
+    const r=await gasCall({action:'ocrNutritionLabel',imageBase64:_captureDataURL,mediaType:mt});
+    if(!r||!r.ok)throw new Error(r?.error||'OCR 失敗');
+    showOcrResult(r.item);
+  }catch(e){
+    document.getElementById('ocr-status').innerHTML=`<span style="color:var(--danger)">OCR 失敗：${e.message}</span>`;
+  }
+}
+
+async function submitOCRText(){
+  const rawText=document.getElementById('ocr-raw-text').value.trim();
+  if(!rawText){toast('請先輸入或貼上標示文字');return;}
+  closeCapture();
+  const card=document.getElementById('ocr-result-card');
+  card.style.display='block';
+  document.getElementById('ocr-status').innerHTML='<span class="spin"></span>AI 解析標示文字…';
+  document.getElementById('ocr-item-preview').style.display='none';
+  try{
+    const r=await gasCall({action:'ocrNutritionLabel',rawText});
+    if(!r||!r.ok)throw new Error(r?.error||'解析失敗');
+    showOcrResult(r.item);
+  }catch(e){
+    document.getElementById('ocr-status').innerHTML=`<span style="color:var(--danger)">解析失敗：${e.message}</span>`;
+  }
+}
+
+function showOcrResult(item){
+  if(!item){document.getElementById('ocr-status').innerHTML='<span style="color:var(--danger)">未讀到有效數據</span>';return;}
+  S.pendingOcrItem=item;
+  document.getElementById('ocr-status').innerHTML='<span style="color:var(--accent-md)">✓ 解析成功，確認後加入</span>';
+  document.getElementById('ocr-name').textContent=item.name+' ('+item.amount+'g)';
+  document.getElementById('ocr-meta').textContent=`${item.cal}kcal · 蛋白${item.prot}g · 碳水${item.carb}g · 脂${item.fat}g`;
+  document.getElementById('ocr-item-preview').style.display='block';
+}
+
+function addOcrItem(){
+  if(!S.pendingOcrItem)return;
+  addFoods([S.pendingOcrItem]);
+  S.pendingOcrItem=null;
+  document.getElementById('ocr-result-card').style.display='none';
+  toast('✓ 已加入掃描食品');
+}
+
+// ══ TOAST & RESIZE ═══════════════════════════════════════════
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
 let _rt=null;
 window.addEventListener('resize',()=>{clearTimeout(_rt);_rt=setTimeout(()=>{if(S.chartInst)try{S.chartInst.resize();}catch(e){}},150);});
 
@@ -1779,9 +1998,6 @@ window.addEventListener('resize',()=>{clearTimeout(_rt);_rt=setTimeout(()=>{if(S
 window.addEventListener('DOMContentLoaded',()=>{
   toggleStairs();
   document.getElementById('sig-normal').classList.add('on-green');
-  if(typeof loadCombos==='function')loadCombos();
-  if(typeof renderCustomFoodList==='function')renderCustomFoodList();
-  if(typeof updateQuickPanel==='function')updateQuickPanel();
   initUser();
 });
 </script>
