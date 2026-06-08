@@ -1416,12 +1416,12 @@ function toggleVoice(){
 
 // ══ FOOD OPS ═════════════════════════════════════════════════
 function getTotals(){
-  return S.foods.reduce((a,f)=>({
+  return S.foods.reduce((a,f)=>{return {
     cal:a.cal+f.cal,prot:a.prot+f.prot,carb:a.carb+f.carb,fat:a.fat+f.fat,
     sug:a.sug+(f.sug||0),fib:a.fib+(f.fib||0),
     protAnimal:a.protAnimal+((f.protType||'a')==='a'?f.prot:0),
     protPlant:a.protPlant+((f.protType||'a')==='p'?f.prot:0),
-  },{cal:0,prot:0,carb:0,fat:0,sug:0,fib:0,protAnimal:0,protPlant:0});
+  };},{cal:0,prot:0,carb:0,fat:0,sug:0,fib:0,protAnimal:0,protPlant:0});
 }
 
 async function addFoods(items){
