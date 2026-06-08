@@ -1147,12 +1147,16 @@ async function loadAll(){
     S.waterGoal=S.targets.water;
     applyProfileToForm();renderBodyMetrics();
   }
-  S.foods=(d.foods||[]).map((f,i)=>({...f,prot:+f.prot,carb:+f.carb,fat:+f.fat,cal:+f.cal,sug:+f.sug||0,fib:+f.fib||0,amount:+f.amount,protType:f.protType||'a',id:i}));
-  S.water=+(d.water)||0;
-  S.activities=(d.activities||[]).map((a,i)=>({...a,min:+a.minutes||+a.min,cal:+a.cal,id:i,
+  // ★ 只在 GAS 有今日資料時才覆蓋，避免 GAS 回傳空值把本機快取清空
+  const gasFoods=(d.foods||[]).map((f,i)=>({...f,prot:+f.prot,carb:+f.carb,fat:+f.fat,cal:+f.cal,sug:+f.sug||0,fib:+f.fib||0,amount:+f.amount,protType:f.protType||'a',id:i}));
+  if(gasFoods.length>0) S.foods=gasFoods;
+  const gasActs=(d.activities||[]).map((a,i)=>({...a,min:+a.minutes||+a.min,cal:+a.cal,id:i,
     stairsInfo:a.stairsUp?{up:+a.stairsUp,sets:+a.stairsSets,total:+a.stairsTotal}:null}));
-  S.supps=(d.supplements||[]).map((s,i)=>({...s,id:i}));
-  S.history=(d.history||[]).map(h=>({...h,weight:+h.weight,bf:+h.bf,muscle:+h.muscle,vf:+h.vf,water:+h.water}));
+  if(gasActs.length>0) S.activities=gasActs;
+  if(d.water>0) S.water=+(d.water)||0;
+  // 保健品與歷史紀錄不是當日資料，直接覆蓋
+  if((d.supplements||[]).length>0) S.supps=d.supplements.map((s,i)=>({...s,id:i}));
+  if((d.history||[]).length>0) S.history=d.history.map(h=>({...h,weight:+h.weight,bf:+h.bf,muscle:+h.muscle,vf:+h.vf,water:+h.water}));
   renderFoodList();updateProgress();updateWaterUI();renderActList();renderSuppList();renderTimeline();
   checkProtProtocol();checkGutAlert();updateDeficitTable();updateProteinRatio();
   setTimeout(()=>renderChart(S.chartType),200);
