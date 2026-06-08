@@ -961,9 +961,15 @@ function confirmUser(){
   const label=document.getElementById('current-user-label');
   if(label)label.textContent=name;
   document.getElementById('user-modal').style.display='none';
+  // 先跳首頁，再背景載入資料
+  swPage('home');
   renderUsersPage();
   restoreFromCache();
-  if(CFG.gasUrl)loadAll();else swPage('setup');
+  if(CFG.gasUrl){
+    loadAll();
+  } else {
+    setTimeout(()=>toast('💡 尚未設定 Apps Script 網址，可至「設定」頁完成連線'),600);
+  }
 }
 
 function addNewUser(){document.getElementById('add-user-form').style.display='block';document.getElementById('new-user-input').focus();}
